@@ -1,0 +1,24 @@
+{
+  "result": {
+    "missionTplId": "_examples/SysLogExample.tl",
+    "assetClassNames": [
+      "LRAUV"
+    ],
+    "parameters": [
+      {
+        "paramName": "newTime",
+        "type": "float",
+        "required": false,
+        "defaultValue": "5",
+        "defaultUnits": "minute"
+      },
+      {
+        "paramName": "SkipComms",
+        "type": "boolean",
+        "required": false,
+        "defaultValue": "false",
+        "valueCanReference": "anyString"
+      }
+    ]
+  }
+}

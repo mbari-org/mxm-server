@@ -1,0 +1,33 @@
+{
+    "result": [
+        {
+            "name": "ampere",
+            "abbreviation": "A"
+        },
+        {
+            "name": "ampere_hour",
+            "abbreviation": "Ah",
+            "baseUnit": "ampere_second"
+        },
+        {
+            "name": "ampere_per_count",
+            "abbreviation": "A/count"
+        },
+        {
+            "name": "ampere_per_meter",
+            "abbreviation": "A/m"
+        },
+        {
+            "name": "ampere_per_square_meter",
+            "abbreviation": "A/m2"
+        },
+        {
+            "name": "ampere_second",
+            "abbreviation": "As"
+        },
+        {
+            "name": "ampere_second_meter_squared_per_mole",
+            "abbreviation": "Asm2/M"
+        }
+    ]
+}

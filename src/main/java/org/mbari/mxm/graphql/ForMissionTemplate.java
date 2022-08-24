@@ -1,0 +1,52 @@
+package org.mbari.mxm.graphql;
+
+import io.quarkus.arc.Unremovable;
+import org.eclipse.microprofile.graphql.Source;
+import org.mbari.mxm.db.assetClass.AssetClass;
+import org.mbari.mxm.db.mission.Mission;
+import org.mbari.mxm.db.mission.MissionService;
+import org.mbari.mxm.db.missionTemplate.MissionTemplate;
+import org.mbari.mxm.db.missionTemplateAssetClass.MissionTemplateAssetClassService;
+import org.mbari.mxm.db.parameter.Parameter;
+import org.mbari.mxm.db.parameter.ParameterService;
+import org.mbari.mxm.db.provider.Provider;
+import org.mbari.mxm.db.provider.ProviderService;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+
+@ApplicationScoped
+@Unremovable
+public class ForMissionTemplate {
+  @Inject
+  ProviderService providerService;
+
+  @Inject
+  ParameterService parameterService;
+
+  @Inject
+  MissionService missionService;
+
+  @Inject
+  MissionTemplateAssetClassService missionTemplateAssetClassService;
+
+  public List<Provider> provider(@Source List<MissionTemplate> missionTemplates) {
+    List<String> providerIds = missionTemplates.stream().map(e -> e.providerId).collect(toList());
+    return providerService.getProviders(providerIds);
+  }
+
+  public List<List<Parameter>> parameters(@Source List<MissionTemplate> missionTemplates) {
+    return parameterService.getParametersMultiple(missionTemplates);
+  }
+
+  public List<List<Mission>> missions(@Source List<MissionTemplate> missionTemplates) {
+    return missionService.getMissionsMultiple(missionTemplates);
+  }
+
+  public List<List<AssetClass>> assetClasses(@Source List<MissionTemplate> missionTemplates) {
+    return missionTemplateAssetClassService.getAssetNamesMultiple(missionTemplates);
+  }
+}

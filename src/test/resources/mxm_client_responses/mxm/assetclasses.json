@@ -1,0 +1,19 @@
+{
+  "result": [
+    {
+      "assetClassName": "LRAUV",
+      "description": "Long-Range Autonomous Underwater Vehicle",
+      "assets": [
+        {
+          "assetId": "sim"
+        },
+        {
+          "assetId": "baz"
+        },
+        {
+          "assetId": "foo"
+        }
+      ]
+    }
+  ]
+}

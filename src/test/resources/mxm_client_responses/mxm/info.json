@@ -1,0 +1,12 @@
+{
+  "result": {
+    "providerName": "TethysDash",
+    "providerDescription": "TethysDash/LRAUV System",
+    "capabilities": {
+      "usesSched": true,
+      "usesUnits": true,
+      "canValidate": false,
+      "canReportMissionStatus": false
+    }
+  }
+}
