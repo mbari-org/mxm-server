@@ -1,6 +1,7 @@
 package org.mbari.mxm.graphql;
 
 import io.quarkus.arc.Unremovable;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.eclipse.microprofile.graphql.Source;
 import org.mbari.mxm.db.asset.Asset;
 import org.mbari.mxm.db.asset.AssetService;
@@ -22,6 +23,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 @ApplicationScoped
+@RegisterForReflection
 @Unremovable
 public class ForProvider {
   @Inject

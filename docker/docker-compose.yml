@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  mxm-server:
+    container_name: mxm-server
+
+    image: mbari/mxm-jvm
+
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+
+    environment:
+      JDBC_URL: jdbc:postgres://mxm@mxm-postgres:5432/mxm
+
+    depends_on:
+      - mxm-postgres
+    restart: always
+
+  mxm-postgres:
+    container_name: mxm-postgres
+    image: mbari/mxm-postgres:0.9.0-alpine
+    ports:
+      - "25432:5432"
+    restart: always
+    volumes:
+      - ${PWD}/bochica/db_data:/var/lib/postgresql/data
+
+    environment:
+      # POSTGRES_USER: will trigger the creation of the "mxm" user
+      # and the "mxm" database upon initial run of the container:
+      POSTGRES_USER: mxm
+      POSTGRES_PASSWORD: password

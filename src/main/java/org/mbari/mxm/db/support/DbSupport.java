@@ -11,14 +11,17 @@ import javax.enterprise.context.ApplicationScoped;
 @Slf4j
 public class DbSupport {
 
+  private static final String defaultJdbcUrl = "jdbc:postgresql://localhost:5432/mxm";
+
   Jdbi jdbi = null;
 
   // defaults for a regular, if ad hoc at the moment, "prod" environment:
-  static String jdbcUrl = "jdbc:postgresql://localhost:5432/mxm";
+  static String jdbcUrl = System.getenv().getOrDefault("JDBC_URL", defaultJdbcUrl);
   static String username;
   static String password;
 
   public static void setJdbcUrl(String url, String u, String p) {
+    log.warn("setJdbcUrl: url='{}'", url);
     jdbcUrl = url;
     username = u;
     password = p;
@@ -26,7 +29,7 @@ public class DbSupport {
 
   public Jdbi getJdbi() {
     if (jdbi == null) {
-      log.debug("DbSupport: jdbcUrl='{}'", jdbcUrl);
+      log.warn("DbSupport: jdbcUrl='{}' username='{}'", jdbcUrl, username);
       if (username != null && password != null) {
         jdbi = Jdbi.create(jdbcUrl, username, password);
       }
