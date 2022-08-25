@@ -1,1 +1,1 @@
-src/main/resources/mxm-schema.sql
+../src/main/resources/mxm-schema.sql
