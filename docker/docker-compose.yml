@@ -1,4 +1,6 @@
-version: '3.8'
+# 3.3. due to current docker version on mxm
+version: '3.3'
+
 services:
   mxm-server:
     container_name: mxm-server
@@ -10,7 +12,9 @@ services:
       - "5005:5005"
 
     environment:
-      JDBC_URL: jdbc:postgres://mxm@mxm-postgres:5432/mxm
+      JDBC_URL: "jdbc:postgres://mxm@mxm-postgres:5432/mxm"
+      MXM_SERVER_BASE_URL: "http://localhost:8080"
+#      MXM_SERVER_BASE_URL: "http://mxm.shore.mbari.org/mxm2"
 
     depends_on:
       - mxm-postgres
@@ -19,8 +23,7 @@ services:
   mxm-postgres:
     container_name: mxm-postgres
     image: mbari/mxm-postgres:0.9.0-alpine
-    ports:
-      - "25432:5432"
+    # ports: ["25432:5432"]
     restart: always
     volumes:
       - ${PWD}/bochica/db_data:/var/lib/postgresql/data

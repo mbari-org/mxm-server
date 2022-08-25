@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import java.util.Map;
+import java.util.Objects;
 
 // With the mxm-ui component in history mode, part of the following below to
 // redirect to / for GET requested paths starting with `/p/` or equal to `/p`.
@@ -18,6 +19,8 @@ import java.util.Map;
 @ApplicationScoped
 @Slf4j
 public class SPARouting {
+
+  private static String MXM_SERVER_BASE_URL = System.getenv("MXM_SERVER_BASE_URL");
 
   public void init(@Observes Router router) {
     router.get("/*").handler(rc -> {
@@ -33,7 +36,9 @@ public class SPARouting {
 
       // TODO adjust to provide server related config to the UI:
       else if (path.equals("/statics/config/config.json")) {
-        final var serverLoc = rc.request().scheme() + "://" + rc.request().host();
+        final String serverLoc = Objects.requireNonNullElseGet(MXM_SERVER_BASE_URL,
+          () -> rc.request().scheme() + "://" + rc.request().host()
+        );
         final var graphqlUri = serverLoc + "/graphql";
         log.debug("SPARouting: graphqlUri='{}'", graphqlUri);
         final var uiConfig = Utl.writeJson(Map.of(
