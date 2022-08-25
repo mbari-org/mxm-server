@@ -1,6 +1,7 @@
 package org.mbari.mxm.graphql;
 
 import io.quarkus.arc.Unremovable;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.eclipse.microprofile.graphql.Source;
 import org.mbari.mxm.db.assetClass.AssetClass;
 import org.mbari.mxm.db.mission.Mission;
@@ -19,6 +20,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 @ApplicationScoped
+@RegisterForReflection
 @Unremovable
 public class ForMissionTemplate {
   @Inject
