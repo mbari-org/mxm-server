@@ -23,7 +23,8 @@ public class MissionMapper implements RowMapper<Mission> {
       MissionSchedType.valueOf(rs.getString("sched_type")),
       rs.getObject("sched_date", OffsetDateTime.class),
       rs.getObject("start_date", OffsetDateTime.class),
-      rs.getObject("end_date", OffsetDateTime.class)
+      rs.getObject("end_date", OffsetDateTime.class),
+      rs.getObject("updated_date", OffsetDateTime.class)
     );
   }
 }

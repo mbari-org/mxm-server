@@ -1,5 +1,31 @@
 ## Misc notes
 
+### Subscription with nested members
+
+Take for example:
+```graphql
+subscription {
+  missionUpdated {
+    providerId
+    missionTplId
+    missionId
+    description
+    schedType
+    arguments {
+      paramName
+      paramValue
+      paramUnits
+    }
+  }
+}
+```
+If only a nested member (in this case, some argument) gets updated, then there would not be any
+notification for that particular subscription because such entity does not have a change per se.
+A solution is to complete the member update with some update in the parent entity, which
+I'm implementing by adding and setting an `updatedDate` in relevant `Mission` field whenever
+some argument change takes effect.
+
+
 ### Native
 
 Native build is not a priority, but did some quick testing:

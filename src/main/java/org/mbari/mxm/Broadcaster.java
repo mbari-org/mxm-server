@@ -37,7 +37,7 @@ public abstract class Broadcaster<T> {
   }
 
   public void broadcastCreated(T t) {
-    broadcastForKey(new PID(EventType.CREATED), t);
+    broadcastForPID(new PID(EventType.CREATED), t);
   }
 
   public void broadcastUpdated(T t) {
@@ -49,11 +49,11 @@ public abstract class Broadcaster<T> {
   }
 
   private void broadcast(EventType event, T t) {
-    broadcastForKey(new PID(event), t);
-    broadcastForKey(new PID(event, getPrimaryKey(t)), t);
+    broadcastForPID(new PID(event), t);
+    broadcastForPID(new PID(event, getPrimaryKey(t)), t);
   }
 
-  private void broadcastForKey(PID pid, T t) {
+  private void broadcastForPID(PID pid, T t) {
     var p = processorMap.get(pid);
     if (p != null) {
       p.onNext(t);

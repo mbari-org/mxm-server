@@ -138,6 +138,7 @@ create table if not exists missions
   sched_date     timestamp with time zone,
   start_date     timestamp with time zone,
   end_date       timestamp with time zone,
+  updated_date   timestamp with time zone,
   foreign key (provider_id, mission_tpl_id) references mission_tpls on update cascade on delete cascade,
   foreign key (provider_id, asset_id) references assets on update cascade on delete cascade,
   primary key (provider_id, mission_tpl_id, mission_id)

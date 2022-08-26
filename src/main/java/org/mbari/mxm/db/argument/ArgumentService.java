@@ -3,10 +3,12 @@ package org.mbari.mxm.db.argument;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.DbUtl;
 import org.mbari.mxm.db.mission.Mission;
+import org.mbari.mxm.db.mission.MissionService;
 import org.mbari.mxm.db.support.DbSupport;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,9 @@ public class ArgumentService {
 
   @Inject
   DbSupport dbSupport;
+
+  @Inject
+  MissionService missionService;
 
   public List<Argument> getArguments(String providerId, String missionTplId, String missionId) {
     return dbSupport.getJdbi()
@@ -61,11 +66,11 @@ public class ArgumentService {
   }
 
   public Argument createArgument(Argument pl) {
-    return dbSupport.getJdbi()
+    var res = dbSupport.getJdbi()
       .withExtension(ArgumentDao.class, dao -> dao.insertArgument(pl));
+    broadcastMissionUpdated(res);
+    return res;
   }
-
-  private final ArgumentMapper argumentMapper = new ArgumentMapper();
 
   public Argument updateArgument(Argument pl) {
     log.debug("updateArgument: pl={}", pl);
@@ -81,7 +86,7 @@ public class ArgumentService {
       .set(pl.paramValue, "paramValue")
       .set(pl.paramUnits, "paramUnits");
 
-    return dbSupport.getJdbi()
+    var res = dbSupport.getJdbi()
       .withHandle(handle ->
         upDef.createQuery(handle)
           .execute((statementSupplier, ctx) -> {
@@ -89,13 +94,26 @@ public class ArgumentService {
             return rs.next() ? ArgumentMapper.instance.map(rs, ctx) : null;
           })
       );
+    broadcastMissionUpdated(res);
+    return res;
   }
 
   public Argument deleteArgument(Argument pl) {
-    return dbSupport.getJdbi()
+    var res = dbSupport.getJdbi()
       .withExtension(ArgumentDao.class,
         dao -> dao.deleteArgument(pl.providerId, pl.missionTplId, pl.missionId, pl.paramName)
       );
+    broadcastMissionUpdated(res);
+    return res;
+  }
+
+  private void broadcastMissionUpdated(Argument arg) {
+    if (arg != null) {
+      var m = missionService.getMission(arg.providerId, arg.missionTplId, arg.missionId);
+      if (m != null) {
+        m.setUpdatedDate(OffsetDateTime.now());
+      }
+      missionService.getBroadcaster().broadcastUpdated(m);
+    }
   }
 }
-

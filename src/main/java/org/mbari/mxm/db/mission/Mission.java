@@ -40,6 +40,8 @@ public class Mission {
   public OffsetDateTime startDate;
   public OffsetDateTime endDate;
 
+  public OffsetDateTime updatedDate;
+
   @JsonIgnore
   public boolean noPatch() {
     return missionStatus == null
@@ -48,6 +50,8 @@ public class Mission {
       && schedType == null
       && schedDate == null
       && startDate == null
-      && endDate == null;
+      && endDate == null
+      && updatedDate == null
+      ;
   }
 }

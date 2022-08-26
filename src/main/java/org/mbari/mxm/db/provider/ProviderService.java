@@ -24,8 +24,8 @@ public class ProviderService {
       return Provider.class.getSimpleName();
     }
 
-    public String getPrimaryKey(Provider p) {
-      return p.providerId;
+    public String getPrimaryKey(Provider e) {
+      return e.providerId;
     }
   };
 

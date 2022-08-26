@@ -45,7 +45,7 @@ public class ForMission {
   }
 
   public List<Asset> asset(@Source List<Mission> missions) {
-    return assetService.getAssetsForProvider(missions);
+    return assetService.getAssetsForMissionMultiple(missions);
   }
 
   public List<List<Argument>> arguments(@Source List<Mission> missions) {

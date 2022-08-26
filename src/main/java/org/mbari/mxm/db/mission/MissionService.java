@@ -27,8 +27,8 @@ public class MissionService {
       return Mission.class.getSimpleName();
     }
 
-    public String getPrimaryKey(Mission m) {
-      return String.format("%s,%s,%s", m.providerId, m.missionTplId,  m.missionId);
+    public String getPrimaryKey(Mission e) {
+      return String.format("%s,%s,%s", e.providerId, e.missionTplId,  e.missionId);
     }
   };
 
@@ -138,7 +138,9 @@ public class MissionService {
       .set(pl.schedType, "schedType")
       .set(pl.schedDate, "schedDate")
       .set(pl.startDate, "startDate")
-      .set(pl.endDate, "endDate");
+      .set(pl.endDate, "endDate")
+      .set(pl.updatedDate, "updatedDate")
+      ;
 
     if (uDef.noSets()) {
       return pl;

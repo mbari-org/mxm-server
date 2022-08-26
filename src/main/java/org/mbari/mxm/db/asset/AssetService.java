@@ -29,7 +29,7 @@ public class AssetService {
       .withExtension(AssetDao.class, dao -> dao.getAssets(providerId));
   }
 
-  public List<Asset> getAssetsForProvider(List<Mission> missions) {
+  public List<Asset> getAssetsForMissionMultiple(List<Mission> missions) {
     final var tuples = missions.stream()
       .map(a -> String.format("('%s', '%s')", a.providerId, a.assetId))
       .collect(Collectors.toList());
