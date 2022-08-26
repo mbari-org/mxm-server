@@ -17,8 +17,8 @@ public class DbSupport {
 
   // defaults for a regular, if ad hoc at the moment, "prod" environment:
   static String jdbcUrl = System.getenv().getOrDefault("JDBC_URL", defaultJdbcUrl);
-  static String username;
-  static String password;
+  static String username = System.getenv("POSTGRES_USER");
+  static String password = System.getenv("POSTGRES_PASSWORD");
 
   public static void setJdbcUrl(String url, String u, String p) {
     log.warn("setJdbcUrl: url='{}'", url);

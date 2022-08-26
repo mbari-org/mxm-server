@@ -1,20 +1,20 @@
-# 3.3. due to current docker version on mxm
-version: '3.3'
+version: '3.6'
 
 services:
   mxm-server:
     container_name: mxm-server
 
-    image: mbari/mxm-jvm
+    image: mbari/mxm-server
 
     ports:
       - "8080:8080"
       - "5005:5005"
 
     environment:
-      JDBC_URL: "jdbc:postgres://mxm@mxm-postgres:5432/mxm"
-      MXM_SERVER_BASE_URL: "http://localhost:8080"
-#      MXM_SERVER_BASE_URL: "http://mxm.shore.mbari.org/mxm2"
+      MXM_EXTERNAL_URL: ${MXM_EXTERNAL_URL}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: "mxm"
+      JDBC_URL: "jdbc:postgresql://mxm-postgres/mxm"
 
     depends_on:
       - mxm-postgres
@@ -23,13 +23,16 @@ services:
   mxm-postgres:
     container_name: mxm-postgres
     image: mbari/mxm-postgres:0.9.0-alpine
+
     # ports: ["25432:5432"]
+
     restart: always
+
     volumes:
-      - ${PWD}/bochica/db_data:/var/lib/postgresql/data
+      - ${POSTGRES_DATA}:/var/lib/postgresql/data
 
     environment:
       # POSTGRES_USER: will trigger the creation of the "mxm" user
       # and the "mxm" database upon initial run of the container:
       POSTGRES_USER: mxm
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

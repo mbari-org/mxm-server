@@ -1,10 +1,7 @@
 package org.mbari.mxm.graphql;
 
-import io.smallrye.graphql.api.Subscription;
-import io.smallrye.mutiny.Multi;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.graphql.*;
-import org.mbari.mxm.Broadcaster;
 import org.mbari.mxm.ProviderManager;
 import org.mbari.mxm.db.argument.Argument;
 import org.mbari.mxm.db.argument.ArgumentService;
@@ -105,11 +102,13 @@ public class MxmGraphQLEndpoint {
     return created;
   }
 
+/*
   @Subscription
   @Description("Get notified when a provider is created")
   public Multi<Provider> providerCreated() {
     return providerService.getBroadcaster().createProcessor(Broadcaster.EventType.CREATED);
   }
+*/
 
   @Mutation
   @Description("Update a provider")
@@ -126,6 +125,7 @@ public class MxmGraphQLEndpoint {
     return providerService.deleteProvider(pl);
   }
 
+/*
   @Subscription
   @Description("Get notified when a provider is updated")
   public Multi<Provider> providerUpdated() {
@@ -143,7 +143,7 @@ public class MxmGraphQLEndpoint {
   public Multi<Provider> providerDeleted() {
     return providerService.getBroadcaster().createProcessor(Broadcaster.EventType.DELETED);
   }
-
+*/
   ///////////////////////////////////////////////////////////////////
   // assetClasses
 
@@ -357,6 +357,7 @@ public class MxmGraphQLEndpoint {
     return missionService.deleteMission(pl);
   }
 
+/*
   @Subscription
   @Description("Get notified when a mission is created")
   public Multi<Mission> missionCreated() {
@@ -374,6 +375,7 @@ public class MxmGraphQLEndpoint {
   public Multi<Mission> missionDeleted() {
     return missionService.getBroadcaster().createProcessor(Broadcaster.EventType.DELETED);
   }
+*/
 
   ///////////////////////////////////////////////////////////////////
   // Arguments

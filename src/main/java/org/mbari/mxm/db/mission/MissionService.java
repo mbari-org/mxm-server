@@ -51,7 +51,9 @@ public class MissionService {
     var flatList = dbSupport.getJdbi()
       .withHandle(handle ->
         handle.createQuery(sql)
-          .defineList("providerIds", providerIds)
+          .defineList("providerIds", providerIds.stream()
+            .map(i -> "'" + i + "'").collect(Collectors.joining(", "))
+          )
           .mapToBean(Mission.class)
           .list()
       );

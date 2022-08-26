@@ -20,7 +20,9 @@ import java.util.Objects;
 @Slf4j
 public class SPARouting {
 
-  private static String MXM_SERVER_BASE_URL = System.getenv("MXM_SERVER_BASE_URL");
+  private static final boolean historyMode = false;
+
+  private static String MXM_EXTERNAL_URL = System.getenv("MXM_EXTERNAL_URL");
 
   public void init(@Observes Router router) {
     router.get("/*").handler(rc -> {
@@ -28,15 +30,18 @@ public class SPARouting {
 
       log.warn("SPARouting: path='{}'", path);
 
-      // SPA routing for history mode:
-      if (path.matches("^/p(/.*)?$")) {
-        log.debug("SPARouting: rerouting to / for path='{}'", path);
-        rc.reroute("/");
+      if (historyMode) {
+        // part of some preliminary tests
+        if (path.matches("^/p(/.*)?$")) {
+          log.debug("SPARouting: rerouting to / for path='{}'", path);
+          rc.reroute("/");
+          return;
+        }
       }
 
       // TODO adjust to provide server related config to the UI:
-      else if (path.equals("/statics/config/config.json")) {
-        final String serverLoc = Objects.requireNonNullElseGet(MXM_SERVER_BASE_URL,
+      if (path.equals("/statics/config/config.json")) {
+        final String serverLoc = Objects.requireNonNullElseGet(MXM_EXTERNAL_URL,
           () -> rc.request().scheme() + "://" + rc.request().host()
         );
         final var graphqlUri = serverLoc + "/graphql";
