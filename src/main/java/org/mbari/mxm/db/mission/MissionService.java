@@ -3,6 +3,7 @@ package org.mbari.mxm.db.mission;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.Broadcaster;
+import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.DbUtl;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.support.DbSupport;
@@ -28,7 +29,7 @@ public class MissionService {
     }
 
     public String getPrimaryKey(Mission e) {
-      return String.format("%s,%s,%s", e.providerId, e.missionTplId,  e.missionId);
+      return Utl.primaryKey(e.providerId, e.missionTplId,  e.missionId);
     }
   };
 
@@ -141,6 +142,10 @@ public class MissionService {
       .set(pl.endDate, "endDate")
       .set(pl.updatedDate, "updatedDate")
       ;
+
+    if (pl.schedType != null && pl.schedType != MissionSchedType.DATE) {
+      uDef.setNull("schedDate");
+    }
 
     if (uDef.noSets()) {
       return pl;

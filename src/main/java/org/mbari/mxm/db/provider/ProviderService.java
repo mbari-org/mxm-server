@@ -2,6 +2,7 @@ package org.mbari.mxm.db.provider;
 
 import lombok.Getter;
 import org.mbari.mxm.Broadcaster;
+import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.DbUtl;
 import org.mbari.mxm.db.support.DbSupport;
 
@@ -25,7 +26,7 @@ public class ProviderService {
     }
 
     public String getPrimaryKey(Provider e) {
-      return e.providerId;
+      return Utl.primaryKey(e.providerId);
     }
   };
 

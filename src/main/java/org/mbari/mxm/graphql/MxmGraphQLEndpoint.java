@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.graphql.*;
 import org.mbari.mxm.Broadcaster;
 import org.mbari.mxm.ProviderManager;
+import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.argument.Argument;
 import org.mbari.mxm.db.argument.ArgumentService;
 import org.mbari.mxm.db.asset.Asset;
@@ -135,7 +136,8 @@ public class MxmGraphQLEndpoint {
   @Subscription
   @Description("Get notified when a specific provider is updated")
   public Multi<Provider> providerUpdatedById(@Name("providerId") String providerId) {
-    return providerService.getBroadcaster().createProcessor(Broadcaster.EventType.UPDATED, providerId);
+    return providerService.getBroadcaster().createProcessor(Broadcaster.EventType.UPDATED,
+      Utl.primaryKey(providerId));
   }
 
   @Subscription
@@ -364,10 +366,26 @@ public class MxmGraphQLEndpoint {
   }
 
   @Subscription
-  @Description("Get notified when a mission is updated")
+  @Description("""
+    Get notified when a mission or any argument is updated.
+    """)
   public Multi<Mission> missionUpdated() {
     return missionService.getBroadcaster().createProcessor(Broadcaster.EventType.UPDATED);
   }
+
+  @Subscription
+  @Description("""
+    Get notified when a particular mission or any of its arguments is updated.
+    """)
+  public Multi<Mission> missionUpdatedById(
+    @Name("providerId") String providerId,
+    @Name("missionTplId") String missionTplId,
+    @Name("missionId") String missionId
+  ) {
+    return missionService.getBroadcaster().createProcessor(Broadcaster.EventType.UPDATED,
+      Utl.primaryKey(providerId, missionTplId, missionId));
+  }
+
 
   @Subscription
   @Description("Get notified when a mission is deleted")

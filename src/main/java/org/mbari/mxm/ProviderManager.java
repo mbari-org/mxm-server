@@ -303,6 +303,7 @@ public class ProviderManager {
         }
         else if (pl.missionStatus == null || pl.missionStatus == MissionStatusType.DRAFT) {
           // OK, no requested change in status; let mutation proceed.
+          pl.setUpdatedDate(OffsetDateTime.now());
         }
         else {
           // from DRAFT, only SUBMITTED is allowed.
@@ -314,6 +315,7 @@ public class ProviderManager {
         // This is a request for refreshing the mission status.
         if (provider.canReportMissionStatus) {
           pl.missionStatus = retrieveMissionStatus(mission);
+          pl.setUpdatedDate(OffsetDateTime.now());
         }
         else {
           log.warn("provider '{}' does not support reporting mission status", provider.providerId);

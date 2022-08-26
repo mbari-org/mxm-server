@@ -78,6 +78,11 @@ public class DbUtl {
       return this;
     }
 
+    public UpdateDef setNull(String camelName) {
+      sets.add(snakize(camelName) + " = null");
+      return this;
+    }
+
     public boolean noSets() {
       return sets.isEmpty();
     }

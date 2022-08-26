@@ -7,6 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Utl {
+  public static String primaryKey(String... parts) {
+    return String.join(",", parts);
+  }
+
   /**
    * Cleans a directory or file path string so:
    * - single leading slash always
