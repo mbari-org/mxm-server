@@ -2,10 +2,11 @@ package org.mbari.mxm;
 
 import io.vertx.ext.web.Router;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Objects;
 
 // With the mxm-ui component in history mode, part of the following below to
@@ -22,13 +23,17 @@ public class SPARouting {
 
   private static final boolean historyMode = false;
 
-  private static String MXM_EXTERNAL_URL = System.getenv("MXM_EXTERNAL_URL");
+  private static final String MXM_EXTERNAL_URL = System.getenv("MXM_EXTERNAL_URL");
+
+
+  @ConfigProperty(name = "mxm.version")
+  String mxmVersion;
 
   public void init(@Observes Router router) {
     router.get("/*").handler(rc -> {
       final var path = rc.normalizedPath();
 
-      log.warn("SPARouting: path='{}'", path);
+      log.debug("SPARouting: path='{}'", path);
 
       if (historyMode) {
         // part of some preliminary tests
@@ -39,17 +44,28 @@ public class SPARouting {
         }
       }
 
-      // TODO adjust to provide server related config to the UI:
+      // provide server related config to the UI:
       if (path.equals("/statics/config/config.json")) {
         final String serverLoc = Objects.requireNonNullElseGet(MXM_EXTERNAL_URL,
           () -> rc.request().scheme() + "://" + rc.request().host()
         );
         final var graphqlUri = serverLoc + "/graphql";
         log.debug("SPARouting: graphqlUri='{}'", graphqlUri);
-        final var uiConfig = Utl.writeJson(Map.of(
-          "graphqlUri", graphqlUri
-          // other props ...
-        ));
+
+        LinkedHashMap<String, Object> config = new LinkedHashMap<>();
+        config.put("mxmVersion", mxmVersion);
+        var googleApiKey = System.getenv("GOOGLE_API_KEY");
+        if (googleApiKey != null) {
+          config.put("googleApiKey", googleApiKey);
+        }
+        config.put("graphqlUri", graphqlUri);
+        config.put("graphqlSchema", serverLoc + "/graphql/schema.graphql");
+        config.put("graphqlUi", serverLoc + "/q/graphql-ui");
+        config.put("openapi", serverLoc + "/q/openapi");
+        config.put("openapiSchema", serverLoc + "/q/openapi");
+        config.put("swaggerUi", serverLoc + "/q/swagger-ui");
+
+        final var uiConfig = Utl.writeJson(config);
         rc.response().putHeader("content-type", "application/json")
           .end(uiConfig)
         ;

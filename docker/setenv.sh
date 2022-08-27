@@ -6,3 +6,7 @@ export POSTGRES_PASSWORD=
 
 # Host directory for the postgres database:
 export POSTGRES_DATA="$(pwd)/db_data"
+
+# (optional) If defined and properly configured, some Google Map base layers will be
+# available for selection:
+#export GOOGLE_API_KEY=

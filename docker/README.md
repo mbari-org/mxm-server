@@ -18,7 +18,7 @@ It's assumed that the `mxm-server` and `mxm-ui` clones are sibling directories.
 cd to/this/project/root/directory
 
 ./mvnw package
-docker build -f src/main/docker/Dockerfile.jvm -t mbari/mxm-server .
+docker build -f src/main/docker/Dockerfile.jvm -t mbari/mxm-server:0.9.0 .
 ```
 
 ## `mbari/mxm-postgres:x.y.z`
@@ -27,8 +27,8 @@ The MXM Postgres image is manually created and published as needed.
 
 ```bash
 cd docker
-docker build -f Dockerfile-postgres -t mbari/mxm-postgres:0.9.0-alpine .
-docker push mbari/mxm-postgres:0.9.0-alpine
+docker build -f Dockerfile-postgres -t mbari/mxm-postgres:0.9.0 .
+docker push mbari/mxm-postgres:0.9.0
 ```
 
 # Launching the MXM system
