@@ -1,8 +1,13 @@
 {
   "result": {
     "subDir": "Science",
-    "filenames": [
-      "mbts_sci2.tl"
+    "entries": [
+      {
+        "missionTplId": "Science/mbts_sci2.tl",
+        "assetClassNames": [
+          "LRAUV"
+        ]
+      }
     ]
   }
 }

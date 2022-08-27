@@ -47,6 +47,7 @@ public class MissionService {
     var sql = """
       select * from missions
       where provider_id in (<providerIds>)
+      order by provider_id, mission_tpl_id, mission_id
       """;
 
     var flatList = dbSupport.getJdbi()
@@ -81,6 +82,7 @@ public class MissionService {
     var sql = """
       select * from missions
       where (provider_id, mission_tpl_id) in (<tuples>)
+      order by provider_id, mission_tpl_id, mission_id
       """;
 
     var flatList = dbSupport.getJdbi()

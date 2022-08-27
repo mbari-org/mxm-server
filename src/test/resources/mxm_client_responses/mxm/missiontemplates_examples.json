@@ -1,8 +1,13 @@
 {
   "result": {
     "subDir": "_examples",
-    "filenames": [
-      "SysLogExample.tl"
+    "entries": [
+      {
+        "missionTplId": "_examples/SysLogExample.tl",
+        "assetClassNames": [
+          "LRAUV"
+        ]
+      }
     ]
   }
 }

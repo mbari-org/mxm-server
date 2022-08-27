@@ -167,13 +167,27 @@ public class ProviderManager {
       getAndCreateMissionTpl(provider, directory, OffsetDateTime.now(), true);
       // though `simple` param irrelevant for directory.
 
-      // and for each of the listing:
+      // get directory entries:
       var missionTplListing = mxmProviderClient.getMissionTemplates(
         directory.replaceFirst("^/+", "")   // TODO consistent path name handling
       );
-      missionTplListing.result.filenames.forEach(filename -> {
-        var missionTplId = directory + "/" + filename;
-        getAndCreateMissionTpl(provider, missionTplId, null, true);
+      missionTplListing.result.entries.forEach(entry -> {
+        final var missionTplId = Utl.cleanPath(entry.missionTplId);
+
+        MissionTemplate missionTemplate = new MissionTemplate(provider.providerId, missionTplId);
+        missionTemplate.description = entry.description;
+        missionTemplate.retrievedAt = null;
+
+        // create this entry:
+        missionTemplateService.createMissionTemplate(missionTemplate);
+
+        final var isDirectory = missionTplId.endsWith("/");
+        if (!isDirectory) {
+          // just add the associated asset classes to the mission template:
+          if (entry.assetClassNames != null) {
+            createAssociatedAssetClasses(provider, missionTemplate, entry.assetClassNames);
+          }
+        }
       });
     }
 

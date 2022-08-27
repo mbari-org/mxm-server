@@ -1,9 +1,13 @@
 {
   "result": {
     "subDir": "",
-    "filenames": [
-      "Science/",
-      "_examples/"
+    "entries": [
+      {
+        "missionTplId": "Science/"
+      },
+      {
+        "missionTplId": "_examples/"
+      }
     ]
   }
 }

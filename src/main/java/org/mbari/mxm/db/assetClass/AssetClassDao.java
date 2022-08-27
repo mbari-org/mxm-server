@@ -30,6 +30,7 @@ public interface AssetClassDao {
     """
       select * from asset_classes
       where provider_id in (<providerIds>)
+      order by class_name
       """
   )
   List<AssetClass> getAssetClassesMultiple(@BindList("providerIds") List<String> providerIds);

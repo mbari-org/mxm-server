@@ -14,13 +14,20 @@ import java.util.List;
 @RegisterBeanMapper(Mission.class)
 public interface MissionDao {
 
-  @SqlQuery("select * from missions")
+  @SqlQuery(
+    """
+      select * from missions
+      order by provider_id, mission_tpl_id, mission_id
+      """
+
+  )
   List<Mission> getAllMissions();
 
   @SqlQuery(
     """
       select * from missions
       where provider_id    = :providerId
+      order by mission_tpl_id, mission_id
       """
   )
   List<Mission> getMissionsForProvider(@Bind("providerId") String providerId);

@@ -22,6 +22,7 @@ public interface AssetDao {
     """
       select * from assets
       where provider_id = :providerId
+      order by asset_id
       """
   )
   List<Asset> getAssets(@Bind("providerId") String providerId);
@@ -30,6 +31,7 @@ public interface AssetDao {
     """
       select * from assets
       where provider_id in (<providerIds>)
+      order by asset_id
       """
   )
   List<Asset> getAssetsMultiple(@BindList("providerIds") List<String> providerIds);

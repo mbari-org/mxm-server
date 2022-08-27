@@ -15,13 +15,19 @@ import java.util.List;
 @RegisterBeanMapper(MissionTemplate.class)
 public interface MissionTemplateDao {
 
-  @SqlQuery("select * from mission_tpls")
+  @SqlQuery(
+    """
+      select * from mission_tpls
+      order by provider_id, mission_tpl_id
+      """
+  )
   List<MissionTemplate> getAllMissionTemplates();
 
   @SqlQuery(
     """
       select * from mission_tpls
       where provider_id = :providerId
+      order by mission_tpl_id
       """
   )
   List<MissionTemplate> getMissionTemplates(@Bind("providerId") String providerId);
@@ -33,6 +39,7 @@ public interface MissionTemplateDao {
         and mission_tpl_id != :directory
         and mission_tpl_id ~ ('^' || :directory || '[^/]*/?$')
         -- the regex is to allow for direct subdirectories, but not further descendents.
+        order by mission_tpl_id
         """
   )
   List<MissionTemplate> listMissionTplsDirectory(@Bind("providerId") String providerId,
@@ -42,6 +49,7 @@ public interface MissionTemplateDao {
     """
       select * from mission_tpls
       where provider_id in (<providerIds>)
+      order by provider_id, mission_tpl_id
       """
   )
   List<MissionTemplate> getMissionTemplatesMultiple(@BindList("providerIds") List<String> providerIds);
