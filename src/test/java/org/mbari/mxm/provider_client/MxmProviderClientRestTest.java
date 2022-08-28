@@ -68,7 +68,7 @@ public class MxmProviderClientRestTest {
   public void testMissionTemplatesEndpoint() {
     var response = client.getMissionTemplates();
     var result = response.result;
-    assertEquals("", result.subDir);
+    assertEquals("", result.directory);
     assertEquals(2, result.entries.size());
   }
 
@@ -76,7 +76,7 @@ public class MxmProviderClientRestTest {
   public void testMissionTemplatesEndpoint_examples() {
     var response = client.getMissionTemplates("_examples");
     var result = response.result;
-    assertEquals("_examples", result.subDir);
+    assertEquals("_examples", result.directory);
     assertEquals("_examples/SysLogExample.tl", result.entries.get(0).missionTplId);
   }
 
@@ -84,7 +84,7 @@ public class MxmProviderClientRestTest {
   public void testMissionTemplatesEndpointScience() {
     var response = client.getMissionTemplates("Science");
     var result = response.result;
-    assertEquals("Science", result.subDir);
+    assertEquals("Science", result.directory);
     assertEquals(1, result.entries.size());
     assertEquals("Science/mbts_sci2.tl", result.entries.get(0).missionTplId);
   }

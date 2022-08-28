@@ -11,7 +11,7 @@ public class MissionTemplatesResponse {
 
   @Data
   public static class MissionTemplateList {
-    public String subDir;
+    public String directory;
     public List<MissionTemplateResponse.MissionTemplate> entries;
   }
 }

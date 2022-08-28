@@ -1,6 +1,6 @@
 {
   "result": {
-    "subDir": "_examples",
+    "directory": "_examples",
     "entries": [
       {
         "missionTplId": "_examples/SysLogExample.tl",

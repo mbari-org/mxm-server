@@ -1,6 +1,6 @@
 {
   "result": {
-    "subDir": "Science",
+    "directory": "Science",
     "entries": [
       {
         "missionTplId": "Science/mbts_sci2.tl",
