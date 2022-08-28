@@ -91,7 +91,7 @@ public class MxmProviderClientRestTest {
 
   @Test
   public void testMissionTemplateEndpoint() {
-    var response = client.getMissionTemplate("Science/mbts_sci2.tl", false);
+    var response = client.getMissionTemplate("Science/mbts_sci2.tl");
 
     var result = response.result;
     assertEquals("Science/mbts_sci2.tl", result.missionTplId);

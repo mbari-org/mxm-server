@@ -164,8 +164,7 @@ public class ProviderManager {
       assert directory.endsWith("/");
 
       // create a MissionTemplate entry for the directory itself:
-      getAndCreateMissionTpl(provider, directory, OffsetDateTime.now(), true);
-      // though `simple` param irrelevant for directory.
+      getAndCreateMissionTpl(provider, directory);
 
       // get directory entries:
       var missionTplListing = mxmProviderClient.getMissionTemplates(
@@ -191,15 +190,12 @@ public class ProviderManager {
       });
     }
 
-    private void getAndCreateMissionTpl(Provider provider, String missionTplId,
-                                        OffsetDateTime retrievedAt,
-                                        boolean simple
-    ) {
+    private void getAndCreateMissionTpl(Provider provider, String missionTplId) {
       missionTplId = Utl.cleanPath(missionTplId);
       final var isDirectory = missionTplId.endsWith("/");
 
       MissionTemplate missionTemplate = new MissionTemplate(provider.providerId, missionTplId);
-      missionTemplate.retrievedAt = retrievedAt;
+      missionTemplate.retrievedAt = OffsetDateTime.now();
 
       if (isDirectory) {
         // no info needed from provider, just create the entry:
@@ -208,7 +204,7 @@ public class ProviderManager {
       else {
         // actual template, get info from provider as needed:
         log.debug("getAndCreateMissionTpl: missionTplId='{}'", missionTplId);
-        var response = mxmProviderClient.getMissionTemplate(missionTplId, simple);
+        var response = mxmProviderClient.getMissionTemplate(missionTplId);
         var missionTemplateFromProvider = response.result;
         createActualMissionTemplate(provider, missionTemplate, missionTemplateFromProvider);
       }
@@ -218,6 +214,7 @@ public class ProviderManager {
                                              MissionTemplateResponse.MissionTemplate missionTemplateFromProvider
     ) {
       missionTemplate.description = missionTemplateFromProvider.description;
+      missionTemplate.retrievedAt = OffsetDateTime.now();
 
       missionTemplateService.createMissionTemplate(missionTemplate);
 
@@ -297,11 +294,10 @@ public class ProviderManager {
       else {
         missionTemplateService.deleteMissionTemplate(pl);
         log.debug("recreating template missionTplId='{}'", missionTplId);
-        getAndCreateMissionTpl(provider, missionTplId, null, false);
+        getAndCreateMissionTpl(provider, missionTplId);
       }
     }
 
-    // TODO
     public void preUpdateMission(Provider provider, Mission pl) {
       log.debug("preUpdateMission: pl={}", pl);
 

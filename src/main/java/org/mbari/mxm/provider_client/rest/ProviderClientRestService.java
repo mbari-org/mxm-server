@@ -31,9 +31,7 @@ public interface ProviderClientRestService {
 
   @GET
   @Path("missiontemplate/{filePath: .*}")
-  MissionTemplateResponse getMissionTemplate(@PathParam("filePath") String filePath,
-                                             @QueryParam("simple") String simple
-  );
+  MissionTemplateResponse getMissionTemplate(@PathParam("filePath") String filePath);
 
   @GET
   @Path("units")

@@ -88,8 +88,8 @@ public class MxmProviderClientRest implements MxmProviderClient {
   }
 
   @Override
-  public MissionTemplateResponse getMissionTemplate(String filePath, boolean simple) {
-    return service.getMissionTemplate(filePath, simple ? "y" : null);
+  public MissionTemplateResponse getMissionTemplate(String filePath) {
+    return service.getMissionTemplate(filePath);
   }
 
   @Override

@@ -51,24 +51,6 @@ create table if not exists mission_tpls
 )
 ;
 
-create or replace function mission_tpls_set_retrieved_at() returns trigger as
-$$
-begin
-  -- set retrieved_at only if not yet set and this is an actual template (not a directory)
-  if new.retrieved_at is null and new.mission_tpl_id !~ '^.*/$' then
-    new.retrieved_at = now();
-  end if;
-  return new;
-end
-$$ language plpgsql;
-
-drop trigger if exists mission_tpls_set_retrieved_at on mission_tpls;
-create trigger mission_tpls_set_retrieved_at
-  before insert
-  on mission_tpls
-  for each row
-execute procedure mission_tpls_set_retrieved_at();
-
 create table if not exists mission_tpl_asset_class
 (
   provider_id      varchar not null,

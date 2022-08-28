@@ -21,7 +21,7 @@ public interface MxmProviderClient {
 
   MissionTemplatesResponse getMissionTemplates(String subDir);
 
-  MissionTemplateResponse getMissionTemplate(String filePath, boolean simple);
+  MissionTemplateResponse getMissionTemplate(String filePath);
 
   UnitsResponse getUnits();
 
