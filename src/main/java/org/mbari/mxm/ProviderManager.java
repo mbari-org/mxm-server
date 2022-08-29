@@ -26,7 +26,7 @@ import org.mbari.mxm.provider_client.responses.AssetClassesResponse;
 import org.mbari.mxm.provider_client.responses.MissionTemplateResponse;
 import org.mbari.mxm.provider_client.responses.PingResponse;
 import org.mbari.mxm.provider_client.responses.UnitsResponse;
-import org.mbari.mxm.provider_client.rest.MissionPayload;
+import org.mbari.mxm.provider_client.rest.PostMissionPayload;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -313,13 +313,14 @@ public class ProviderManager {
 
       // get the current state of the mission:
       var mission = missionService.getMission(pl.providerId, pl.missionTplId, pl.missionId);
+      log.debug("preUpdateMission: saved mission={}", mission);
 
       // depending on current missionStatus:
       if (mission.missionStatus == MissionStatusType.DRAFT) {
         // is mission being submitted?
         if (pl.missionStatus == MissionStatusType.SUBMITTED) {
           log.warn("preUpdateMission: submitting, pl={}", Utl.writeJson(pl));
-          submitMission(provider, mission);
+          submitMission(mission, pl);
         }
         else if (pl.missionStatus == null || pl.missionStatus == MissionStatusType.DRAFT) {
           // OK, no requested change in status; let mutation proceed.
@@ -334,8 +335,7 @@ public class ProviderManager {
       else if (pl.noPatch()) {
         // This is a request for refreshing the mission status.
         if (provider.canReportMissionStatus) {
-          pl.missionStatus = retrieveMissionStatus(mission);
-          pl.setUpdatedDate(OffsetDateTime.now());
+          retrieveMissionStatus(mission.providerMissionId, pl);
         }
         else {
           log.warn("provider '{}' does not support reporting mission status", provider.providerId);
@@ -346,36 +346,54 @@ public class ProviderManager {
       }
     }
 
-    private void submitMission(Provider provider, Mission mission) {
+    private void submitMission(Mission mission, Mission pl) {
       var args= argumentService.getArguments(mission.providerId, mission.missionTplId, mission.missionId);
 
-      MissionPayload pl = new MissionPayload();
+      PostMissionPayload pmpl = new PostMissionPayload();
 
-      pl.arguments = new HashMap<>();
+      pmpl.arguments = new HashMap<>();
       args.forEach(a -> {
-        pl.arguments.put(a.paramName, new MissionPayload.MissionArgValueAndUnits(a.paramValue, a.paramUnits));
+        pmpl.arguments.put(a.paramName, new PostMissionPayload.MissionArgValueAndUnits(a.paramValue, a.paramUnits));
       });
 
-      pl.missionTplId = mission.missionTplId;
-      pl.missionId = mission.missionId;
-      pl.assetId = mission.assetId;
-      pl.description = mission.description;
-      pl.schedType = mission.schedType == null ? null : mission.schedType.name();
-      pl.schedDate = mission.schedDate == null ? null : mission.schedDate.toString();
+      pmpl.missionTplId = mission.missionTplId;
+      pmpl.assetId = mission.assetId;
+      pmpl.description = mission.description;
+      pmpl.schedType = mission.schedType == null ? null : mission.schedType.name();
+      pmpl.schedDate = mission.schedDate == null ? null : mission.schedDate.toString();
 
-      log.warn("submitMission: pl={}", Utl.writeJson(pl));
-      var res = mxmProviderClient.postMission(pl);
+      log.warn("submitMission: pmpl={}", Utl.writeJson(pmpl));
+      var res = mxmProviderClient.postMission(pmpl);
       log.warn("submitMission: res={}", Utl.writeJson(res));
-      if (res.result.status == null) {
-        log.warn("submitMission: res.result.status is null");
+      if (MissionStatusType.SUBMITTED.name().equals(res.result.status)) {
+        pl.missionStatus = MissionStatusType.SUBMITTED;
+        pl.providerMissionId = res.result.missionId;
+      }
+      else {
+        log.warn("unexpected mission status: {}", res.result.status);
       }
     }
 
-    private MissionStatusType retrieveMissionStatus(Mission mission) {
-      // TODO
+    private void retrieveMissionStatus(String providerMissionId, Mission pl) {
+      if (providerMissionId == null) {
+        log.warn("retrieveMissionStatus: providerMissionId is null");
+        return;
+      }
+      log.warn("retrieveMissionStatus: providerMissionId='{}'", providerMissionId);
 
-      //mxmProviderClient.getMission(mission.missionId);
-      return null;
+      try {
+        var ms = mxmProviderClient.getMissionStatus(providerMissionId);
+        if (ms.result.status == null) {
+          // no change in status (TODO this special null meaning is temporary)
+          log.warn("retrieveMissionStatus: provider reported a null mission status");
+          return;
+        }
+        pl.missionStatus = MissionStatusType.valueOf(ms.result.status);
+        pl.setUpdatedDate(OffsetDateTime.now());
+      }
+      catch (Exception e) {
+        log.warn("retrieveMissionStatus: exception: {}", e.getMessage());
+      }
     }
 
     public void done() {

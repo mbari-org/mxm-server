@@ -93,8 +93,13 @@ public class MxmProviderClientRest implements MxmProviderClient {
   }
 
   @Override
-  public PostMissionResponse postMission(MissionPayload pl) {
+  public MissionStatusResponse postMission(PostMissionPayload pl) {
     return service.postMission(pl);
+  }
+
+  @Override
+  public MissionStatusResponse getMissionStatus(String missionId) {
+    return service.getMissionStatus(missionId);
   }
 
   @Override

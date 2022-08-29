@@ -32,6 +32,7 @@ public class Mission {
     this.missionId = missionId;
   }
 
+  public String providerMissionId;
   public MissionStatusType missionStatus;
   public String assetId;
   public String description;

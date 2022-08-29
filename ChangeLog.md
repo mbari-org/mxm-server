@@ -1,5 +1,8 @@
 2022-08
 
+- added providerMissionId to mission model: captures id given by provider when submitting the mission.
+  Such ID used when requesting status of a mission.
+  TODO set missionId as generated as identity (not prompted to user)
 - better mission template handling by expecting recursive listing from provider
   - now, all mission templates retrieved upon provider registration (not only first level)
   - also, when performing a refresh

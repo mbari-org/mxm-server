@@ -110,17 +110,19 @@ create type mission_sched_type as enum (
 
 create table if not exists missions
 (
-  provider_id    varchar             not null,
-  mission_tpl_id varchar             not null check (mission_tpl_id !~ '^.*/$'),
-  mission_id     varchar             not null,
-  mission_status mission_status_type not null,
-  asset_id       varchar             not null,
-  description    varchar,
-  sched_type     mission_sched_type  not null,
-  sched_date     timestamp with time zone,
-  start_date     timestamp with time zone,
-  end_date       timestamp with time zone,
-  updated_date   timestamp with time zone,
+  provider_id         varchar             not null,
+  mission_tpl_id      varchar             not null check (mission_tpl_id !~ '^.*/$'),
+  mission_id          varchar             not null,
+
+  provider_mission_id varchar,
+  mission_status      mission_status_type not null,
+  asset_id            varchar             not null,
+  description         varchar,
+  sched_type          mission_sched_type  not null,
+  sched_date          timestamp with time zone,
+  start_date          timestamp with time zone,
+  end_date            timestamp with time zone,
+  updated_date        timestamp with time zone,
   foreign key (provider_id, mission_tpl_id) references mission_tpls on update cascade on delete cascade,
   foreign key (provider_id, asset_id) references assets on update cascade on delete cascade,
   primary key (provider_id, mission_tpl_id, mission_id)

@@ -17,6 +17,7 @@ public class MissionMapper implements RowMapper<Mission> {
       rs.getString("provider_id"),
       rs.getString("mission_tpl_id"),
       rs.getString("mission_id"),
+      rs.getString("provider_mission_id"),
       MissionStatusType.valueOf(rs.getString("mission_status")),
       rs.getString("asset_id"),
       rs.getString("description"),

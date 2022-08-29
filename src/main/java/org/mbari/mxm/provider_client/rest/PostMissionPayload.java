@@ -4,18 +4,14 @@ import lombok.AllArgsConstructor;
 
 import java.util.HashMap;
 
-public class MissionPayload {
+public class PostMissionPayload {
 
   public String missionTplId;
-  public String missionId;
   public String assetId;
   public String description;
   public String schedType;
   public String schedDate;
   public HashMap<String, MissionArgValueAndUnits> arguments;
-
-  // TODO remove
-  //public String destinationAddress;
 
 
   @AllArgsConstructor

@@ -135,6 +135,7 @@ public class MissionService {
       .where("providerId")
       .where("missionTplId")
       .where("missionId")
+      .set(pl.providerMissionId, "providerMissionId")
       .set(pl.missionStatus, "missionStatus")
       .set(pl.assetId, "assetId")
       .set(pl.description, "description")
