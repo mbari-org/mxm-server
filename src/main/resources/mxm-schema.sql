@@ -1,1 +1,1 @@
-/Users/carueda/github/mbari-org/mxm-repos/mxm-server/docker/mxm-schema.sql
+../../../docker/mxm-schema.sql
