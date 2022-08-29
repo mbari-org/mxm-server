@@ -17,8 +17,6 @@ public interface MxmProviderClient {
 
   AssetClassesResponse getAssetClasses();
 
-  MissionTemplatesResponse getMissionTemplates();
-
   MissionTemplatesResponse getMissionTemplates(String subDir);
 
   MissionTemplateResponse getMissionTemplate(String filePath);

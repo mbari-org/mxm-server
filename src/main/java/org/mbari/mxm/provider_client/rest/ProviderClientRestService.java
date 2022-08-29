@@ -23,7 +23,7 @@ public interface ProviderClientRestService {
 
   @GET
   @Path("missiontemplates")
-  MissionTemplatesResponse getMissionTemplates();
+  MissionTemplatesResponse getMissionTemplatesRoot();
 
   @GET
   @Path("missiontemplates/{subDir: .*}")

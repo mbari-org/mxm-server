@@ -81,11 +81,11 @@ public class ProviderManager {
                                      String httpEndpoint,
                                      ProviderApiType apiType) {
       log.debug("setMxmProviderClient: providerId={}, httpEndpoint={}, apiType={}", providerId, httpEndpoint, apiType);
-      this.mxmProviderClient = MxmProviderClientBuilder.create(providerId, httpEndpoint, apiType);
+      mxmProviderClient = MxmProviderClientBuilder.create(providerId, httpEndpoint, apiType);
     }
 
     public PingResponse ping() throws ProviderPingException {
-      return this.mxmProviderClient.ping();
+      return mxmProviderClient.ping();
     }
 
     public void preInsertProvider(Provider provider) {
@@ -93,14 +93,14 @@ public class ProviderManager {
 
       // TODO this try/catch is mainly for the TFT@TSAUV provider, which doesn't support `ping` yet
       try {
-        var pong = this.mxmProviderClient.ping();
+        var pong = mxmProviderClient.ping();
         log.debug("preInsertProvider: ping=>{}", pong);
       }
       catch (ProviderPingException e) {
         log.warn("preInsertProvider: error pinging provider={}: {}", provider.providerId, e.getMessage());
       }
 
-      var infoResponse = this.mxmProviderClient.getGeneralInfo();
+      var infoResponse = mxmProviderClient.getGeneralInfo();
       var info = infoResponse.result;
       log.debug("preInsertProvider: info=>{}", info);
 
@@ -166,22 +166,32 @@ public class ProviderManager {
       // create a MissionTemplate entry for the directory itself:
       getAndCreateMissionTpl(provider, directory);
 
-      // get directory entries:
+      // get all directory entries, recursively as specified in MXM Provider API:
       var missionTplListing = mxmProviderClient.getMissionTemplates(
         directory.replaceFirst("^/+", "")   // TODO consistent path name handling
       );
-      missionTplListing.result.entries.forEach(entry -> {
+      createMissionTplsForDirecvtoryEntries(provider, missionTplListing.result.entries);
+    }
+
+    private void createMissionTplsForDirecvtoryEntries(Provider provider,
+                                                       List<MissionTemplateResponse.MissionTemplate> entries) {
+      entries.forEach(entry -> {
         final var missionTplId = Utl.cleanPath(entry.missionTplId);
+        final var isDirectory = missionTplId.endsWith("/");
 
         MissionTemplate missionTemplate = new MissionTemplate(provider.providerId, missionTplId);
         missionTemplate.description = entry.description;
-        missionTemplate.retrievedAt = null;
+        missionTemplate.retrievedAt = isDirectory ? OffsetDateTime.now() : null;
 
         // create this entry:
         missionTemplateService.createMissionTemplate(missionTemplate);
 
-        final var isDirectory = missionTplId.endsWith("/");
-        if (!isDirectory) {
+        if (isDirectory) {
+          if (entry.entries != null && entry.entries.size() > 0) {
+            createMissionTplsForDirecvtoryEntries(provider, entry.entries);
+          }
+        }
+        else {
           // just add the associated asset classes to the mission template:
           if (entry.assetClassNames != null) {
             createAssociatedAssetClasses(provider, missionTemplate, entry.assetClassNames);

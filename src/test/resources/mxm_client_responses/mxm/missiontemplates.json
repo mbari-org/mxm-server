@@ -3,10 +3,42 @@
     "directory": "",
     "entries": [
       {
+        "missionTplId": "Default.xml",
+        "assetClassNames": [
+          "LRAUV"
+        ]
+      },
+      {
         "missionTplId": "Science/"
       },
       {
-        "missionTplId": "_examples/"
+        "missionTplId": "_examples/",
+        "entries": [
+          {
+            "missionTplId": "_examples/SysLogExample.tl",
+            "assetClassNames": [
+              "LRAUV"
+            ]
+          },
+          {
+            "missionTplId": "_examples/FOO.tl",
+            "description": "FOO",
+            "assetClassNames": [
+              "LRAUV"
+            ]
+          },
+          {
+            "missionTplId": "_examples/subdir/",
+            "entries": [
+              {
+                "missionTplId": "_examples/subdir/baz.tl",
+                "assetClassNames": [
+                  "LRAUV"
+                ]
+              }
+            ]
+          }
+        ]
       }
     ]
   }

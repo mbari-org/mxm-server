@@ -73,14 +73,9 @@ public class MxmProviderClientRest implements MxmProviderClient {
   }
 
   @Override
-  public MissionTemplatesResponse getMissionTemplates() {
-    return service.getMissionTemplates();
-  }
-
-  @Override
   public MissionTemplatesResponse getMissionTemplates(String subDir) {
     if (subDir.equals("") || subDir.equals("/")) {
-      return service.getMissionTemplates();
+      return service.getMissionTemplatesRoot();
     }
     else {
       return service.getMissionTemplates(subDir);

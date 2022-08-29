@@ -7,8 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.provider.ProviderApiType;
 import org.mbari.mxm.graphql.ProviderPingException;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -66,10 +69,23 @@ public class MxmProviderClientRestTest {
 
   @Test
   public void testMissionTemplatesEndpoint() {
-    var response = client.getMissionTemplates();
+    var response = client.getMissionTemplates("/");
     var result = response.result;
+    // log.warn(Utl.writeJson(result));
+
     assertEquals("", result.directory);
-    assertEquals(2, result.entries.size());
+    assertEquals(3, result.entries.size());
+    assertEquals("Default.xml", result.entries.get(0).missionTplId);
+    assertEquals(List.of("LRAUV"), result.entries.get(0).assetClassNames);
+
+    assertEquals("Science/", result.entries.get(1).missionTplId);
+
+    assertEquals("_examples/", result.entries.get(2).missionTplId);
+    assertEquals(3, result.entries.get(2).entries.size());
+    assertEquals("_examples/SysLogExample.tl", result.entries.get(2).entries.get(0).missionTplId);
+    assertEquals("FOO", result.entries.get(2).entries.get(1).description);
+    assertEquals(1, result.entries.get(2).entries.get(2).entries.size());
+    assertEquals("_examples/subdir/baz.tl", result.entries.get(2).entries.get(2).entries.get(0).missionTplId);
   }
 
   @Test
