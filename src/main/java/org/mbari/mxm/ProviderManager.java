@@ -170,11 +170,11 @@ public class ProviderManager {
       var missionTplListing = mxmProviderClient.getMissionTemplates(
         directory.replaceFirst("^/+", "")   // TODO consistent path name handling
       );
-      createMissionTplsForDirecvtoryEntries(provider, missionTplListing.result.entries);
+      createMissionTplsForDirectoryEntries(provider, missionTplListing.result.entries);
     }
 
-    private void createMissionTplsForDirecvtoryEntries(Provider provider,
-                                                       List<MissionTemplateResponse.MissionTemplate> entries) {
+    private void createMissionTplsForDirectoryEntries(Provider provider,
+                                                      List<MissionTemplateResponse.MissionTemplate> entries) {
       entries.forEach(entry -> {
         final var missionTplId = Utl.cleanPath(entry.missionTplId);
         final var isDirectory = missionTplId.endsWith("/");
@@ -188,7 +188,7 @@ public class ProviderManager {
 
         if (isDirectory) {
           if (entry.entries != null && entry.entries.size() > 0) {
-            createMissionTplsForDirecvtoryEntries(provider, entry.entries);
+            createMissionTplsForDirectoryEntries(provider, entry.entries);
           }
         }
         else {
