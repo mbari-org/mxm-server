@@ -32,7 +32,10 @@ import org.mbari.mxm.provider_client.rest.PostMissionPayload;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -310,6 +313,8 @@ public class ProviderManager {
     }
 
     private void updateActualMissionTemplate(Provider provider, String missionTplId) {
+      // TODO modularize this method
+
       log.debug("refreshing template missionTplId='{}'", missionTplId);
       var response = mxmProviderClient.getMissionTemplate(missionTplId);
       var missionTemplateFromProvider = response.result;
@@ -322,6 +327,16 @@ public class ProviderManager {
 
       ////////////////////////////////////////////////////////
       // refresh associated parameters:
+
+      log.debug("missionTemplateFromProvider.parameters=>{}", missionTemplateFromProvider.parameters);
+
+      if (missionTemplateFromProvider.parameters.isEmpty()) {
+        // just remove any parameters that may have been previously captured:
+        var psDeleted = parameterService.deleteForMissionTemplate(provider.providerId, missionTplId);
+        log.debug("preUpdateMissionTpl: psDeleted=>{}", psDeleted);
+        return;
+      }
+
       //  - delete parameters no longer reported by provider for this template
       //  - refresh parameters that are already used by missions
       //  - add any new parameters reported by provider
@@ -342,7 +357,7 @@ public class ProviderManager {
       );
 
       var paramNamesToUpdate = new HashSet<String>();
-      for (Argument referringArg: withReferringArguments) {
+      for (Argument referringArg : withReferringArguments) {
         if (paramNamesFromProvider.contains(referringArg.paramName)) {
           paramNamesToUpdate.add(referringArg.paramName);
         }
@@ -350,14 +365,14 @@ public class ProviderManager {
       var paramNamesToAdd = new HashSet<>(paramNamesFromProvider);
       paramNamesToAdd.removeAll(paramNamesToUpdate);
 
-      log.warn("paramNamesToUpdate = {}", paramNamesToUpdate);
-      log.warn("paramNamesToAdd    = {}", paramNamesToAdd);
+      log.debug("paramNamesToUpdate = {}", paramNamesToUpdate);
+      log.debug("paramNamesToAdd    = {}", paramNamesToAdd);
 
       // delete all params except the ones to be updated:
       var psDeleted = parameterService.deleteForMissionTemplateExcept(
         provider.providerId, missionTplId, paramNamesToUpdate.stream().toList()
       );
-      log.warn("preUpdateMissionTpl: psDeleted=>{}", psDeleted);
+      log.debug("preUpdateMissionTpl: psDeleted=>{}", psDeleted);
 
       // do the updates
       paramNamesToUpdate.forEach(paramName -> {
@@ -409,7 +424,7 @@ public class ProviderManager {
       if (mission.missionStatus == MissionStatusType.DRAFT) {
         // is mission being submitted?
         if (pl.missionStatus == MissionStatusType.SUBMITTED) {
-          log.warn("preUpdateMission: submitting, pl={}", Utl.writeJson(pl));
+          log.debug("preUpdateMission: submitting, pl={}", Utl.writeJson(pl));
           submitMission(mission, pl);
         }
         else if (pl.missionStatus == null || pl.missionStatus == MissionStatusType.DRAFT) {
@@ -437,7 +452,7 @@ public class ProviderManager {
     }
 
     private void submitMission(Mission mission, Mission pl) {
-      var args= argumentService.getArguments(mission.providerId, mission.missionTplId, mission.missionId);
+      var args = argumentService.getArguments(mission.providerId, mission.missionTplId, mission.missionId);
 
       PostMissionPayload pmpl = new PostMissionPayload();
 
@@ -452,9 +467,9 @@ public class ProviderManager {
       pmpl.schedType = mission.schedType == null ? null : mission.schedType.name();
       pmpl.schedDate = mission.schedDate == null ? null : mission.schedDate.toString();
 
-      log.warn("submitMission: pmpl={}", Utl.writeJson(pmpl));
+      log.debug("submitMission: pmpl={}", Utl.writeJson(pmpl));
       var res = mxmProviderClient.postMission(pmpl);
-      log.warn("submitMission: res={}", Utl.writeJson(res));
+      log.debug("submitMission: res={}", Utl.writeJson(res));
       if (MissionStatusType.SUBMITTED.name().equals(res.result.status)) {
         pl.missionStatus = MissionStatusType.SUBMITTED;
         pl.providerMissionId = res.result.missionId;
@@ -469,7 +484,7 @@ public class ProviderManager {
         log.warn("retrieveMissionStatus: providerMissionId is null");
         return;
       }
-      log.warn("retrieveMissionStatus: providerMissionId='{}'", providerMissionId);
+      log.debug("retrieveMissionStatus: providerMissionId='{}'", providerMissionId);
 
       try {
         var ms = mxmProviderClient.getMissionStatus(providerMissionId);

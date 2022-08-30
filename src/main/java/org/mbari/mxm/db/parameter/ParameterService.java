@@ -99,12 +99,26 @@ public class ParameterService {
       );
   }
 
+  public Integer deleteForMissionTemplate(String providerId,
+                                          String missionTplId
+  ) {
+    log.debug("deleteForMissionTemplateExcept: providerId={}, missionTplId={}",
+      providerId, missionTplId);
+
+    return dbSupport.getJdbi()
+      .withExtension(ParameterDao.class, dao -> dao.deleteForMissionTemplate(providerId, missionTplId));
+  }
+
   public Integer deleteForMissionTemplateExcept(String providerId,
                                                 String missionTplId,
                                                 List<String> paramNames
   ) {
-    log.warn("deleteForMissionTemplateExcept: providerId={}, missionTplId={}, paramNames={}",
+    log.debug("deleteForMissionTemplateExcept: providerId={}, missionTplId={}, paramNames={}",
       providerId, missionTplId, paramNames);
+
+    if (paramNames.isEmpty()) {
+      return deleteForMissionTemplate(providerId, missionTplId);
+    }
 
     final var quotedParams = paramNames.stream()
       .map(paramName -> String.format("'%s'", paramName)).toList();
@@ -126,4 +140,3 @@ public class ParameterService {
       );
   }
 }
-

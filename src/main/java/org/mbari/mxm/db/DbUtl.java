@@ -78,6 +78,15 @@ public class DbUtl {
       return this;
     }
 
+    public UpdateDef setEvenIfNull(Object fieldValue, String camelName) {
+      if (fieldValue != null) {
+        return set(fieldValue, camelName);
+      }
+      else {
+        return setNull(camelName);
+      }
+    }
+
     public UpdateDef setNull(String camelName) {
       sets.add(snakize(camelName) + " = null");
       return this;

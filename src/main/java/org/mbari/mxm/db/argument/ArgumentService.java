@@ -69,6 +69,10 @@ public class ArgumentService {
                                                        String missionTplId,
                                                        List<String> paramNames
   ) {
+    if (paramNames.isEmpty()) {
+      return List.of();
+    }
+
     final var quotedParams = paramNames.stream()
       .map(paramName -> String.format("'%s'", paramName)).toList();
 
@@ -108,8 +112,8 @@ public class ArgumentService {
       .where("missionTplId")
       .where("missionId")
       .where("paramName")
-      .set(pl.paramValue, "paramValue")
-      .set(pl.paramUnits, "paramUnits");
+      .setEvenIfNull(pl.paramValue, "paramValue")
+      .setEvenIfNull(pl.paramUnits, "paramUnits");
 
     var res = dbSupport.getJdbi()
       .withHandle(handle ->
