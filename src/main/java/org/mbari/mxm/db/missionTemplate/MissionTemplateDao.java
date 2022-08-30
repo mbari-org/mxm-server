@@ -77,8 +77,9 @@ public interface MissionTemplateDao {
 
   @SqlUpdate(
     """
-      delete from mission_tpls where
-      provider_id = :providerId and mission_tpl_id = :missionTplId
+      delete from mission_tpls
+      where provider_id    = :providerId
+        and mission_tpl_id = :missionTplId
       returning *
       """
   )
@@ -88,8 +89,9 @@ public interface MissionTemplateDao {
 
   @SqlUpdate(
     """
-      delete from mission_tpls where
-      provider_id = :providerId and mission_tpl_id like (:directory || '/%')
+      delete from mission_tpls
+      where provider_id = :providerId
+        and mission_tpl_id like (:directory || '/%')
       """
   )
   Integer deleteDirectoryRecursive(@Bind("providerId") String providerId,

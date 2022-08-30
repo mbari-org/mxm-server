@@ -135,9 +135,7 @@ public class ProviderManager {
     }
 
     private void createAssetClasses(Provider provider, List<AssetClassesResponse.AssetClass> assetClasses) {
-      assetClasses.forEach(assetClass -> {
-        createAssetClass(provider, assetClass);
-      });
+      assetClasses.forEach(assetClass -> createAssetClass(provider, assetClass));
     }
 
     private void createAssetClass(Provider provider, AssetClassesResponse.AssetClass assetClass) {
@@ -150,9 +148,7 @@ public class ProviderManager {
     }
 
     private void createAssets(Provider provider, AssetClassesResponse.AssetClass assetClass) {
-      assetClass.assets.forEach(asset -> {
-        createAsset(provider, assetClass, asset);
-      });
+      assetClass.assets.forEach(asset -> createAsset(provider, assetClass, asset));
     }
 
     private void createAsset(Provider provider, AssetClassesResponse.AssetClass assetClass, AssetClassesResponse.Asset a) {
@@ -243,11 +239,9 @@ public class ProviderManager {
     private void createAssociatedAssetClasses(Provider provider, MissionTemplate missionTemplate,
                                               List<String> assetClassNames) {
 
-      assetClassNames.forEach(assetClassName -> {
-        missionTemplateAssetClassService.createMissionTemplateAssetClass(
-          new MissionTemplateAssetClass(provider.providerId, missionTemplate.missionTplId, assetClassName)
-        );
-      });
+      assetClassNames.forEach(assetClassName -> missionTemplateAssetClassService.createMissionTemplateAssetClass(
+        new MissionTemplateAssetClass(provider.providerId, missionTemplate.missionTplId, assetClassName)
+      ));
     }
 
     private void createParameters(Provider provider, MissionTemplate missionTemplate,
@@ -271,13 +265,9 @@ public class ProviderManager {
         .collect(Collectors.partitioningBy(u -> u.baseUnit == null));
 
       // first, create units without a base:
-      units.get(true).forEach(u -> {
-        createUnit(provider, u);
-      });
+      units.get(true).forEach(u -> createUnit(provider, u));
       // then the others:
-      units.get(false).forEach(u -> {
-        createUnit(provider, u);
-      });
+      units.get(false).forEach(u -> createUnit(provider, u));
     }
 
     private void createUnit(Provider provider, UnitsResponse.Unit unit) {
@@ -362,9 +352,7 @@ public class ProviderManager {
       //  - add any new parameters reported by provider
 
       Map<String, MissionTemplateResponse.Parameter> byParamNameFromProvider = new HashMap<>();
-      missionTemplateFromProvider.parameters.forEach(param -> {
-        byParamNameFromProvider.put(param.paramName, param);
-      });
+      missionTemplateFromProvider.parameters.forEach(param -> byParamNameFromProvider.put(param.paramName, param));
 
       final var paramNamesFromProvider = missionTemplateFromProvider.parameters.stream()
         .map(p -> p.paramName).collect(Collectors.toSet());
@@ -463,9 +451,8 @@ public class ProviderManager {
       PostMissionPayload pmpl = new PostMissionPayload();
 
       pmpl.arguments = new HashMap<>();
-      args.forEach(a -> {
-        pmpl.arguments.put(a.paramName, new PostMissionPayload.MissionArgValueAndUnits(a.paramValue, a.paramUnits));
-      });
+      args.forEach(a -> pmpl.arguments.put(a.paramName,
+        new PostMissionPayload.MissionArgValueAndUnits(a.paramValue, a.paramUnits)));
 
       pmpl.missionTplId = mission.missionTplId;
       pmpl.assetId = mission.assetId;
