@@ -1,6 +1,7 @@
 package org.mbari.mxm;
 
 import lombok.extern.slf4j.Slf4j;
+import org.mbari.mxm.db.argument.Argument;
 import org.mbari.mxm.db.argument.ArgumentService;
 import org.mbari.mxm.db.asset.Asset;
 import org.mbari.mxm.db.asset.AssetService;
@@ -31,8 +32,7 @@ import org.mbari.mxm.provider_client.rest.PostMissionPayload;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -287,25 +287,115 @@ public class ProviderManager {
 
 
     /**
-     * Reloads mission template from the provider.
+     * Refreshes mission template information from the provider.
      */
     public void preUpdateMissionTpl(Provider provider, MissionTemplate pl) {
       log.debug("preUpdateMissionTpl: missionTemplate={}", pl);
-
       final var missionTplId = pl.missionTplId;
-
       if (missionTplId.endsWith("/")) {
-        var deleteAllRes = missionTemplateService.deleteDirectoryRecursive(provider.providerId, missionTplId);
-        log.debug("preUpdateMissionTpl: deleteAllRes=>{}", deleteAllRes);
-
-        log.debug("recreating missionTplId='{}'", missionTplId);
-        getAndCreateMissionTplsForDirectory(provider, missionTplId);
+        updateMissionTemplateDirectory(provider, missionTplId);
       }
       else {
-        missionTemplateService.deleteMissionTemplate(pl);
-        log.debug("recreating template missionTplId='{}'", missionTplId);
-        getAndCreateMissionTpl(provider, missionTplId);
+        updateActualMissionTemplate(provider, missionTplId);
       }
+    }
+
+    private void updateMissionTemplateDirectory(Provider provider, String missionTplId) {
+      // FIXME not a complete recreation, but a refresh depending on existing dependencies!
+      var deleteAllRes = missionTemplateService.deleteDirectoryRecursive(provider.providerId, missionTplId);
+      log.debug("preUpdateMissionTpl: deleteAllRes=>{}", deleteAllRes);
+
+      log.debug("recreating missionTplId='{}'", missionTplId);
+      getAndCreateMissionTplsForDirectory(provider, missionTplId);
+    }
+
+    private void updateActualMissionTemplate(Provider provider, String missionTplId) {
+      log.debug("refreshing template missionTplId='{}'", missionTplId);
+      var response = mxmProviderClient.getMissionTemplate(missionTplId);
+      var missionTemplateFromProvider = response.result;
+
+      // update mission template itself:
+      MissionTemplate missionTemplate = new MissionTemplate(provider.providerId, missionTplId);
+      missionTemplate.description = missionTemplateFromProvider.description;
+      missionTemplate.retrievedAt = OffsetDateTime.now();
+      missionTemplateService.updateMissionTemplate(missionTemplate);
+
+      ////////////////////////////////////////////////////////
+      // refresh associated parameters:
+      //  - delete parameters no longer reported by provider for this template
+      //  - refresh parameters that are already used by missions
+      //  - add any new parameters reported by provider
+
+      Map<String, MissionTemplateResponse.Parameter> byParamNameFromProvider = new HashMap<>();
+      missionTemplateFromProvider.parameters.forEach(param -> {
+        byParamNameFromProvider.put(param.paramName, param);
+      });
+
+      final var paramNamesFromProvider = missionTemplateFromProvider.parameters.stream()
+        .map(p -> p.paramName).collect(Collectors.toSet());
+
+      var currentParameters = parameterService.getParameters(provider.providerId, missionTplId);
+      var currentParamNames = currentParameters.stream().map(p -> p.paramName).toList();
+
+      var withReferringArguments = argumentService.getArgumentsWithParameterNames(
+        provider.providerId, missionTplId, currentParamNames
+      );
+
+      var paramNamesToUpdate = new HashSet<String>();
+      for (Argument referringArg: withReferringArguments) {
+        if (paramNamesFromProvider.contains(referringArg.paramName)) {
+          paramNamesToUpdate.add(referringArg.paramName);
+        }
+      }
+      var paramNamesToAdd = new HashSet<>(paramNamesFromProvider);
+      paramNamesToAdd.removeAll(paramNamesToUpdate);
+
+      log.warn("paramNamesToUpdate = {}", paramNamesToUpdate);
+      log.warn("paramNamesToAdd    = {}", paramNamesToAdd);
+
+      // delete all params except the ones to be updated:
+      var psDeleted = parameterService.deleteForMissionTemplateExcept(
+        provider.providerId, missionTplId, paramNamesToUpdate.stream().toList()
+      );
+      log.warn("preUpdateMissionTpl: psDeleted=>{}", psDeleted);
+
+      // do the updates
+      paramNamesToUpdate.forEach(paramName -> {
+        var paramFromProvider = byParamNameFromProvider.get(paramName);
+        var param = new Parameter(provider.providerId, missionTplId, paramName);
+        param.type = paramFromProvider.type;
+        param.required = paramFromProvider.required;
+        param.defaultValue = paramFromProvider.defaultValue;
+        param.defaultUnits = paramFromProvider.defaultUnits;
+        param.valueCanReference = paramFromProvider.valueCanReference;
+        param.description = paramFromProvider.description;
+        parameterService.updateParameter(param);
+      });
+
+      // (re)create the rest:
+      paramNamesToAdd.forEach(paramName -> {
+        var paramFromProvider = byParamNameFromProvider.get(paramName);
+        var param = new Parameter(provider.providerId, missionTplId, paramName);
+        param.type = paramFromProvider.type;
+        param.required = paramFromProvider.required;
+        param.defaultValue = paramFromProvider.defaultValue;
+        param.defaultUnits = paramFromProvider.defaultUnits;
+        param.valueCanReference = paramFromProvider.valueCanReference;
+        param.description = paramFromProvider.description;
+        parameterService.createParameter(param);
+      });
+
+      ////////////////////////////////////////////////////////
+      // recreate associated asset classes:
+      var acsDeleted = missionTemplateAssetClassService.deleteForMissionTemplate(provider.providerId, missionTplId);
+      log.debug("preUpdateMissionTpl: acsDeleted=>{}", acsDeleted);
+      if (missionTemplateFromProvider.assetClassNames != null) {
+        createAssociatedAssetClasses(provider, missionTemplate, missionTemplateFromProvider.assetClassNames);
+      }
+      // Note: complete recreation of the asset classes association does not have any cascading effect on missions
+      // (as it would be the case above for parameters if completely recreated), but any possible removal of an asset
+      // class in the template would render associated missions invalid in terms of the associated asset.
+      // TODO(low prio) perhaps some more sophisticated handling/error-reporting, etc.
     }
 
     public void preUpdateMission(Provider provider, Mission pl) {

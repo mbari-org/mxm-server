@@ -99,10 +99,30 @@ public class ParameterService {
       );
   }
 
-  public Parameter deleteParameter(Parameter pl) {
+  public Integer deleteForMissionTemplateExcept(String providerId,
+                                                String missionTplId,
+                                                List<String> paramNames
+  ) {
+    log.warn("deleteForMissionTemplateExcept: providerId={}, missionTplId={}, paramNames={}",
+      providerId, missionTplId, paramNames);
+
+    final var quotedParams = paramNames.stream()
+      .map(paramName -> String.format("'%s'", paramName)).toList();
+
+    var sql = """
+      delete from parameters
+      where provider_id    = :providerId
+        and mission_tpl_id = :missionTplId
+        and param_name     not in (<quotedParams>)
+      """;
+
     return dbSupport.getJdbi()
-      .withExtension(ParameterDao.class,
-        dao -> dao.deleteParameter(pl.providerId, pl.missionTplId, pl.paramName)
+      .withHandle(handle ->
+        handle.createUpdate(sql)
+          .bind("providerId", providerId)
+          .bind("missionTplId", missionTplId)
+          .defineList("quotedParams", quotedParams)
+          .execute()
       );
   }
 }

@@ -1,5 +1,6 @@
 2022-08
 
+- improved handling of updating missions wrt to templates
 - added providerMissionId to mission model: captures id given by provider when submitting the mission.
   Such ID used when requesting status of a mission.
   TODO set missionId as generated as identity (not prompted to user)

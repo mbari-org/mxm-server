@@ -104,7 +104,7 @@ public class MissionTemplateService {
       .set(pl.retrievedAt, "retrievedAt");
 
     if (uDef.noSets()) {
-      log.warn("updateMissionTemplate: no sets");
+      log.warn("updateMissionTemplate: no sets, providerId={}, missionTplId={}", pl.providerId, pl.missionTplId);
       return pl;
     }
     return dbSupport.getJdbi()

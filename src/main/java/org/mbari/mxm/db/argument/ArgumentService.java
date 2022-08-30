@@ -65,6 +65,31 @@ public class ArgumentService {
         dao.getArgument(providerId, missionTplId, missionId, paramName));
   }
 
+  public List<Argument> getArgumentsWithParameterNames(String providerId,
+                                                       String missionTplId,
+                                                       List<String> paramNames
+  ) {
+    final var quotedParams = paramNames.stream()
+      .map(paramName -> String.format("'%s'", paramName)).toList();
+
+    var sql = """
+      select * from arguments
+      where provider_id    = :providerId
+        and mission_tpl_id = :missionTplId
+        and param_name     in (<quotedParams>)
+      """;
+
+    return dbSupport.getJdbi()
+      .withHandle(handle ->
+        handle.createQuery(sql)
+          .bind("providerId", providerId)
+          .bind("missionTplId", missionTplId)
+          .defineList("quotedParams", quotedParams)
+          .mapToBean(Argument.class)
+          .list()
+      );
+  }
+
   public Argument createArgument(Argument pl) {
     var res = dbSupport.getJdbi()
       .withExtension(ArgumentDao.class, dao -> dao.insertArgument(pl));

@@ -48,15 +48,13 @@ public interface MissionTemplateAssetClassDao {
 
   @SqlUpdate(
     """
-      delete from mission_tpl_asset_class where
-      provider_id = :providerId and mission_tpl_id = :missionTplId and asset_class_name = :assetClassName
-      returning *
+      delete from mission_tpl_asset_class
+      where provider_id    = :providerId
+        and mission_tpl_id = :missionTplId
       """
   )
-  @GetGeneratedKeys
-  MissionTemplateAssetClass delete(@Bind("providerId") String providerId,
-                                   @Bind("missionTplId") String missionTplId,
-                                   @Bind("assetClassName") String assetClassName
+  Integer deleteForMissionTemplate(@Bind("providerId") String providerId,
+                                   @Bind("missionTplId") String missionTplId
   );
 
 }

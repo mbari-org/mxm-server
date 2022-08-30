@@ -56,19 +56,4 @@ public interface ParameterDao {
   )
   @GetGeneratedKeys
   Parameter insertParameter(@BindBean Parameter pl);
-
-  @SqlUpdate(
-    """
-      delete from parameters
-      where provider_id    = :providerId
-        and mission_tpl_id = :missionTplId
-        and param_name     = :paramName
-      returning *
-      """
-  )
-  @GetGeneratedKeys
-  Parameter deleteParameter(@Bind("providerId") String providerId,
-                            @Bind("missionTplId") String missionTplId,
-                            @Bind("paramName") String paramName);
-
 }

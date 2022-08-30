@@ -107,12 +107,12 @@ public class MissionTemplateAssetClassService {
       );
   }
 
-  public MissionTemplateAssetClass deleteMissionTemplateAssetClass(String providerId,
-                                                                   String missionTplId,
-                                                                   String assetClassName) {
+  public Integer deleteForMissionTemplate(String providerId,
+                                          String missionTplId
+  ) {
     return dbSupport.getJdbi()
       .withExtension(MissionTemplateAssetClassDao.class,
-        dao -> dao.delete(providerId, missionTplId, assetClassName)
+        dao -> dao.deleteForMissionTemplate(providerId, missionTplId)
       );
   }
 }
