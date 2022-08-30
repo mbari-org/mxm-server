@@ -313,8 +313,6 @@ public class ProviderManager {
     }
 
     private void updateActualMissionTemplate(Provider provider, String missionTplId) {
-      // TODO modularize this method
-
       log.debug("refreshing template missionTplId='{}'", missionTplId);
       var response = mxmProviderClient.getMissionTemplate(missionTplId);
       var missionTemplateFromProvider = response.result;
@@ -325,9 +323,31 @@ public class ProviderManager {
       missionTemplate.retrievedAt = OffsetDateTime.now();
       missionTemplateService.updateMissionTemplate(missionTemplate);
 
-      ////////////////////////////////////////////////////////
-      // refresh associated parameters:
+      recreateAssociatedAssetClasses(provider, missionTplId, missionTemplate, missionTemplateFromProvider);
 
+      refreshAssociatedParameters(provider, missionTplId, missionTemplateFromProvider);
+    }
+
+    private void recreateAssociatedAssetClasses(Provider provider,
+                                                String missionTplId,
+                                                MissionTemplate missionTemplate,
+                                                MissionTemplateResponse.MissionTemplate missionTemplateFromProvider
+    ) {
+      // Note: complete recreation of the asset classes association does not have any cascading effect on missions
+      // (as it would be the case for parameters if completely recreated), but any possible removal of an asset
+      // class in the template would render associated missions invalid in terms of the associated asset.
+      // TODO(low prio) perhaps some more sophisticated handling/error-reporting, etc.
+      var acsDeleted = missionTemplateAssetClassService.deleteForMissionTemplate(provider.providerId, missionTplId);
+      log.debug("preUpdateMissionTpl: acsDeleted=>{}", acsDeleted);
+      if (missionTemplateFromProvider.assetClassNames != null) {
+        createAssociatedAssetClasses(provider, missionTemplate, missionTemplateFromProvider.assetClassNames);
+      }
+    }
+
+    private void refreshAssociatedParameters(Provider provider,
+                                             String missionTplId,
+                                             MissionTemplateResponse.MissionTemplate missionTemplateFromProvider
+    ) {
       log.debug("missionTemplateFromProvider.parameters=>{}", missionTemplateFromProvider.parameters);
 
       if (missionTemplateFromProvider.parameters.isEmpty()) {
@@ -365,8 +385,7 @@ public class ProviderManager {
       var paramNamesToAdd = new HashSet<>(paramNamesFromProvider);
       paramNamesToAdd.removeAll(paramNamesToUpdate);
 
-      log.debug("paramNamesToUpdate = {}", paramNamesToUpdate);
-      log.debug("paramNamesToAdd    = {}", paramNamesToAdd);
+      log.debug("paramNamesToUpdate={} paramNamesToAdd={}", paramNamesToUpdate, paramNamesToAdd);
 
       // delete all params except the ones to be updated:
       var psDeleted = parameterService.deleteForMissionTemplateExcept(
@@ -376,41 +395,28 @@ public class ProviderManager {
 
       // do the updates
       paramNamesToUpdate.forEach(paramName -> {
-        var paramFromProvider = byParamNameFromProvider.get(paramName);
-        var param = new Parameter(provider.providerId, missionTplId, paramName);
-        param.type = paramFromProvider.type;
-        param.required = paramFromProvider.required;
-        param.defaultValue = paramFromProvider.defaultValue;
-        param.defaultUnits = paramFromProvider.defaultUnits;
-        param.valueCanReference = paramFromProvider.valueCanReference;
-        param.description = paramFromProvider.description;
+        var param = createParameterFromProvider(provider, missionTplId, byParamNameFromProvider.get(paramName));
         parameterService.updateParameter(param);
       });
 
       // (re)create the rest:
       paramNamesToAdd.forEach(paramName -> {
-        var paramFromProvider = byParamNameFromProvider.get(paramName);
-        var param = new Parameter(provider.providerId, missionTplId, paramName);
-        param.type = paramFromProvider.type;
-        param.required = paramFromProvider.required;
-        param.defaultValue = paramFromProvider.defaultValue;
-        param.defaultUnits = paramFromProvider.defaultUnits;
-        param.valueCanReference = paramFromProvider.valueCanReference;
-        param.description = paramFromProvider.description;
+        var param = createParameterFromProvider(provider, missionTplId, byParamNameFromProvider.get(paramName));
         parameterService.createParameter(param);
       });
+    }
 
-      ////////////////////////////////////////////////////////
-      // recreate associated asset classes:
-      var acsDeleted = missionTemplateAssetClassService.deleteForMissionTemplate(provider.providerId, missionTplId);
-      log.debug("preUpdateMissionTpl: acsDeleted=>{}", acsDeleted);
-      if (missionTemplateFromProvider.assetClassNames != null) {
-        createAssociatedAssetClasses(provider, missionTemplate, missionTemplateFromProvider.assetClassNames);
-      }
-      // Note: complete recreation of the asset classes association does not have any cascading effect on missions
-      // (as it would be the case above for parameters if completely recreated), but any possible removal of an asset
-      // class in the template would render associated missions invalid in terms of the associated asset.
-      // TODO(low prio) perhaps some more sophisticated handling/error-reporting, etc.
+    private Parameter createParameterFromProvider(Provider provider,
+                                                  String missionTplId,
+                                                  MissionTemplateResponse.Parameter paramFromProvider) {
+      var param = new Parameter(provider.providerId, missionTplId, paramFromProvider.paramName);
+      param.type = paramFromProvider.type;
+      param.required = paramFromProvider.required;
+      param.defaultValue = paramFromProvider.defaultValue;
+      param.defaultUnits = paramFromProvider.defaultUnits;
+      param.valueCanReference = paramFromProvider.valueCanReference;
+      param.description = paramFromProvider.description;
+      return param;
     }
 
     public void preUpdateMission(Provider provider, Mission pl) {
