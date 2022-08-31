@@ -12,10 +12,8 @@ public class Utl {
   }
 
   /**
-   * Cleans a directory or file path string so:
-   * <p>
-   * - single leading slash always
-   * - no consecutive slashes.
+   * Cleans a directory or file path string so: single leading slash always, and no consecutive
+   * slashes.
    */
   public static String cleanPath(String filePath) {
     // no consecutive //
