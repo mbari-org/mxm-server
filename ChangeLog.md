@@ -1,5 +1,6 @@
 2022-08
 
+- version 0.9.1
 - mission template update adjustments
 - improved handling of updating missions wrt to templates
 - added providerMissionId to mission model: captures id given by provider when submitting the mission.
