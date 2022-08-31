@@ -2,6 +2,10 @@ package org.mbari.mxm.graphql;
 
 import io.smallrye.graphql.api.Subscription;
 import io.smallrye.mutiny.Multi;
+import java.util.List;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.graphql.*;
 import org.mbari.mxm.Broadcaster;
@@ -27,49 +31,34 @@ import org.mbari.mxm.db.unit.Unit;
 import org.mbari.mxm.db.unit.UnitService;
 import org.mbari.mxm.provider_client.responses.PingResponse;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.validation.Valid;
-import java.util.List;
-
 @GraphQLApi
 @ApplicationScoped
 @Slf4j
 public class MxmGraphQLEndpoint {
 
-  @Inject
-  ProviderService providerService;
+  @Inject ProviderService providerService;
 
-  @Inject
-  AssetClassService assetClassService;
+  @Inject AssetClassService assetClassService;
 
-  @Inject
-  AssetService assetService;
+  @Inject AssetService assetService;
 
-  @Inject
-  MissionTemplateService missionTemplateService;
+  @Inject MissionTemplateService missionTemplateService;
 
-  @Inject
-  MissionTemplateAssetClassService missionTemplateAssetClassService;
+  @Inject MissionTemplateAssetClassService missionTemplateAssetClassService;
 
-  @Inject
-  UnitService unitService;
+  @Inject UnitService unitService;
 
-  @Inject
-  ParameterService parameterService;
+  @Inject ParameterService parameterService;
 
-  @Inject
-  MissionService missionService;
+  @Inject MissionService missionService;
 
-  @Inject
-  ArgumentService argumentService;
+  @Inject ArgumentService argumentService;
 
-  @Inject
-  ProviderManager providerManager;
+  @Inject ProviderManager providerManager;
 
   private ProviderManager.PMInstance createProviderManager(Provider pl) {
     return providerManager.createInstance(
-      pl.getProviderId(), pl.getHttpEndpoint(), pl.getApiType());
+        pl.getProviderId(), pl.getHttpEndpoint(), pl.getApiType());
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -136,8 +125,9 @@ public class MxmGraphQLEndpoint {
   @Subscription
   @Description("Get notified when a specific provider is updated")
   public Multi<Provider> providerUpdatedById(@Name("providerId") String providerId) {
-    return providerService.getBroadcaster().createProcessor(Broadcaster.EventType.UPDATED,
-      Utl.primaryKey(providerId));
+    return providerService
+        .getBroadcaster()
+        .createProcessor(Broadcaster.EventType.UPDATED, Utl.primaryKey(providerId));
   }
 
   @Subscription
@@ -157,8 +147,8 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get an asset class")
-  public AssetClass assetClass(@Name("providerId") String providerId,
-                               @Name("className") String className) {
+  public AssetClass assetClass(
+      @Name("providerId") String providerId, @Name("className") String className) {
     return assetClassService.getAssetClass(providerId, className);
   }
 
@@ -179,8 +169,7 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get an asset")
-  public Asset asset(@Name("providerId") String providerId,
-                     @Name("assetId") String assetId) {
+  public Asset asset(@Name("providerId") String providerId, @Name("assetId") String assetId) {
     return assetService.getAsset(providerId, assetId);
   }
 
@@ -201,8 +190,8 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get a mission template")
-  public MissionTemplate missionTemplate(@Name("providerId") String providerId,
-                                         @Name("missionTplId") String missionTplId) {
+  public MissionTemplate missionTemplate(
+      @Name("providerId") String providerId, @Name("missionTplId") String missionTplId) {
     return missionTemplateService.getMissionTemplate(providerId, missionTplId);
   }
 
@@ -214,9 +203,8 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Gets the mission templates under the given directory.")
-  public List<MissionTemplate> listMissionTplsDirectory(@Name("providerId") String providerId,
-                                                        @Name("directory") String directory
-  ) {
+  public List<MissionTemplate> listMissionTplsDirectory(
+      @Name("providerId") String providerId, @Name("directory") String directory) {
     return missionTemplateService.listMissionTplsDirectory(providerId, directory);
   }
 
@@ -265,8 +253,7 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get a unit")
-  public Unit unit(@Name("providerId") String providerId,
-                   @Name("unitName") String unitName) {
+  public Unit unit(@Name("providerId") String providerId, @Name("unitName") String unitName) {
     return unitService.getUnit(providerId, unitName);
   }
 
@@ -287,18 +274,17 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get all parameters of a mission template")
-  public List<Parameter> parameters(@Name("providerId") String providerId,
-                                    @Name("missionTplId") String missionTplId
-  ) {
+  public List<Parameter> parameters(
+      @Name("providerId") String providerId, @Name("missionTplId") String missionTplId) {
     return parameterService.getParameters(providerId, missionTplId);
   }
 
   @Query
   @Description("Get a parameter")
-  public Parameter parameter(@Name("providerId") String providerId,
-                             @Name("missionTplId") String missionTplId,
-                             @Name("paramName") String paramName
-  ) {
+  public Parameter parameter(
+      @Name("providerId") String providerId,
+      @Name("missionTplId") String missionTplId,
+      @Name("paramName") String paramName) {
     return parameterService.getParameter(providerId, missionTplId, paramName);
   }
 
@@ -319,18 +305,17 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get all missions of a mission template")
-  public List<Mission> missionsForTemplate(@Name("providerId") String providerId,
-                                           @Name("missionTplId") String missionTplId
-  ) {
+  public List<Mission> missionsForTemplate(
+      @Name("providerId") String providerId, @Name("missionTplId") String missionTplId) {
     return missionService.getMissionsForTemplate(providerId, missionTplId);
   }
 
   @Query
   @Description("Get a mission")
-  public Mission mission(@Name("providerId") String providerId,
-                         @Name("missionTplId") String missionTplId,
-                         @Name("missionId") String missionId
-  ) {
+  public Mission mission(
+      @Name("providerId") String providerId,
+      @Name("missionTplId") String missionTplId,
+      @Name("missionId") String missionId) {
     return missionService.getMission(providerId, missionTplId, missionId);
   }
 
@@ -374,18 +359,19 @@ public class MxmGraphQLEndpoint {
   }
 
   @Subscription
-  @Description("""
+  @Description(
+      """
     Get notified when a particular mission or any of its arguments is updated.
     """)
   public Multi<Mission> missionUpdatedById(
-    @Name("providerId") String providerId,
-    @Name("missionTplId") String missionTplId,
-    @Name("missionId") String missionId
-  ) {
-    return missionService.getBroadcaster().createProcessor(Broadcaster.EventType.UPDATED,
-      Utl.primaryKey(providerId, missionTplId, missionId));
+      @Name("providerId") String providerId,
+      @Name("missionTplId") String missionTplId,
+      @Name("missionId") String missionId) {
+    return missionService
+        .getBroadcaster()
+        .createProcessor(
+            Broadcaster.EventType.UPDATED, Utl.primaryKey(providerId, missionTplId, missionId));
   }
-
 
   @Subscription
   @Description("Get notified when a mission is deleted")
@@ -401,20 +387,20 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get the arguments defined in a mission")
-  public List<Argument> getArguments(@Name("providerId") String providerId,
-                                     @Name("missionTplId") String missionTplId,
-                                     @Name("missionId") String missionId
-  ) {
+  public List<Argument> getArguments(
+      @Name("providerId") String providerId,
+      @Name("missionTplId") String missionTplId,
+      @Name("missionId") String missionId) {
     return argumentService.getArguments(providerId, missionTplId, missionId);
   }
 
   @Query
   @Description("Get an argument")
-  public Argument getArgument(@Name("providerId") String providerId,
-                              @Name("missionTplId") String missionTplId,
-                              @Name("missionId") String missionId,
-                              @Name("paramName") String paramName
-  ) {
+  public Argument getArgument(
+      @Name("providerId") String providerId,
+      @Name("missionTplId") String missionTplId,
+      @Name("missionId") String missionId,
+      @Name("paramName") String paramName) {
     return argumentService.getArgument(providerId, missionTplId, missionId, paramName);
   }
 
@@ -435,5 +421,4 @@ public class MxmGraphQLEndpoint {
   public Argument deleteArgument(Argument pl) {
     return argumentService.deleteArgument(pl);
   }
-
 }

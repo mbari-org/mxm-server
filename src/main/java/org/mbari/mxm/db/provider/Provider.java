@@ -2,12 +2,11 @@ package org.mbari.mxm.db.provider;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.NotNull;
 
 @Data
 @NoArgsConstructor
@@ -15,10 +14,9 @@ import javax.validation.constraints.NotNull;
 @Builder
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Provider  {
+public class Provider {
 
-  @NotNull
-  public String providerId;
+  @NotNull public String providerId;
 
   public Provider(String providerId) {
     this.providerId = providerId;

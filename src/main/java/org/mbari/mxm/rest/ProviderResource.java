@@ -1,23 +1,22 @@
 package org.mbari.mxm.rest;
 
+import static javax.ws.rs.core.Response.Status.CREATED;
+
+import java.util.List;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.asset.AssetService;
 import org.mbari.mxm.db.assetClass.AssetClass;
 import org.mbari.mxm.db.assetClass.AssetClassCreatePayload;
 import org.mbari.mxm.db.assetClass.AssetClassService;
+import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateCreatePayload;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
-import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.provider.Provider;
 import org.mbari.mxm.db.provider.ProviderService;
-
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.List;
-
-import static javax.ws.rs.core.Response.Status.CREATED;
 
 @Path("/providers")
 @Produces(MediaType.APPLICATION_JSON)
@@ -25,16 +24,14 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 @Slf4j
 public class ProviderResource extends BaseResource {
 
-  @Inject
-  ProviderService service;
+  @Inject ProviderService service;
 
   @GET
   public Response getProviders() {
     try {
       List<Provider> providers = service.getProviders();
       return Response.ok().entity(providers).build();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -50,13 +47,12 @@ public class ProviderResource extends BaseResource {
     return Response.ok(p).build();
   }
 
-
   @POST
   public Response createProvider(Provider pl) {
     if (pl == null || pl.providerId == null || pl.apiType == null) {
       return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-        .entity("Invalid createProvider payload")
-        .build();
+          .entity("Invalid createProvider payload")
+          .build();
     }
     var res = service.createProvider(pl);
     log.debug("createProvider: pl={} =>{}", pl, res);
@@ -68,8 +64,8 @@ public class ProviderResource extends BaseResource {
   public Response updateProvider(@PathParam("providerId") String providerId, Provider pl) {
     if (pl == null || (pl.providerId != null && !pl.providerId.equals(providerId))) {
       return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-        .entity("Invalid updateProvider payload")
-        .build();
+          .entity("Invalid updateProvider payload")
+          .build();
     }
     pl.providerId = providerId;
     var res = service.updateProvider(pl);
@@ -89,8 +85,7 @@ public class ProviderResource extends BaseResource {
   ////////////////////////////////////////////////////////////////////////////////
   // AssetClasses
 
-  @Inject
-  AssetClassService assetClassService;
+  @Inject AssetClassService assetClassService;
 
   @GET
   @Path("/{providerId}/assetClasses")
@@ -98,8 +93,7 @@ public class ProviderResource extends BaseResource {
     try {
       List<AssetClass> list = assetClassService.getAssetClasses(providerId);
       return Response.ok().entity(list).build();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -107,8 +101,8 @@ public class ProviderResource extends BaseResource {
 
   @GET
   @Path("/{providerId}/assetClasses/{className}")
-  public Response getAssetClass(@PathParam("providerId") String providerId,
-                                @PathParam("className") String className) {
+  public Response getAssetClass(
+      @PathParam("providerId") String providerId, @PathParam("className") String className) {
     var p = assetClassService.getAssetClass(providerId, className);
     if (p == null) {
       return Response.status(Response.Status.NOT_FOUND).build();
@@ -118,7 +112,8 @@ public class ProviderResource extends BaseResource {
 
   @POST
   @Path("/{providerId}/assetClasses")
-  public Response createAssetClass(@PathParam("providerId") String providerId, AssetClassCreatePayload pl) {
+  public Response createAssetClass(
+      @PathParam("providerId") String providerId, AssetClassCreatePayload pl) {
     var p = assetClassService.createAssetClass(pl.toAssetClass(providerId));
     if (p == null) {
       return Response.status(Response.Status.NOT_FOUND).build();
@@ -128,16 +123,16 @@ public class ProviderResource extends BaseResource {
 
   @PUT
   @Path("/{providerId}/assetClasses/{className}")
-  public Response updateAssetClass(@PathParam("providerId") String providerId,
-                                   @PathParam("className") String className, AssetClass pl
-  ) {
+  public Response updateAssetClass(
+      @PathParam("providerId") String providerId,
+      @PathParam("className") String className,
+      AssetClass pl) {
     if (pl == null
-      || (pl.providerId != null && !pl.providerId.equals(providerId))
-      || (pl.className != null && !pl.className.equals(className))
-    ) {
+        || (pl.providerId != null && !pl.providerId.equals(providerId))
+        || (pl.className != null && !pl.className.equals(className))) {
       return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-        .entity("Invalid updateAssetClass payload")
-        .build();
+          .entity("Invalid updateAssetClass payload")
+          .build();
     }
     pl.providerId = providerId;
     pl.className = className;
@@ -150,8 +145,8 @@ public class ProviderResource extends BaseResource {
 
   @DELETE
   @Path("/{providerId}/assetClasses/{className}")
-  public Response deleteAssetClass(@PathParam("providerId") String providerId,
-                                   @PathParam("className") String className) {
+  public Response deleteAssetClass(
+      @PathParam("providerId") String providerId, @PathParam("className") String className) {
     var pl = new AssetClass(providerId, className);
     var p = assetClassService.deleteAssetClass(pl);
     if (p == null) {
@@ -163,8 +158,7 @@ public class ProviderResource extends BaseResource {
   ////////////////////////////////////////////////////////////////////////////////
   // Assets
 
-  @Inject
-  AssetService assetService;
+  @Inject AssetService assetService;
 
   @GET
   @Path("/{providerId}/assets")
@@ -176,12 +170,10 @@ public class ProviderResource extends BaseResource {
     return Response.ok(p).build();
   }
 
-
   ////////////////////////////////////////////////////////////////////////////////
   // MissionTemplates
 
-  @Inject
-  MissionTemplateService missionTemplateService;
+  @Inject MissionTemplateService missionTemplateService;
 
   @GET
   @Path("/{providerId}/missionTemplates")
@@ -190,8 +182,7 @@ public class ProviderResource extends BaseResource {
     try {
       var list = missionTemplateService.getMissionTemplates(providerId);
       return Response.ok().entity(list).build();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -199,8 +190,8 @@ public class ProviderResource extends BaseResource {
 
   @GET
   @Path("/{providerId}/missionTemplates/{missionTplId}")
-  public Response getMissionTemplate(@PathParam("providerId") String providerId,
-                                     @PathParam("missionTplId") String missionTplId) {
+  public Response getMissionTemplate(
+      @PathParam("providerId") String providerId, @PathParam("missionTplId") String missionTplId) {
     log.debug("getMissionTemplate: providerId={}, missionTplId={}", providerId, missionTplId);
     var p = missionTemplateService.getMissionTemplate(providerId, missionTplId);
     if (p == null) {
@@ -211,7 +202,8 @@ public class ProviderResource extends BaseResource {
 
   @POST
   @Path("/{providerId}/missionTemplates")
-  public Response createMissionTemplate(@PathParam("providerId") String providerId, MissionTemplateCreatePayload pl) {
+  public Response createMissionTemplate(
+      @PathParam("providerId") String providerId, MissionTemplateCreatePayload pl) {
     var p = missionTemplateService.createMissionTemplate(pl.toMissionTemplate(providerId));
     if (p == null) {
       return Response.status(Response.Status.NOT_FOUND).build();
@@ -221,17 +213,16 @@ public class ProviderResource extends BaseResource {
 
   @PUT
   @Path("/{providerId}/missionTemplates/{missionTplId}")
-  public Response updateMissionTemplate(@PathParam("providerId") String providerId,
-                                        @PathParam("missionTplId") String missionTplId,
-                                        MissionTemplate pl
-  ) {
+  public Response updateMissionTemplate(
+      @PathParam("providerId") String providerId,
+      @PathParam("missionTplId") String missionTplId,
+      MissionTemplate pl) {
     if (pl == null
-      || (pl.providerId != null && !pl.providerId.equals(providerId))
-      || (pl.missionTplId != null && !pl.missionTplId.equals(missionTplId))
-    ) {
+        || (pl.providerId != null && !pl.providerId.equals(providerId))
+        || (pl.missionTplId != null && !pl.missionTplId.equals(missionTplId))) {
       return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-        .entity("Invalid updateAssetClass payload")
-        .build();
+          .entity("Invalid updateAssetClass payload")
+          .build();
     }
     pl.providerId = providerId;
     pl.missionTplId = missionTplId;
@@ -244,8 +235,8 @@ public class ProviderResource extends BaseResource {
 
   @DELETE
   @Path("/{providerId}/missionTemplates/{missionTplId}")
-  public Response deleteMissionTemplate(@PathParam("providerId") String providerId,
-                                        @PathParam("missionTplId") String missionTplId) {
+  public Response deleteMissionTemplate(
+      @PathParam("providerId") String providerId, @PathParam("missionTplId") String missionTplId) {
     var pl = new MissionTemplate(providerId, missionTplId);
     var p = missionTemplateService.deleteMissionTemplate(pl);
     if (p == null) {
@@ -253,5 +244,4 @@ public class ProviderResource extends BaseResource {
     }
     return Response.ok(p).build();
   }
-
 }

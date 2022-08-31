@@ -1,7 +1,12 @@
 package org.mbari.mxm.graphql;
 
+import static java.util.stream.Collectors.toList;
+
 import io.quarkus.arc.Unremovable;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import java.util.List;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import org.eclipse.microprofile.graphql.Source;
 import org.mbari.mxm.db.assetClass.AssetClass;
 import org.mbari.mxm.db.mission.Mission;
@@ -13,27 +18,17 @@ import org.mbari.mxm.db.parameter.ParameterService;
 import org.mbari.mxm.db.provider.Provider;
 import org.mbari.mxm.db.provider.ProviderService;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
-
 @ApplicationScoped
 @RegisterForReflection
 @Unremovable
 public class ForMissionTemplate {
-  @Inject
-  ProviderService providerService;
+  @Inject ProviderService providerService;
 
-  @Inject
-  ParameterService parameterService;
+  @Inject ParameterService parameterService;
 
-  @Inject
-  MissionService missionService;
+  @Inject MissionService missionService;
 
-  @Inject
-  MissionTemplateAssetClassService missionTemplateAssetClassService;
+  @Inject MissionTemplateAssetClassService missionTemplateAssetClassService;
 
   public List<Provider> provider(@Source List<MissionTemplate> missionTemplates) {
     List<String> providerIds = missionTemplates.stream().map(e -> e.providerId).collect(toList());

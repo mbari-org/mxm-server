@@ -1,18 +1,17 @@
 package org.mbari.mxm.graphql;
 
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.mbari.mxm.BaseForTests;
 import org.mbari.mxm.db.PostgresResource;
-
-import java.util.Collections;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 @QuarkusTest
 @QuarkusTestResource(PostgresResource.class)
@@ -22,8 +21,9 @@ public class MxmEndpointTest extends BaseForTests {
   @Test
   public void allProviders() throws JsonProcessingException {
 
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         {
            allProviders {
              apiType
@@ -45,24 +45,24 @@ public class MxmEndpointTest extends BaseForTests {
              }
            }
          }
-         """
-    );
+         """);
 
     given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      // >= 0 just for initial testing:
-      .body("data.allProviders.size()", greaterThanOrEqualTo(0))
-      .statusCode(200);
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        // >= 0 just for initial testing:
+        .body("data.allProviders.size()", greaterThanOrEqualTo(0))
+        .statusCode(200);
   }
 
   @Test
   public void getProvider() throws JsonProcessingException {
 
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         query($providerId: String!) {
           provider(providerId: $providerId) {
             canValidate
@@ -83,15 +83,14 @@ public class MxmEndpointTest extends BaseForTests {
           }
         }
         """,
-      Collections.singletonMap("providerId", "NEW_PROV")
-    );
+            Collections.singletonMap("providerId", "NEW_PROV"));
 
     given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      .statusCode(200);
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        .statusCode(200);
   }
 
   ///////////
@@ -99,25 +98,25 @@ public class MxmEndpointTest extends BaseForTests {
   @Test
   public void allAssetClasses() throws JsonProcessingException {
 
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         {
           allAssetClasses {
             providerId
             className
           }
         }
-        """
-    );
+        """);
 
     given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      // >= 0 just for initial testing:
-      .body("data.allAssetClasses.size()", greaterThanOrEqualTo(0))
-      .statusCode(200);
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        // >= 0 just for initial testing:
+        .body("data.allAssetClasses.size()", greaterThanOrEqualTo(0))
+        .statusCode(200);
   }
 
   ///////////
@@ -125,8 +124,9 @@ public class MxmEndpointTest extends BaseForTests {
   @Test
   public void allAssets() throws JsonProcessingException {
 
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         {
            allAssets {
              providerId
@@ -134,17 +134,16 @@ public class MxmEndpointTest extends BaseForTests {
              className
            }
          }
-        """
-    );
+        """);
 
     given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      // >= 0 just for initial testing:
-      .body("data.allAssets.size()", greaterThanOrEqualTo(0))
-      .statusCode(200);
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        // >= 0 just for initial testing:
+        .body("data.allAssets.size()", greaterThanOrEqualTo(0))
+        .statusCode(200);
   }
 
   ///////////
@@ -152,8 +151,9 @@ public class MxmEndpointTest extends BaseForTests {
   @Test
   public void allMissionTemplates() throws JsonProcessingException {
 
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         {
             allMissionTemplates {
               providerId
@@ -161,17 +161,16 @@ public class MxmEndpointTest extends BaseForTests {
               description
             }
           }
-        """
-    );
+        """);
 
     given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      // >= 0 just for initial testing:
-      .body("data.allMissionTemplates.size()", greaterThanOrEqualTo(0))
-      .statusCode(200);
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        // >= 0 just for initial testing:
+        .body("data.allMissionTemplates.size()", greaterThanOrEqualTo(0))
+        .statusCode(200);
   }
 
   ///////////
@@ -179,8 +178,9 @@ public class MxmEndpointTest extends BaseForTests {
   @Test
   public void allMissionTemplateAssetClasses() throws JsonProcessingException {
 
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         {
           allMissionTemplateAssetClasses {
             providerId
@@ -188,17 +188,16 @@ public class MxmEndpointTest extends BaseForTests {
             assetClassName
           }
         }
-        """
-    );
+        """);
 
     given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      // >= 0 just for initial testing:
-      .body("data.allMissionTemplateAssetClasses.size()", greaterThanOrEqualTo(0))
-      .statusCode(200);
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        // >= 0 just for initial testing:
+        .body("data.allMissionTemplateAssetClasses.size()", greaterThanOrEqualTo(0))
+        .statusCode(200);
   }
 
   ///////////
@@ -206,25 +205,25 @@ public class MxmEndpointTest extends BaseForTests {
   @Test
   public void allUnits() throws JsonProcessingException {
 
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         {
             allUnits {
               providerId
               unitName
             }
           }
-         """
-    );
+         """);
 
     given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      // >= 0 just for initial testing:
-      .body("data.allUnits.size()", greaterThanOrEqualTo(0))
-      .statusCode(200);
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        // >= 0 just for initial testing:
+        .body("data.allUnits.size()", greaterThanOrEqualTo(0))
+        .statusCode(200);
   }
 
   ///////////
@@ -232,24 +231,24 @@ public class MxmEndpointTest extends BaseForTests {
   @Test
   public void allParameters() throws JsonProcessingException {
 
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
          {
           allParameters {
             paramName
           }
         }
-        """
-    );
+        """);
 
     given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      // >= 0 just for initial testing:
-      .body("data.allParameters.size()", greaterThanOrEqualTo(0))
-      .statusCode(200);
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        // >= 0 just for initial testing:
+        .body("data.allParameters.size()", greaterThanOrEqualTo(0))
+        .statusCode(200);
   }
 
   ///////////
@@ -257,8 +256,9 @@ public class MxmEndpointTest extends BaseForTests {
   @Test
   public void allMissions() throws JsonProcessingException {
 
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
          {
             allMissions {
               providerId
@@ -266,24 +266,24 @@ public class MxmEndpointTest extends BaseForTests {
               missionId
             }
           }
-        """
-    );
+        """);
 
     given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      // >= 0 just for initial testing:
-      .body("data.allMissions.size()", greaterThanOrEqualTo(0))
-      .statusCode(200);
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        // >= 0 just for initial testing:
+        .body("data.allMissions.size()", greaterThanOrEqualTo(0))
+        .statusCode(200);
   }
 
   @Test
   public void allMissionsWithArguments() throws JsonProcessingException {
 
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
          {
            allMissions {
              providerId
@@ -296,16 +296,15 @@ public class MxmEndpointTest extends BaseForTests {
              }
            }
          }
-        """
-    );
+        """);
 
     given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      // >= 0 just for initial testing:
-      .body("data.allMissions.size()", greaterThanOrEqualTo(0))
-      .statusCode(200);
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        // >= 0 just for initial testing:
+        .body("data.allMissions.size()", greaterThanOrEqualTo(0))
+        .statusCode(200);
   }
 }

@@ -23,5 +23,4 @@ public class GeneralInfoResponse {
     public final boolean canValidate;
     public final boolean canReportMissionStatus;
   }
-
 }

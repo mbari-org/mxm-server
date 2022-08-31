@@ -1,14 +1,11 @@
 package org.mbari.mxm;
 
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
+import java.util.HashMap;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-
-/**
- * Helper for supporting subscriptions.
- */
+/** Helper for supporting subscriptions. */
 @Slf4j
 public abstract class Broadcaster<T> {
 
@@ -17,23 +14,29 @@ public abstract class Broadcaster<T> {
   public abstract String getPrimaryKey(T t);
 
   public enum EventType {
-    CREATED, UPDATED, DELETED
+    CREATED,
+    UPDATED,
+    DELETED,
   }
 
   public BroadcastProcessor<T> createProcessor(EventType event) {
     var pid = new PID(event);
-    return processorMap.computeIfAbsent(pid, k -> {
-      log.warn("createProcessor: pid='{}'", pid);
-      return BroadcastProcessor.create();
-    });
+    return processorMap.computeIfAbsent(
+        pid,
+        k -> {
+          log.warn("createProcessor: pid='{}'", pid);
+          return BroadcastProcessor.create();
+        });
   }
 
   public BroadcastProcessor<T> createProcessor(EventType event, String primaryKey) {
     var pid = new PID(event, primaryKey);
-    return processorMap.computeIfAbsent(pid, k -> {
-      log.warn("createProcessor: pid='{}'", pid);
-      return BroadcastProcessor.create();
-    });
+    return processorMap.computeIfAbsent(
+        pid,
+        k -> {
+          log.warn("createProcessor: pid='{}'", pid);
+          return BroadcastProcessor.create();
+        });
   }
 
   public void broadcastCreated(T t) {
@@ -82,5 +85,4 @@ public abstract class Broadcaster<T> {
       this.primaryKey = null;
     }
   }
-
 }

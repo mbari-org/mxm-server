@@ -1,5 +1,8 @@
 package org.mbari.mxm.provider_client.rest;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.mbari.mxm.db.provider.ProviderApiType;
@@ -7,13 +10,7 @@ import org.mbari.mxm.graphql.ProviderPingException;
 import org.mbari.mxm.provider_client.MxmProviderClient;
 import org.mbari.mxm.provider_client.responses.*;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.net.URI;
-
-/**
- * Client to interact with external provider using the REST MXM Provider API.
- */
+/** Client to interact with external provider using the REST MXM Provider API. */
 @Slf4j
 public class MxmProviderClientRest implements MxmProviderClient {
 
@@ -25,16 +22,17 @@ public class MxmProviderClientRest implements MxmProviderClient {
   /**
    * Creates a new instance.
    *
-   * @param providerId   Provider ID.
+   * @param providerId Provider ID.
    * @param httpEndpoint Base URL of the provider REST API.
    */
   public MxmProviderClientRest(String providerId, String httpEndpoint) {
     this.providerId = providerId;
     this.httpEndpoint = httpEndpoint;
 
-    service = RestClientBuilder.newBuilder()
-      .baseUri(URI.create(httpEndpoint))
-      .build(ProviderClientRestService.class);
+    service =
+        RestClientBuilder.newBuilder()
+            .baseUri(URI.create(httpEndpoint))
+            .build(ProviderClientRestService.class);
   }
 
   @Override
@@ -56,8 +54,7 @@ public class MxmProviderClientRest implements MxmProviderClient {
   public PingResponse ping() throws ProviderPingException {
     try {
       return service.ping();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       throw new ProviderPingException(providerId, httpEndpoint, e);
     }
   }
@@ -76,8 +73,7 @@ public class MxmProviderClientRest implements MxmProviderClient {
   public MissionTemplatesResponse getMissionTemplates(String subDir) {
     if (subDir.equals("") || subDir.equals("/")) {
       return service.getMissionTemplatesRoot();
-    }
-    else {
+    } else {
       return service.getMissionTemplates(subDir);
     }
   }
@@ -106,10 +102,8 @@ public class MxmProviderClientRest implements MxmProviderClient {
   public void done() {
     try {
       ((Closeable) service).close();
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       log.warn("Failed to close REST client", e);
     }
   }
-
 }

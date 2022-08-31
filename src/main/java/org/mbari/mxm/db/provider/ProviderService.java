@@ -1,56 +1,51 @@
 package org.mbari.mxm.db.provider;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import lombok.Getter;
 import org.mbari.mxm.Broadcaster;
 import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.DbUtl;
 import org.mbari.mxm.db.support.DbSupport;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @ApplicationScoped
 @lombok.extern.slf4j.Slf4j
 public class ProviderService {
 
-  @Inject
-  DbSupport dbSupport;
+  @Inject DbSupport dbSupport;
 
   @Getter
-  private final Broadcaster<Provider> broadcaster = new Broadcaster<>() {
-    @Override
-    public String getEntityName() {
-      return Provider.class.getSimpleName();
-    }
+  private final Broadcaster<Provider> broadcaster =
+      new Broadcaster<>() {
+        @Override
+        public String getEntityName() {
+          return Provider.class.getSimpleName();
+        }
 
-    public String getPrimaryKey(Provider e) {
-      return Utl.primaryKey(e.providerId);
-    }
-  };
+        public String getPrimaryKey(Provider e) {
+          return Utl.primaryKey(e.providerId);
+        }
+      };
 
   public List<Provider> getProviders() {
-    return dbSupport.getJdbi()
-      .withExtension(ProviderDao.class, ProviderDao::list);
+    return dbSupport.getJdbi().withExtension(ProviderDao.class, ProviderDao::list);
   }
 
   public Provider getProvider(String providerId) {
     log.debug("getProvider: providerId='{}'", providerId);
-    return dbSupport.getJdbi()
-      .withExtension(ProviderDao.class, dao -> dao.get(providerId));
+    return dbSupport.getJdbi().withExtension(ProviderDao.class, dao -> dao.get(providerId));
   }
 
   public List<Provider> getProviders(List<String> providerIds) {
     log.debug("getProviders: providerIds='{}'", providerIds);
-    var res = dbSupport.getJdbi()
-      .withExtension(ProviderDao.class, dao -> dao.getProviders(providerIds));
+    var res =
+        dbSupport.getJdbi().withExtension(ProviderDao.class, dao -> dao.getProviders(providerIds));
 
     if (providerIds.size() != res.size()) {
-      var byId = res.stream().collect(
-        Collectors.groupingBy(Provider::getProviderId,
-          Collectors.toList())
-      );
+      var byId =
+          res.stream().collect(Collectors.groupingBy(Provider::getProviderId, Collectors.toList()));
       res = providerIds.stream().map(p -> byId.get(p).get(0)).collect(Collectors.toList());
     }
     return res;
@@ -68,26 +63,29 @@ public class ProviderService {
   }
 
   public Provider doCreate(Provider pl) {
-    var cDef = DbUtl.createDef("providers")
-      .set(pl.providerId, "providerId")
-      .set(pl.apiType, "apiType")
-      .set(pl.httpEndpoint, "httpEndpoint")
-      .set(pl.description, "description")
-      .set(pl.descriptionFormat, "descriptionFormat")
-      .set(pl.usesSched, "usesSched")
-      .set(pl.canValidate, "canValidate")
-      .set(pl.usesUnits, "usesUnits")
-      .set(pl.canReportMissionStatus, "canReportMissionStatus");
+    var cDef =
+        DbUtl.createDef("providers")
+            .set(pl.providerId, "providerId")
+            .set(pl.apiType, "apiType")
+            .set(pl.httpEndpoint, "httpEndpoint")
+            .set(pl.description, "description")
+            .set(pl.descriptionFormat, "descriptionFormat")
+            .set(pl.usesSched, "usesSched")
+            .set(pl.canValidate, "canValidate")
+            .set(pl.usesUnits, "usesUnits")
+            .set(pl.canReportMissionStatus, "canReportMissionStatus");
 
-    return dbSupport.getJdbi()
-      .withHandle(handle ->
-        cDef.createUpdate(handle)
-          .bindBean(pl)
-          .execute((statementSupplier, ctx) -> {
-            var rs = statementSupplier.get().getResultSet();
-            return rs.next() ? ProviderMapper.instance.map(rs, ctx) : null;
-          })
-      );
+    return dbSupport
+        .getJdbi()
+        .withHandle(
+            handle ->
+                cDef.createUpdate(handle)
+                    .bindBean(pl)
+                    .execute(
+                        (statementSupplier, ctx) -> {
+                          var rs = statementSupplier.get().getResultSet();
+                          return rs.next() ? ProviderMapper.instance.map(rs, ctx) : null;
+                        }));
   }
 
   public Provider updateProvider(Provider pl) {
@@ -101,40 +99,41 @@ public class ProviderService {
   }
 
   private Provider doUpdate(Provider pl) {
-    var uDef = DbUtl.updateDef("providers", pl)
-      .where("providerId")
-      .set(pl.httpEndpoint, "httpEndpoint")
-      .set(pl.apiType, "apiType")
-      .set(pl.description, "description")
-      .set(pl.descriptionFormat, "descriptionFormat")
-      .set(pl.usesSched, "usesSched")
-      .set(pl.canValidate, "canValidate")
-      .set(pl.usesUnits, "usesUnits")
-      .set(pl.canReportMissionStatus, "canReportMissionStatus");
+    var uDef =
+        DbUtl.updateDef("providers", pl)
+            .where("providerId")
+            .set(pl.httpEndpoint, "httpEndpoint")
+            .set(pl.apiType, "apiType")
+            .set(pl.description, "description")
+            .set(pl.descriptionFormat, "descriptionFormat")
+            .set(pl.usesSched, "usesSched")
+            .set(pl.canValidate, "canValidate")
+            .set(pl.usesUnits, "usesUnits")
+            .set(pl.canReportMissionStatus, "canReportMissionStatus");
 
     if (uDef.noSets()) {
       return pl;
     }
-    return dbSupport.getJdbi()
-      .withHandle(handle ->
-        uDef.createQuery(handle)
-          .execute((statementSupplier, ctx) -> {
-            var rs = statementSupplier.get().executeQuery();
-            var next = rs.next();
-            if (!next) {
-              log.warn("doUpdate: no next result!");
-            }
-            return next ? ProviderMapper.instance.map(rs, ctx) : null;
-          })
-      );
+    return dbSupport
+        .getJdbi()
+        .withHandle(
+            handle ->
+                uDef.createQuery(handle)
+                    .execute(
+                        (statementSupplier, ctx) -> {
+                          var rs = statementSupplier.get().executeQuery();
+                          var next = rs.next();
+                          if (!next) {
+                            log.warn("doUpdate: no next result!");
+                          }
+                          return next ? ProviderMapper.instance.map(rs, ctx) : null;
+                        }));
   }
 
   public Provider deleteProvider(Provider pl) {
     log.debug("deleteProvider: pl='{}'", pl);
-    var res = dbSupport.getJdbi()
-      .withExtension(ProviderDao.class,
-        dao -> dao.deleteById(pl.providerId)
-      );
+    var res =
+        dbSupport.getJdbi().withExtension(ProviderDao.class, dao -> dao.deleteById(pl.providerId));
 
     if (res != null) {
       broadcaster.broadcastDeleted(res);
@@ -142,4 +141,3 @@ public class ProviderService {
     return res;
   }
 }
-

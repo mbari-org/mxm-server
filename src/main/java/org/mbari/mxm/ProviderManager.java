@@ -1,5 +1,13 @@
 package org.mbari.mxm;
 
+import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.argument.Argument;
 import org.mbari.mxm.db.argument.ArgumentService;
@@ -29,61 +37,45 @@ import org.mbari.mxm.provider_client.responses.PingResponse;
 import org.mbari.mxm.provider_client.responses.UnitsResponse;
 import org.mbari.mxm.provider_client.rest.PostMissionPayload;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @ApplicationScoped
 @Slf4j
 public class ProviderManager {
 
-  @Inject
-  AssetClassService assetClassService;
+  @Inject AssetClassService assetClassService;
 
-  @Inject
-  AssetService assetService;
+  @Inject AssetService assetService;
 
-  @Inject
-  UnitService unitService;
+  @Inject UnitService unitService;
 
-  @Inject
-  MissionTemplateService missionTemplateService;
+  @Inject MissionTemplateService missionTemplateService;
 
-  @Inject
-  MissionTemplateAssetClassService missionTemplateAssetClassService;
+  @Inject MissionTemplateAssetClassService missionTemplateAssetClassService;
 
-  @Inject
-  ParameterService parameterService;
+  @Inject ParameterService parameterService;
 
-  @Inject
-  MissionService missionService;
+  @Inject MissionService missionService;
 
-  @Inject
-  ArgumentService argumentService;
+  @Inject ArgumentService argumentService;
 
-  public PMInstance createInstance(String providerId,
-                                   String httpEndpoint,
-                                   ProviderApiType apiType) {
+  public PMInstance createInstance(
+      String providerId, String httpEndpoint, ProviderApiType apiType) {
 
     var instance = new PMInstance();
     instance.setMxmProviderClient(providerId, httpEndpoint, apiType);
     return instance;
-
   }
 
   public class PMInstance {
 
     private MxmProviderClient mxmProviderClient;
 
-    public void setMxmProviderClient(String providerId,
-                                     String httpEndpoint,
-                                     ProviderApiType apiType) {
-      log.debug("setMxmProviderClient: providerId={}, httpEndpoint={}, apiType={}", providerId, httpEndpoint, apiType);
+    public void setMxmProviderClient(
+        String providerId, String httpEndpoint, ProviderApiType apiType) {
+      log.debug(
+          "setMxmProviderClient: providerId={}, httpEndpoint={}, apiType={}",
+          providerId,
+          httpEndpoint,
+          apiType);
       mxmProviderClient = MxmProviderClientBuilder.create(providerId, httpEndpoint, apiType);
     }
 
@@ -98,9 +90,11 @@ public class ProviderManager {
       try {
         var pong = mxmProviderClient.ping();
         log.debug("preInsertProvider: ping=>{}", pong);
-      }
-      catch (ProviderPingException e) {
-        log.warn("preInsertProvider: error pinging provider={}: {}", provider.providerId, e.getMessage());
+      } catch (ProviderPingException e) {
+        log.warn(
+            "preInsertProvider: error pinging provider={}: {}",
+            provider.providerId,
+            e.getMessage());
       }
 
       var infoResponse = mxmProviderClient.getGeneralInfo();
@@ -134,14 +128,17 @@ public class ProviderManager {
       getAndCreateMissionTplsForDirectory(provider, "/");
     }
 
-    private void createAssetClasses(Provider provider, List<AssetClassesResponse.AssetClass> assetClasses) {
+    private void createAssetClasses(
+        Provider provider, List<AssetClassesResponse.AssetClass> assetClasses) {
       assetClasses.forEach(assetClass -> createAssetClass(provider, assetClass));
     }
 
     private void createAssetClass(Provider provider, AssetClassesResponse.AssetClass assetClass) {
       log.debug("createAssetClass: assetClass=>{}", assetClass);
-      var ac = assetClassService.createAssetClass(new AssetClass(provider.providerId, assetClass.assetClassName,
-        assetClass.description));
+      var ac =
+          assetClassService.createAssetClass(
+              new AssetClass(
+                  provider.providerId, assetClass.assetClassName, assetClass.description));
       log.debug("createAssetClass: created=>{}", ac);
 
       createAssets(provider, assetClass);
@@ -151,7 +148,10 @@ public class ProviderManager {
       assetClass.assets.forEach(asset -> createAsset(provider, assetClass, asset));
     }
 
-    private void createAsset(Provider provider, AssetClassesResponse.AssetClass assetClass, AssetClassesResponse.Asset a) {
+    private void createAsset(
+        Provider provider,
+        AssetClassesResponse.AssetClass assetClass,
+        AssetClassesResponse.Asset a) {
       log.debug("createAsset: a=>{}", a);
       var asset = new Asset(provider.providerId, a.assetId);
       asset.className = assetClass.assetClassName;
@@ -166,37 +166,39 @@ public class ProviderManager {
       getAndCreateMissionTpl(provider, directory);
 
       // get all directory entries, recursively as specified in MXM Provider API:
-      var missionTplListing = mxmProviderClient.getMissionTemplates(
-        directory.replaceFirst("^/+", "")   // TODO consistent path name handling
-      );
+      var missionTplListing =
+          mxmProviderClient.getMissionTemplates(
+              directory.replaceFirst("^/+", "") // TODO consistent path name handling
+              );
       createMissionTplsForDirectoryEntries(provider, missionTplListing.result.entries);
     }
 
-    private void createMissionTplsForDirectoryEntries(Provider provider,
-                                                      List<MissionTemplateResponse.MissionTemplate> entries) {
-      entries.forEach(entry -> {
-        final var missionTplId = Utl.cleanPath(entry.missionTplId);
-        final var isDirectory = missionTplId.endsWith("/");
+    private void createMissionTplsForDirectoryEntries(
+        Provider provider, List<MissionTemplateResponse.MissionTemplate> entries) {
+      entries.forEach(
+          entry -> {
+            final var missionTplId = Utl.cleanPath(entry.missionTplId);
+            final var isDirectory = missionTplId.endsWith("/");
 
-        MissionTemplate missionTemplate = new MissionTemplate(provider.providerId, missionTplId);
-        missionTemplate.description = entry.description;
-        missionTemplate.retrievedAt = isDirectory ? OffsetDateTime.now() : null;
+            MissionTemplate missionTemplate =
+                new MissionTemplate(provider.providerId, missionTplId);
+            missionTemplate.description = entry.description;
+            missionTemplate.retrievedAt = isDirectory ? OffsetDateTime.now() : null;
 
-        // create this entry:
-        missionTemplateService.createMissionTemplate(missionTemplate);
+            // create this entry:
+            missionTemplateService.createMissionTemplate(missionTemplate);
 
-        if (isDirectory) {
-          if (entry.entries != null && entry.entries.size() > 0) {
-            createMissionTplsForDirectoryEntries(provider, entry.entries);
-          }
-        }
-        else {
-          // just add the associated asset classes to the mission template:
-          if (entry.assetClassNames != null) {
-            createAssociatedAssetClasses(provider, missionTemplate, entry.assetClassNames);
-          }
-        }
-      });
+            if (isDirectory) {
+              if (entry.entries != null && entry.entries.size() > 0) {
+                createMissionTplsForDirectoryEntries(provider, entry.entries);
+              }
+            } else {
+              // just add the associated asset classes to the mission template:
+              if (entry.assetClassNames != null) {
+                createAssociatedAssetClasses(provider, missionTemplate, entry.assetClassNames);
+              }
+            }
+          });
     }
 
     private void getAndCreateMissionTpl(Provider provider, String missionTplId) {
@@ -209,8 +211,7 @@ public class ProviderManager {
       if (isDirectory) {
         // no info needed from provider, just create the entry:
         missionTemplateService.createMissionTemplate(missionTemplate);
-      }
-      else {
+      } else {
         // actual template, get info from provider as needed:
         log.debug("getAndCreateMissionTpl: missionTplId='{}'", missionTplId);
         var response = mxmProviderClient.getMissionTemplate(missionTplId);
@@ -219,16 +220,18 @@ public class ProviderManager {
       }
     }
 
-    private void createActualMissionTemplate(Provider provider, MissionTemplate missionTemplate,
-                                             MissionTemplateResponse.MissionTemplate missionTemplateFromProvider
-    ) {
+    private void createActualMissionTemplate(
+        Provider provider,
+        MissionTemplate missionTemplate,
+        MissionTemplateResponse.MissionTemplate missionTemplateFromProvider) {
       missionTemplate.description = missionTemplateFromProvider.description;
       missionTemplate.retrievedAt = OffsetDateTime.now();
 
       missionTemplateService.createMissionTemplate(missionTemplate);
 
       if (missionTemplateFromProvider.assetClassNames != null) {
-        createAssociatedAssetClasses(provider, missionTemplate, missionTemplateFromProvider.assetClassNames);
+        createAssociatedAssetClasses(
+            provider, missionTemplate, missionTemplateFromProvider.assetClassNames);
       }
 
       if (missionTemplateFromProvider.parameters != null) {
@@ -236,33 +239,38 @@ public class ProviderManager {
       }
     }
 
-    private void createAssociatedAssetClasses(Provider provider, MissionTemplate missionTemplate,
-                                              List<String> assetClassNames) {
+    private void createAssociatedAssetClasses(
+        Provider provider, MissionTemplate missionTemplate, List<String> assetClassNames) {
 
-      assetClassNames.forEach(assetClassName -> missionTemplateAssetClassService.createMissionTemplateAssetClass(
-        new MissionTemplateAssetClass(provider.providerId, missionTemplate.missionTplId, assetClassName)
-      ));
+      assetClassNames.forEach(
+          assetClassName ->
+              missionTemplateAssetClassService.createMissionTemplateAssetClass(
+                  new MissionTemplateAssetClass(
+                      provider.providerId, missionTemplate.missionTplId, assetClassName)));
     }
 
-    private void createParameters(Provider provider, MissionTemplate missionTemplate,
-                                  List<MissionTemplateResponse.Parameter> parameters
-    ) {
-      parameters.forEach(pp -> {
-        var parameter = new Parameter(provider.providerId, missionTemplate.missionTplId, pp.paramName);
-        parameter.type = pp.type;
-        parameter.required = pp.required;
-        parameter.defaultValue = pp.defaultValue;
-        parameter.defaultUnits = pp.defaultUnits;
-        parameter.valueCanReference = pp.valueCanReference;
-        parameter.description = pp.description;
-        parameterService.createParameter(parameter);
-      });
+    private void createParameters(
+        Provider provider,
+        MissionTemplate missionTemplate,
+        List<MissionTemplateResponse.Parameter> parameters) {
+      parameters.forEach(
+          pp -> {
+            var parameter =
+                new Parameter(provider.providerId, missionTemplate.missionTplId, pp.paramName);
+            parameter.type = pp.type;
+            parameter.required = pp.required;
+            parameter.defaultValue = pp.defaultValue;
+            parameter.defaultUnits = pp.defaultUnits;
+            parameter.valueCanReference = pp.valueCanReference;
+            parameter.description = pp.description;
+            parameterService.createParameter(parameter);
+          });
     }
-
 
     private void getAndCreateUnits(Provider provider) {
-      var units = mxmProviderClient.getUnits().result.stream()
-        .collect(Collectors.partitioningBy(u -> u.baseUnit == null));
+      var units =
+          mxmProviderClient.getUnits().result.stream()
+              .collect(Collectors.partitioningBy(u -> u.baseUnit == null));
 
       // first, create units without a base:
       units.get(true).forEach(u -> createUnit(provider, u));
@@ -278,24 +286,21 @@ public class ProviderManager {
       log.trace("createUnit: created=>{}", created);
     }
 
-
-    /**
-     * Refreshes mission template information from the provider.
-     */
+    /** Refreshes mission template information from the provider. */
     public void preUpdateMissionTpl(Provider provider, MissionTemplate pl) {
       log.debug("preUpdateMissionTpl: missionTemplate={}", pl);
       final var missionTplId = pl.missionTplId;
       if (missionTplId.endsWith("/")) {
         updateMissionTemplateDirectory(provider, missionTplId);
-      }
-      else {
+      } else {
         updateActualMissionTemplate(provider, missionTplId);
       }
     }
 
     private void updateMissionTemplateDirectory(Provider provider, String missionTplId) {
       // FIXME not a complete recreation, but a refresh depending on existing dependencies!
-      var deleteAllRes = missionTemplateService.deleteDirectoryRecursive(provider.providerId, missionTplId);
+      var deleteAllRes =
+          missionTemplateService.deleteDirectoryRecursive(provider.providerId, missionTplId);
       log.debug("preUpdateMissionTpl: deleteAllRes=>{}", deleteAllRes);
 
       log.debug("recreating missionTplId='{}'", missionTplId);
@@ -313,36 +318,45 @@ public class ProviderManager {
       missionTemplate.retrievedAt = OffsetDateTime.now();
       missionTemplateService.updateMissionTemplate(missionTemplate);
 
-      recreateAssociatedAssetClasses(provider, missionTplId, missionTemplate, missionTemplateFromProvider);
+      recreateAssociatedAssetClasses(
+          provider, missionTplId, missionTemplate, missionTemplateFromProvider);
 
       refreshAssociatedParameters(provider, missionTplId, missionTemplateFromProvider);
     }
 
-    private void recreateAssociatedAssetClasses(Provider provider,
-                                                String missionTplId,
-                                                MissionTemplate missionTemplate,
-                                                MissionTemplateResponse.MissionTemplate missionTemplateFromProvider
-    ) {
-      // Note: complete recreation of the asset classes association does not have any cascading effect on missions
-      // (as it would be the case for parameters if completely recreated), but any possible removal of an asset
-      // class in the template would render associated missions invalid in terms of the associated asset.
+    private void recreateAssociatedAssetClasses(
+        Provider provider,
+        String missionTplId,
+        MissionTemplate missionTemplate,
+        MissionTemplateResponse.MissionTemplate missionTemplateFromProvider) {
+      // Note: complete recreation of the asset classes association does not have any cascading
+      // effect on missions
+      // (as it would be the case for parameters if completely recreated), but any possible removal
+      // of an asset
+      // class in the template would render associated missions invalid in terms of the associated
+      // asset.
       // TODO(low prio) perhaps some more sophisticated handling/error-reporting, etc.
-      var acsDeleted = missionTemplateAssetClassService.deleteForMissionTemplate(provider.providerId, missionTplId);
+      var acsDeleted =
+          missionTemplateAssetClassService.deleteForMissionTemplate(
+              provider.providerId, missionTplId);
       log.debug("preUpdateMissionTpl: acsDeleted=>{}", acsDeleted);
       if (missionTemplateFromProvider.assetClassNames != null) {
-        createAssociatedAssetClasses(provider, missionTemplate, missionTemplateFromProvider.assetClassNames);
+        createAssociatedAssetClasses(
+            provider, missionTemplate, missionTemplateFromProvider.assetClassNames);
       }
     }
 
-    private void refreshAssociatedParameters(Provider provider,
-                                             String missionTplId,
-                                             MissionTemplateResponse.MissionTemplate missionTemplateFromProvider
-    ) {
-      log.debug("missionTemplateFromProvider.parameters=>{}", missionTemplateFromProvider.parameters);
+    private void refreshAssociatedParameters(
+        Provider provider,
+        String missionTplId,
+        MissionTemplateResponse.MissionTemplate missionTemplateFromProvider) {
+      log.debug(
+          "missionTemplateFromProvider.parameters=>{}", missionTemplateFromProvider.parameters);
 
       if (missionTemplateFromProvider.parameters.isEmpty()) {
         // just remove any parameters that may have been previously captured:
-        var psDeleted = parameterService.deleteForMissionTemplate(provider.providerId, missionTplId);
+        var psDeleted =
+            parameterService.deleteForMissionTemplate(provider.providerId, missionTplId);
         log.debug("preUpdateMissionTpl: psDeleted=>{}", psDeleted);
         return;
       }
@@ -352,17 +366,20 @@ public class ProviderManager {
       //  - add any new parameters reported by provider
 
       Map<String, MissionTemplateResponse.Parameter> byParamNameFromProvider = new HashMap<>();
-      missionTemplateFromProvider.parameters.forEach(param -> byParamNameFromProvider.put(param.paramName, param));
+      missionTemplateFromProvider.parameters.forEach(
+          param -> byParamNameFromProvider.put(param.paramName, param));
 
-      final var paramNamesFromProvider = missionTemplateFromProvider.parameters.stream()
-        .map(p -> p.paramName).collect(Collectors.toSet());
+      final var paramNamesFromProvider =
+          missionTemplateFromProvider.parameters.stream()
+              .map(p -> p.paramName)
+              .collect(Collectors.toSet());
 
       var currentParameters = parameterService.getParameters(provider.providerId, missionTplId);
       var currentParamNames = currentParameters.stream().map(p -> p.paramName).toList();
 
-      var withReferringArguments = argumentService.getArgumentsWithParameterNames(
-        provider.providerId, missionTplId, currentParamNames
-      );
+      var withReferringArguments =
+          argumentService.getArgumentsWithParameterNames(
+              provider.providerId, missionTplId, currentParamNames);
 
       var paramNamesToUpdate = new HashSet<String>();
       for (Argument referringArg : withReferringArguments) {
@@ -376,27 +393,34 @@ public class ProviderManager {
       log.debug("paramNamesToUpdate={} paramNamesToAdd={}", paramNamesToUpdate, paramNamesToAdd);
 
       // delete all params except the ones to be updated:
-      var psDeleted = parameterService.deleteForMissionTemplateExcept(
-        provider.providerId, missionTplId, paramNamesToUpdate.stream().toList()
-      );
+      var psDeleted =
+          parameterService.deleteForMissionTemplateExcept(
+              provider.providerId, missionTplId, paramNamesToUpdate.stream().toList());
       log.debug("preUpdateMissionTpl: psDeleted=>{}", psDeleted);
 
       // do the updates
-      paramNamesToUpdate.forEach(paramName -> {
-        var param = createParameterFromProvider(provider, missionTplId, byParamNameFromProvider.get(paramName));
-        parameterService.updateParameter(param);
-      });
+      paramNamesToUpdate.forEach(
+          paramName -> {
+            var param =
+                createParameterFromProvider(
+                    provider, missionTplId, byParamNameFromProvider.get(paramName));
+            parameterService.updateParameter(param);
+          });
 
       // (re)create the rest:
-      paramNamesToAdd.forEach(paramName -> {
-        var param = createParameterFromProvider(provider, missionTplId, byParamNameFromProvider.get(paramName));
-        parameterService.createParameter(param);
-      });
+      paramNamesToAdd.forEach(
+          paramName -> {
+            var param =
+                createParameterFromProvider(
+                    provider, missionTplId, byParamNameFromProvider.get(paramName));
+            parameterService.createParameter(param);
+          });
     }
 
-    private Parameter createParameterFromProvider(Provider provider,
-                                                  String missionTplId,
-                                                  MissionTemplateResponse.Parameter paramFromProvider) {
+    private Parameter createParameterFromProvider(
+        Provider provider,
+        String missionTplId,
+        MissionTemplateResponse.Parameter paramFromProvider) {
       var param = new Parameter(provider.providerId, missionTplId, paramFromProvider.paramName);
       param.type = paramFromProvider.type;
       param.required = paramFromProvider.required;
@@ -420,39 +444,38 @@ public class ProviderManager {
         if (pl.missionStatus == MissionStatusType.SUBMITTED) {
           log.debug("preUpdateMission: submitting, pl={}", Utl.writeJson(pl));
           submitMission(mission, pl);
-        }
-        else if (pl.missionStatus == null || pl.missionStatus == MissionStatusType.DRAFT) {
+        } else if (pl.missionStatus == null || pl.missionStatus == MissionStatusType.DRAFT) {
           // OK, no requested change in status; let mutation proceed.
           pl.setUpdatedDate(OffsetDateTime.now());
-        }
-        else {
+        } else {
           // from DRAFT, only SUBMITTED is allowed.
-          throw new Error(String.format("Unexpected pl.missionStatus=%s in DRAFT status",
-            pl.missionStatus));
+          throw new Error(
+              String.format("Unexpected pl.missionStatus=%s in DRAFT status", pl.missionStatus));
         }
-      }
-      else if (pl.noPatch()) {
+      } else if (pl.noPatch()) {
         // This is a request for refreshing the mission status.
         if (provider.canReportMissionStatus) {
           retrieveMissionStatus(mission.providerMissionId, pl);
-        }
-        else {
+        } else {
           log.warn("provider '{}' does not support reporting mission status", provider.providerId);
         }
-      }
-      else {
+      } else {
         throw new IllegalStateException("Unexpected pl.missionStatus: " + pl.missionStatus);
       }
     }
 
     private void submitMission(Mission mission, Mission pl) {
-      var args = argumentService.getArguments(mission.providerId, mission.missionTplId, mission.missionId);
+      var args =
+          argumentService.getArguments(mission.providerId, mission.missionTplId, mission.missionId);
 
       PostMissionPayload pmpl = new PostMissionPayload();
 
       pmpl.arguments = new HashMap<>();
-      args.forEach(a -> pmpl.arguments.put(a.paramName,
-        new PostMissionPayload.MissionArgValueAndUnits(a.paramValue, a.paramUnits)));
+      args.forEach(
+          a ->
+              pmpl.arguments.put(
+                  a.paramName,
+                  new PostMissionPayload.MissionArgValueAndUnits(a.paramValue, a.paramUnits)));
 
       pmpl.missionTplId = mission.missionTplId;
       pmpl.assetId = mission.assetId;
@@ -466,8 +489,7 @@ public class ProviderManager {
       if (MissionStatusType.SUBMITTED.name().equals(res.result.status)) {
         pl.missionStatus = MissionStatusType.SUBMITTED;
         pl.providerMissionId = res.result.missionId;
-      }
-      else {
+      } else {
         log.warn("unexpected mission status: {}", res.result.status);
       }
     }
@@ -488,8 +510,7 @@ public class ProviderManager {
         }
         pl.missionStatus = MissionStatusType.valueOf(ms.result.status);
         pl.setUpdatedDate(OffsetDateTime.now());
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         log.warn("retrieveMissionStatus: exception: {}", e.getMessage());
       }
     }

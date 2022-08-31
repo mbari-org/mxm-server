@@ -1,14 +1,12 @@
 package org.mbari.mxm.db.missionTemplate;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -24,10 +22,10 @@ public class MissionTemplateCreatePayload {
 
   public MissionTemplate toMissionTemplate(String providerId) {
     return MissionTemplate.builder()
-      .providerId(providerId)
-      .missionTplId(missionTplId)
-      .description(description)
-      .retrievedAt(retrievedAt)
-      .build();
+        .providerId(providerId)
+        .missionTplId(missionTplId)
+        .description(description)
+        .retrievedAt(retrievedAt)
+        .build();
   }
 }

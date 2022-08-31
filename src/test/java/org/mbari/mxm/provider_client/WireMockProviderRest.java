@@ -1,17 +1,16 @@
 package org.mbari.mxm.provider_client;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.junit.jupiter.api.Assertions.fail;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class WireMockProviderRest implements QuarkusTestResourceLifecycleManager {
@@ -35,8 +34,8 @@ public class WireMockProviderRest implements QuarkusTestResourceLifecycleManager
     wireMockServer.start();
     addStubs();
     return Collections.singletonMap(
-      "quarkus.rest-client.\"org.mbari.mxm.provider_client.ProviderClientService\".url",
-      wireMockServer.baseUrl() + BASE_API_PATH);
+        "quarkus.rest-client.\"org.mbari.mxm.provider_client.ProviderClientService\".url",
+        wireMockServer.baseUrl() + BASE_API_PATH);
   }
 
   @Override
@@ -56,8 +55,7 @@ public class WireMockProviderRest implements QuarkusTestResourceLifecycleManager
       addStub("/missiontemplate/Science/mbts_sci2.tl");
       addStub("/assetclasses");
       addStub("/units");
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       fail("Could not configure Wiremock server. Caused by: " + e.getMessage());
     }
   }
@@ -70,9 +68,7 @@ public class WireMockProviderRest implements QuarkusTestResourceLifecycleManager
     String resContent = getResource(resName);
     log.debug("resName={} => resContent={}", resName, resContent);
 
-    wireMockServer.stubFor(
-      get(urlEqualTo(BASE_API_PATH + suffix)).willReturn(okJson(resContent))
-    );
+    wireMockServer.stubFor(get(urlEqualTo(BASE_API_PATH + suffix)).willReturn(okJson(resContent)));
   }
 
   private String getResource(String resName) throws IOException {

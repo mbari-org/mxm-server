@@ -1,8 +1,7 @@
 package org.mbari.mxm.provider_client.responses;
 
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class MissionTemplatesResponse {

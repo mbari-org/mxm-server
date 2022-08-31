@@ -1,7 +1,12 @@
 package org.mbari.mxm.graphql;
 
+import static java.util.stream.Collectors.toList;
+
 import io.quarkus.arc.Unremovable;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import java.util.List;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import org.eclipse.microprofile.graphql.Source;
 import org.mbari.mxm.db.argument.Argument;
 import org.mbari.mxm.db.argument.ArgumentService;
@@ -13,27 +18,17 @@ import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
 import org.mbari.mxm.db.provider.Provider;
 import org.mbari.mxm.db.provider.ProviderService;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
-
 @ApplicationScoped
 @RegisterForReflection
 @Unremovable
 public class ForMission {
-  @Inject
-  ProviderService providerService;
+  @Inject ProviderService providerService;
 
-  @Inject
-  MissionTemplateService missionTemplateService;
+  @Inject MissionTemplateService missionTemplateService;
 
-  @Inject
-  AssetService assetService;
+  @Inject AssetService assetService;
 
-  @Inject
-  ArgumentService argumentService;
+  @Inject ArgumentService argumentService;
 
   public List<Provider> provider(@Source List<Mission> missions) {
     List<String> providerIds = missions.stream().map(e -> e.providerId).collect(toList());
@@ -51,5 +46,4 @@ public class ForMission {
   public List<List<Argument>> arguments(@Source List<Mission> missions) {
     return argumentService.getArgumentsMultiple(missions);
   }
-
 }

@@ -1,6 +1,5 @@
 package org.mbari.mxm.db.assetClass;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;

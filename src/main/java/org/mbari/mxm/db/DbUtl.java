@@ -1,11 +1,10 @@
 package org.mbari.mxm.db;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.core.statement.Update;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DbUtl {
   static String snakize(String s) {
@@ -34,16 +33,17 @@ public class DbUtl {
     }
 
     public Update createUpdate(Handle handle) {
-      var sql = """
+      var sql =
+          """
         insert into <table>
         (<cols>) values (<vals>)
         returning *
         """;
-      return handle.createUpdate(sql)
-        .define("table", tableName)
-        .defineList("cols", cols)
-        .defineList("vals", vals)
-        ;
+      return handle
+          .createUpdate(sql)
+          .define("table", tableName)
+          .defineList("cols", cols)
+          .defineList("vals", vals);
     }
   }
 
@@ -81,8 +81,7 @@ public class DbUtl {
     public UpdateDef setEvenIfNull(Object fieldValue, String camelName) {
       if (fieldValue != null) {
         return set(fieldValue, camelName);
-      }
-      else {
+      } else {
         return setNull(camelName);
       }
     }
@@ -102,19 +101,22 @@ public class DbUtl {
     }
 
     public Query createQuery(Handle handle) {
-      var sql = """
+      var sql =
+          """
         update <table>
         set    <sets>
         where  <ands>
         returning *
         """;
-      return handle.createQuery(sql)
-        .define("table", tableName)
-        .defineList("sets", sets)
-        .define("ands", String.join(" and ", ands))
-        .bindBean(pl)
-        //.defineNamedBindings() // unneeded for now as we are not using the `<if(a)>a = :a,<endif>` syntax.
-        ;
+      return handle
+          .createQuery(sql)
+          .define("table", tableName)
+          .defineList("sets", sets)
+          .define("ands", String.join(" and ", ands))
+          .bindBean(pl)
+      // .defineNamedBindings() // unneeded for now as we are not using the `<if(a)>a = :a,<endif>`
+      // syntax.
+      ;
     }
   }
 }

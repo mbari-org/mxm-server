@@ -12,8 +12,7 @@ public abstract class BaseResource {
   String writeValueAsString(Object value) {
     try {
       return om.writeValueAsString(value);
-    }
-    catch (JsonProcessingException e) {
+    } catch (JsonProcessingException e) {
       log.warn("Failed to write value as string", e);
       return String.valueOf(value);
     }

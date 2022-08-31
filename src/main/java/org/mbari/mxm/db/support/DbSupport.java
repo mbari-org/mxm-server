@@ -1,11 +1,10 @@
 package org.mbari.mxm.db.support;
 
+import javax.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.postgres.PostgresPlugin;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
-
-import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @Slf4j
@@ -32,8 +31,7 @@ public class DbSupport {
       log.warn("DbSupport: jdbcUrl='{}' username='{}'", jdbcUrl, username);
       if (username != null && password != null) {
         jdbi = Jdbi.create(jdbcUrl, username, password);
-      }
-      else {
+      } else {
         jdbi = Jdbi.create(jdbcUrl);
       }
       jdbi.installPlugin(new PostgresPlugin());

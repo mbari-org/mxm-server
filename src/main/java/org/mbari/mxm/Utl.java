@@ -13,6 +13,7 @@ public class Utl {
 
   /**
    * Cleans a directory or file path string so:
+   * <p>
    * - single leading slash always
    * - no consecutive slashes.
    */
@@ -29,12 +30,12 @@ public class Utl {
   public static String writeJson(Object obj) {
     try {
       return objectWriter.writeValueAsString(obj);
-    }
-    catch (JsonProcessingException e) {
+    } catch (JsonProcessingException e) {
       log.warn("Failed to write JSON", e);
       return String.valueOf(obj);
     }
   }
 
-  private static final ObjectWriter objectWriter = new ObjectMapper().writerWithDefaultPrettyPrinter();
+  private static final ObjectWriter objectWriter =
+      new ObjectMapper().writerWithDefaultPrettyPrinter();
 }

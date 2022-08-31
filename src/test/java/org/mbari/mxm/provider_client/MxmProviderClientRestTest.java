@@ -1,28 +1,25 @@
 package org.mbari.mxm.provider_client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.common.ResourceArg;
 import io.quarkus.test.junit.QuarkusTest;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.provider.ProviderApiType;
 import org.mbari.mxm.graphql.ProviderPingException;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 @QuarkusTest
 @QuarkusTestResource(
-  value = WireMockProviderRest.class,
-  initArgs = {
-    @ResourceArg(name = "port", value = "8888"),
-  }
-)
+    value = WireMockProviderRest.class,
+    initArgs = {
+      @ResourceArg(name = "port", value = "8888"),
+    })
 @Slf4j
 public class MxmProviderClientRestTest {
 
@@ -30,11 +27,9 @@ public class MxmProviderClientRestTest {
 
   @BeforeAll
   public static void init() {
-    client = MxmProviderClientBuilder.create(
-      "TethysDash",
-      "http://localhost:8888/api",
-      ProviderApiType.REST0
-    );
+    client =
+        MxmProviderClientBuilder.create(
+            "TethysDash", "http://localhost:8888/api", ProviderApiType.REST0);
   }
 
   @AfterAll
@@ -85,7 +80,9 @@ public class MxmProviderClientRestTest {
     assertEquals("_examples/SysLogExample.tl", result.entries.get(2).entries.get(0).missionTplId);
     assertEquals("FOO", result.entries.get(2).entries.get(1).description);
     assertEquals(1, result.entries.get(2).entries.get(2).entries.size());
-    assertEquals("_examples/subdir/baz.tl", result.entries.get(2).entries.get(2).entries.get(0).missionTplId);
+    assertEquals(
+        "_examples/subdir/baz.tl",
+        result.entries.get(2).entries.get(2).entries.get(0).missionTplId);
   }
 
   @Test

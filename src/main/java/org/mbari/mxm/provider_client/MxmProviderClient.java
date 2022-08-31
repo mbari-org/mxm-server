@@ -8,7 +8,9 @@ import org.mbari.mxm.provider_client.rest.PostMissionPayload;
 public interface MxmProviderClient {
 
   String providerId();
+
   String httpEndpoint();
+
   ProviderApiType apiType();
 
   PingResponse ping() throws ProviderPingException;

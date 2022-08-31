@@ -1,8 +1,7 @@
 package org.mbari.mxm.provider_client.rest;
 
-import lombok.AllArgsConstructor;
-
 import java.util.HashMap;
+import lombok.AllArgsConstructor;
 
 public class PostMissionPayload {
 
@@ -12,7 +11,6 @@ public class PostMissionPayload {
   public String schedType;
   public String schedDate;
   public HashMap<String, MissionArgValueAndUnits> arguments;
-
 
   @AllArgsConstructor
   public static class MissionArgValueAndUnits {

@@ -1,10 +1,15 @@
 package org.mbari.mxm.graphql;
 
+import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.common.ResourceArg;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import java.util.Collections;
+import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.mbari.mxm.BaseForTests;
@@ -16,26 +21,20 @@ import org.mbari.mxm.db.provider.ProviderApiType;
 import org.mbari.mxm.db.unit.Unit;
 import org.mbari.mxm.provider_client.WireMockProviderRest;
 
-import java.util.Collections;
-import java.util.HashMap;
-
-import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.*;
-
 @QuarkusTest
 @QuarkusTestResource(
-  value = WireMockProviderRest.class,
-  initArgs = {
-    @ResourceArg(name = "port", value = "8890"),
-  }
-)
+    value = WireMockProviderRest.class,
+    initArgs = {
+      @ResourceArg(name = "port", value = "8890"),
+    })
 @QuarkusTestResource(PostgresResource.class)
 @Slf4j
 public class ProviderTest extends BaseForTests {
 
   private Provider createProvider(Provider pl) throws JsonProcessingException {
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
             mutation($pl: ProviderInput!) {
               createProvider(pl: $pl) {
                 providerId
@@ -44,24 +43,25 @@ public class ProviderTest extends BaseForTests {
                 description
               }
             }
-        """
-      , Collections.singletonMap("pl", pl)
-    );
+        """,
+            Collections.singletonMap("pl", pl));
 
     return given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      .statusCode(200)
-      .extract()
-      .body().jsonPath().getObject("data.createProvider", Provider.class)
-      ;
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        .statusCode(200)
+        .extract()
+        .body()
+        .jsonPath()
+        .getObject("data.createProvider", Provider.class);
   }
 
   private Provider getProvider(String providerId) throws JsonProcessingException {
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         query ($providerId: String!) {
           provider(providerId: $providerId) {
             providerId
@@ -75,53 +75,56 @@ public class ProviderTest extends BaseForTests {
             canReportMissionStatus
           }
         }
-        """
-      , Collections.singletonMap("providerId", providerId)
-    );
+        """,
+            Collections.singletonMap("providerId", providerId));
 
     return given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      .statusCode(200)
-      .extract()
-      .body().jsonPath().getObject("data.provider", Provider.class)
-      ;
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        .statusCode(200)
+        .extract()
+        .body()
+        .jsonPath()
+        .getObject("data.provider", Provider.class);
   }
 
-  private AssetClass getAssetClass(String providerId, String className) throws JsonProcessingException {
+  private AssetClass getAssetClass(String providerId, String className)
+      throws JsonProcessingException {
     var variables = new HashMap<String, Object>();
     variables.put("providerId", providerId);
     variables.put("className", className);
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         query assetClass($providerId: String!, $className: String!) {
           assetClass(providerId: $providerId, className: $className) {
             description
           }
         }
-        """
-      , variables
-    );
+        """,
+            variables);
 
     return given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      .statusCode(200)
-      .extract()
-      .body().jsonPath().getObject("data.assetClass", AssetClass.class)
-      ;
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        .statusCode(200)
+        .extract()
+        .body()
+        .jsonPath()
+        .getObject("data.assetClass", AssetClass.class);
   }
 
   private Asset getAsset(String providerId, String assetId) throws JsonProcessingException {
     var variables = new HashMap<String, Object>();
     variables.put("providerId", providerId);
     variables.put("assetId", assetId);
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         query asset($providerId: String!, $assetId: String!) {
           asset(providerId: $providerId, assetId: $assetId) {
             assetId
@@ -129,27 +132,28 @@ public class ProviderTest extends BaseForTests {
             description
           }
         }
-        """
-      , variables
-    );
+        """,
+            variables);
 
     return given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      .statusCode(200)
-      .extract()
-      .body().jsonPath().getObject("data.asset", Asset.class)
-      ;
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        .statusCode(200)
+        .extract()
+        .body()
+        .jsonPath()
+        .getObject("data.asset", Asset.class);
   }
 
   private Unit getUnit(String providerId, String unitName) throws JsonProcessingException {
     var variables = new HashMap<String, Object>();
     variables.put("providerId", providerId);
     variables.put("unitName", unitName);
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         query unit($providerId: String!, $unitName: String!) {
           unit(providerId: $providerId, unitName: $unitName) {
             unitName
@@ -157,25 +161,26 @@ public class ProviderTest extends BaseForTests {
             baseUnit
           }
         }
-        """
-      , variables
-    );
+        """,
+            variables);
 
     return given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      .statusCode(200)
-      .extract()
-      .body().jsonPath().getObject("data.unit", Unit.class)
-      ;
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        .statusCode(200)
+        .extract()
+        .body()
+        .jsonPath()
+        .getObject("data.unit", Unit.class);
   }
 
   private Provider updateProvider(Provider pl) throws JsonProcessingException {
     log.debug("updateProvider: pl={}", objectWriter.writeValueAsString(pl));
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
           mutation ($pl: ProviderInput!) {
             updateProvider(pl: $pl) {
               providerId
@@ -184,29 +189,27 @@ public class ProviderTest extends BaseForTests {
               canValidate
             }
           }
-        """
-      , Collections.singletonMap("pl", pl)
-    );
+        """,
+            Collections.singletonMap("pl", pl));
     log.debug("updateProvider: requestBody={}\n", requestBody);
 
-    var res = given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      .statusCode(200)
-      .extract()
-      ;
+    var res =
+        given()
+            .body(requestBody)
+            .post("/graphql/")
+            .then()
+            .contentType(ContentType.JSON)
+            .statusCode(200)
+            .extract();
 
     log.debug("updateProvider: res={}\n", res.asString());
-    return res
-      .body().jsonPath().getObject("data.updateProvider", Provider.class)
-      ;
+    return res.body().jsonPath().getObject("data.updateProvider", Provider.class);
   }
 
   private Provider deleteProvider(Provider pl) throws JsonProcessingException {
-    String requestBody = bodyForRequest(
-      """
+    String requestBody =
+        bodyForRequest(
+            """
         mutation ($pl: ProviderInput!) {
           deleteProvider(pl: $pl) {
             providerId
@@ -220,21 +223,20 @@ public class ProviderTest extends BaseForTests {
             canReportMissionStatus
           }
         }
-        """
-      , Collections.singletonMap("pl", pl)
-    );
+        """,
+            Collections.singletonMap("pl", pl));
 
     return given()
-      .body(requestBody)
-      .post("/graphql/")
-      .then()
-      .contentType(ContentType.JSON)
-      .statusCode(200)
-      .extract()
-      .body().jsonPath().getObject("data.deleteProvider", Provider.class)
-      ;
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        .statusCode(200)
+        .extract()
+        .body()
+        .jsonPath()
+        .getObject("data.deleteProvider", Provider.class);
   }
-
 
   @Test
   public void crud() throws JsonProcessingException {
@@ -303,5 +305,4 @@ public class ProviderTest extends BaseForTests {
     assertNull(updateProvider(upl));
     assertNull(deleteProvider(deletePayload));
   }
-
 }

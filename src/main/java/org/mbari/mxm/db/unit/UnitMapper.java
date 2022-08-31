@@ -1,10 +1,9 @@
 package org.mbari.mxm.db.unit;
 
-import org.jdbi.v3.core.mapper.RowMapper;
-import org.jdbi.v3.core.statement.StatementContext;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.jdbi.v3.core.mapper.RowMapper;
+import org.jdbi.v3.core.statement.StatementContext;
 
 public class UnitMapper implements RowMapper<Unit> {
 
@@ -13,10 +12,9 @@ public class UnitMapper implements RowMapper<Unit> {
   @Override
   public Unit map(ResultSet rs, StatementContext ctx) throws SQLException {
     return new Unit(
-      rs.getString("provider_id"),
-      rs.getString("unit_name"),
-      rs.getString("abbreviation"),
-      rs.getString("base_unit")
-    );
+        rs.getString("provider_id"),
+        rs.getString("unit_name"),
+        rs.getString("abbreviation"),
+        rs.getString("base_unit"));
   }
 }

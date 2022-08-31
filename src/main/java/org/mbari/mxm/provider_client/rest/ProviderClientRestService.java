@@ -1,9 +1,8 @@
 package org.mbari.mxm.provider_client.rest;
 
-import org.mbari.mxm.provider_client.responses.*;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import org.mbari.mxm.provider_client.responses.*;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
@@ -46,5 +45,4 @@ public interface ProviderClientRestService {
   @Path("mission/{missionId: .*}")
   @Consumes(MediaType.APPLICATION_JSON)
   MissionStatusResponse getMissionStatus(@PathParam("missionId") String missionId);
-
 }
