@@ -43,11 +43,11 @@ public interface ParameterDao {
       insert into parameters
       (provider_id, mission_tpl_id, param_name,
        type, required, default_value, default_units,
-        value_can_reference, description)
+        value_can_reference, description, param_order)
       values
       (:providerId, :missionTplId, :paramName,
        :type, :required, :defaultValue, :defaultUnits,
-        :valueCanReference, :description)
+        :valueCanReference, :description, :paramOrder)
       returning *
       """)
   @GetGeneratedKeys

@@ -1,13 +1,11 @@
 package org.mbari.mxm;
 
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.argument.Argument;
 import org.mbari.mxm.db.argument.ArgumentService;
@@ -379,6 +377,13 @@ public class ProviderManager {
       }
     }
 
+    // captures parameter from provider including its order
+    @AllArgsConstructor
+    private static class ParameterWithOrder {
+      MissionTemplateResponse.Parameter parameter;
+      int paramOrder;
+    }
+
     private void refreshAssociatedParameters(
         Provider provider,
         String missionTplId,
@@ -399,14 +404,17 @@ public class ProviderManager {
       //  - refresh parameters that are already used by missions
       //  - add any new parameters reported by provider
 
-      Map<String, MissionTemplateResponse.Parameter> byParamNameFromProvider = new HashMap<>();
-      missionTemplateFromProvider.parameters.forEach(
-          param -> byParamNameFromProvider.put(param.paramName, param));
+      // indexed by name, captures parameters from provider, including paramOrder:
+      HashMap<String, ParameterWithOrder> byParamNameFromProvider =
+          missionTemplateFromProvider.parameters.stream()
+              .collect(
+                  HashMap::new,
+                  (map, p) -> map.put(p.paramName, new ParameterWithOrder(p, map.size())),
+                  (map, map2) -> {});
 
       final var paramNamesFromProvider =
-          missionTemplateFromProvider.parameters.stream()
-              .map(p -> p.paramName)
-              .collect(Collectors.toSet());
+          missionTemplateFromProvider.parameters.stream().map(p -> p.paramName).toList();
+      log.warn("paramNamesFromProvider={}", paramNamesFromProvider);
 
       var currentParameters = parameterService.getParameters(provider.providerId, missionTplId);
       var currentParamNames = currentParameters.stream().map(p -> p.paramName).toList();
@@ -452,10 +460,14 @@ public class ProviderManager {
     }
 
     private Parameter createParameterFromProvider(
-        Provider provider,
-        String missionTplId,
-        MissionTemplateResponse.Parameter paramFromProvider) {
+        Provider provider, String missionTplId, ParameterWithOrder paramWithOrder) {
+      log.warn(
+          "paramWithOrder: name={} order={}",
+          paramWithOrder.parameter.paramName,
+          paramWithOrder.paramOrder);
+      MissionTemplateResponse.Parameter paramFromProvider = paramWithOrder.parameter;
       var param = new Parameter(provider.providerId, missionTplId, paramFromProvider.paramName);
+      param.paramOrder = paramWithOrder.paramOrder;
       param.type = paramFromProvider.type;
       param.required = paramFromProvider.required;
       param.defaultValue = paramFromProvider.defaultValue;

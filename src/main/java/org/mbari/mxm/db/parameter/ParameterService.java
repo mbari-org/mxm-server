@@ -76,10 +76,6 @@ public class ParameterService {
 
   public Parameter updateParameter(Parameter pl) {
     log.debug("updateParameter: pl={}", pl);
-    return doUpdate(pl);
-  }
-
-  private Parameter doUpdate(Parameter pl) {
     var uDef =
         DbUtl.updateDef("parameters", pl)
             .where("providerId")
@@ -90,7 +86,8 @@ public class ParameterService {
             .set(pl.defaultValue, "defaultValue")
             .set(pl.defaultUnits, "defaultUnits")
             .set(pl.valueCanReference, "valueCanReference")
-            .set(pl.description, "description");
+            .set(pl.description, "description")
+            .set(pl.paramOrder, "paramOrder");
 
     if (uDef.noSets()) {
       return pl;

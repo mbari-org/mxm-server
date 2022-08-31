@@ -85,7 +85,7 @@ create table if not exists parameters
   default_units       varchar,
   value_can_reference varchar,
   description         varchar,
-  param_order         serial,
+  param_order         integer,
   foreign key (provider_id, mission_tpl_id) references mission_tpls on update cascade on delete cascade,
   foreign key (provider_id, default_units) references units on update cascade on delete cascade,
   primary key (provider_id, mission_tpl_id, param_name)
