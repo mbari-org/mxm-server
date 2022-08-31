@@ -298,13 +298,46 @@ public class ProviderManager {
     }
 
     private void updateMissionTemplateDirectory(Provider provider, String missionTplId) {
-      // FIXME not a complete recreation, but a refresh depending on existing dependencies!
-      var deleteAllRes =
-          missionTemplateService.deleteDirectoryRecursive(provider.providerId, missionTplId);
-      log.debug("preUpdateMissionTpl: deleteAllRes=>{}", deleteAllRes);
+      var response = mxmProviderClient.getMissionTemplates(missionTplId);
+      var missionTemplateList = response.result;
+      if (missionTemplateList.entries.isEmpty()) {
+        deleteAllMissionTemplatesUnderDirectory(provider, missionTplId);
+      } else {
+        updateMissionTemplateDirectoryItself(provider, missionTplId);
+        updateMissionTemplateDirectoryEntries(provider, missionTemplateList.entries);
+      }
+    }
 
-      log.debug("recreating missionTplId='{}'", missionTplId);
-      getAndCreateMissionTplsForDirectory(provider, missionTplId);
+    private void deleteAllMissionTemplatesUnderDirectory(Provider provider, String missionTplId) {
+      var res = missionTemplateService.deleteDirectoryRecursive(provider.providerId, missionTplId);
+      log.debug("preUpdateMissionTpl: no templates under {}, res=>{}", missionTplId, res);
+    }
+
+    private void updateMissionTemplateDirectoryItself(Provider provider, String missionTplId) {
+      // just the retrievedAt timestamp:
+      missionTemplateService.updateMissionTemplate(
+          new MissionTemplate(provider.providerId, missionTplId, null, OffsetDateTime.now()));
+    }
+
+    private void updateMissionTemplateDirectoryEntries(
+        Provider provider, List<MissionTemplateResponse.MissionTemplate> entries) {
+      entries.forEach(entry -> updateMissionTemplateDirectoryEntry(provider, entry));
+    }
+
+    private void updateMissionTemplateDirectoryEntry(
+        Provider provider, MissionTemplateResponse.MissionTemplate entry) {
+      final var missionTplId = Utl.cleanPath(entry.missionTplId);
+      final var isDirectory = missionTplId.endsWith("/");
+      if (isDirectory) {
+        if (entry.entries.isEmpty()) {
+          deleteAllMissionTemplatesUnderDirectory(provider, missionTplId);
+        } else {
+          updateMissionTemplateDirectoryItself(provider, missionTplId);
+          updateMissionTemplateDirectoryEntries(provider, entry.entries);
+        }
+      } else {
+        updateActualMissionTemplate(provider, missionTplId);
+      }
     }
 
     private void updateActualMissionTemplate(Provider provider, String missionTplId) {
@@ -351,7 +384,8 @@ public class ProviderManager {
         String missionTplId,
         MissionTemplateResponse.MissionTemplate missionTemplateFromProvider) {
       log.debug(
-          "missionTemplateFromProvider.parameters=>{}", missionTemplateFromProvider.parameters);
+          "missionTemplateFromProvider.parameters={}",
+          missionTemplateFromProvider.parameters.size());
 
       if (missionTemplateFromProvider.parameters.isEmpty()) {
         // just remove any parameters that may have been previously captured:
