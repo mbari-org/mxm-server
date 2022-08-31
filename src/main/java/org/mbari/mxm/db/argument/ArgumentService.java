@@ -34,13 +34,21 @@ public class ArgumentService {
                 m -> String.format("('%s', '%s', '%s')", m.providerId, m.missionTplId, m.missionId))
             .collect(Collectors.toList());
 
-    // TODO use group by in the query itself; for now, grouping in code below
-    // TODO order by corresponding param_order
     var sql =
         """
-      select * from arguments
-      where (provider_id, mission_tpl_id, mission_id) in (<tuples>)
+      select a.* from arguments a
+      right join parameters using (provider_id, mission_tpl_id)
+      where (a.provider_id, a.mission_tpl_id, a.mission_id) in (<tuples>)
+        and a.param_name = parameters.param_name
+      order by provider_id, mission_tpl_id, param_order
       """;
+    /*
+     select a.* from arguments a
+     right join parameters using (provider_id, mission_tpl_id)
+     where (a.provider_id, a.mission_tpl_id, a.mission_id) in (('tethystest_8080', '/Science/smear_sampling.xml', 'Q'))
+       and a.param_name = parameters.param_name
+     order by provider_id, mission_tpl_id, param_order
+    */
 
     var flatList =
         dbSupport
