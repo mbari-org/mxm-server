@@ -1,5 +1,6 @@
 package org.mbari.mxm.db.missionTemplate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.time.OffsetDateTime;
@@ -27,4 +28,9 @@ public class MissionTemplate {
 
   public String description;
   public OffsetDateTime retrievedAt;
+
+  @JsonIgnore
+  public boolean isDirectory() {
+    return missionTplId.endsWith("/");
+  }
 }

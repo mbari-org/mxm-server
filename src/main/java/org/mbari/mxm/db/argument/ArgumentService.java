@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.DbUtl;
 import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.mission.MissionService;
+import org.mbari.mxm.db.provider.ProviderService;
 import org.mbari.mxm.db.support.DbSupport;
 
 @ApplicationScoped
@@ -18,6 +19,7 @@ public class ArgumentService {
   @Inject DbSupport dbSupport;
 
   @Inject MissionService missionService;
+  @Inject ProviderService providerService;
 
   public List<Argument> getArguments(String providerId, String missionTplId, String missionId) {
     return dbSupport
@@ -170,6 +172,11 @@ public class ArgumentService {
         m.setUpdatedDate(OffsetDateTime.now());
       }
       missionService.getBroadcaster().broadcastUpdated(m);
+
+      var p = providerService.getProvider(arg.providerId);
+      if (p != null) {
+        providerService.getBroadcaster().broadcastUpdated(p);
+      }
     }
   }
 }

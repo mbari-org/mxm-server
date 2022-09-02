@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.Source;
 import org.mbari.mxm.db.asset.Asset;
 import org.mbari.mxm.db.asset.AssetService;
@@ -45,9 +46,17 @@ public class ForProvider {
     return res;
   }
 
+  public List<Integer> numAssetClasses(@Source List<Provider> providers) {
+    return assetClasses(providers).stream().map(List::size).collect(toList());
+  }
+
   public List<List<Asset>> assets(@Source List<Provider> providers) {
     List<String> providerIds = providers.stream().map(e -> e.providerId).collect(toList());
     return assetService.getAssetsForProviderIds(providerIds);
+  }
+
+  public List<Integer> numAssets(@Source List<Provider> providers) {
+    return assets(providers).stream().map(List::size).collect(toList());
   }
 
   public List<List<MissionTemplate>> missionTemplates(@Source List<Provider> providers) {
@@ -60,6 +69,13 @@ public class ForProvider {
     return res;
   }
 
+  @Description("Number of actual mission templates (directories excluded)")
+  public List<Integer> numActualMissionTemplates(@Source List<Provider> providers) {
+    return missionTemplates(providers).stream()
+        .map(mts -> mts.stream().filter(mt -> !mt.isDirectory()).toList().size())
+        .collect(toList());
+  }
+
   public List<List<Mission>> missions(@Source List<Provider> providers) {
     List<String> providerIds = providers.stream().map(e -> e.providerId).collect(toList());
     var byProviderId = missionService.getMissionsForProviderMultiple(providerIds);
@@ -70,6 +86,10 @@ public class ForProvider {
     return res;
   }
 
+  public List<Integer> numMissions(@Source List<Provider> providers) {
+    return missions(providers).stream().map(List::size).collect(toList());
+  }
+
   public List<List<Unit>> units(@Source List<Provider> providers) {
     List<String> providerIds = providers.stream().map(e -> e.providerId).collect(toList());
     var byProviderId = unitService.getUnitsMultiple(providerIds);
@@ -78,5 +98,9 @@ public class ForProvider {
       res.add(byProviderId.get(providerId));
     }
     return res;
+  }
+
+  public List<Integer> numUnits(@Source List<Provider> providers) {
+    return units(providers).stream().map(List::size).collect(toList());
   }
 }

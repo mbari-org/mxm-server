@@ -1,3 +1,7 @@
+2022-09
+
+- added some provider summary fields (numActualMissionTemplates, numMissions, numAssets, etc)
+
 2022-08
 
 - version 0.9.1
