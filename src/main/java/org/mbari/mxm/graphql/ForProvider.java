@@ -47,7 +47,7 @@ public class ForProvider {
   }
 
   public List<Integer> numAssetClasses(@Source List<Provider> providers) {
-    return assetClasses(providers).stream().map(List::size).collect(toList());
+    return assetClasses(providers).stream().map(this::listSize).collect(toList());
   }
 
   public List<List<Asset>> assets(@Source List<Provider> providers) {
@@ -56,7 +56,7 @@ public class ForProvider {
   }
 
   public List<Integer> numAssets(@Source List<Provider> providers) {
-    return assets(providers).stream().map(List::size).collect(toList());
+    return assets(providers).stream().map(this::listSize).collect(toList());
   }
 
   public List<List<MissionTemplate>> missionTemplates(@Source List<Provider> providers) {
@@ -72,7 +72,7 @@ public class ForProvider {
   @Description("Number of actual mission templates (directories excluded)")
   public List<Integer> numActualMissionTemplates(@Source List<Provider> providers) {
     return missionTemplates(providers).stream()
-        .map(mts -> mts.stream().filter(mt -> !mt.isDirectory()).toList().size())
+        .map(l -> l == null ? 0 : l.stream().filter(mt -> !mt.isDirectory()).toList().size())
         .collect(toList());
   }
 
@@ -87,7 +87,7 @@ public class ForProvider {
   }
 
   public List<Integer> numMissions(@Source List<Provider> providers) {
-    return missions(providers).stream().map(List::size).collect(toList());
+    return missions(providers).stream().map(this::listSize).collect(toList());
   }
 
   public List<List<Unit>> units(@Source List<Provider> providers) {
@@ -101,6 +101,10 @@ public class ForProvider {
   }
 
   public List<Integer> numUnits(@Source List<Provider> providers) {
-    return units(providers).stream().map(List::size).collect(toList());
+    return units(providers).stream().map(this::listSize).collect(toList());
+  }
+
+  private <T> int listSize(List<T> list) {
+    return list != null ? list.size() : 0;
   }
 }
