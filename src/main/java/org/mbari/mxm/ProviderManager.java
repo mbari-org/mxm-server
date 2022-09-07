@@ -164,11 +164,14 @@ public class ProviderManager {
       getAndCreateMissionTpl(provider, directory);
 
       // get all directory entries, recursively as specified in MXM Provider API:
-      var missionTplListing =
-          mxmProviderClient.getMissionTemplates(
-              directory.replaceFirst("^/+", "") // TODO consistent path name handling
-              );
-      createMissionTplsForDirectoryEntries(provider, missionTplListing.result.entries);
+      // TODO consistent path name handling
+      final var subDir = directory.replaceFirst("^/+", "");
+      var missionTplListing = mxmProviderClient.getMissionTemplates(subDir);
+      if (missionTplListing.result.entries != null) {
+        createMissionTplsForDirectoryEntries(provider, missionTplListing.result.entries);
+      } else {
+        log.warn("getAndCreateMissionTplsForDirectory: no entries for subDir='{}'", subDir);
+      }
     }
 
     private void createMissionTplsForDirectoryEntries(
