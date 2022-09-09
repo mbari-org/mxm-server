@@ -299,6 +299,7 @@ public class ProviderManager {
     }
 
     private void updateMissionTemplateDirectory(Provider provider, String missionTplId) {
+      log.debug("updateMissionTemplateDirectory: missionTplId='{}'", missionTplId);
       var response = mxmProviderClient.getMissionTemplates(missionTplId);
       var missionTemplateList = response.result;
       if (missionTemplateList.entries.isEmpty()) {
@@ -373,7 +374,7 @@ public class ProviderManager {
       var acsDeleted =
           missionTemplateAssetClassService.deleteForMissionTemplate(
               provider.providerId, missionTplId);
-      log.debug("preUpdateMissionTpl: acsDeleted=>{}", acsDeleted);
+      log.trace("preUpdateMissionTpl: acsDeleted=>{}", acsDeleted);
       if (missionTemplateFromProvider.assetClassNames != null) {
         createAssociatedAssetClasses(
             provider, missionTemplate, missionTemplateFromProvider.assetClassNames);
@@ -391,7 +392,7 @@ public class ProviderManager {
         Provider provider,
         String missionTplId,
         MissionTemplateResponse.MissionTemplate missionTemplateFromProvider) {
-      log.debug(
+      log.trace(
           "missionTemplateFromProvider.parameters={}",
           missionTemplateFromProvider.parameters.size());
 
@@ -417,7 +418,7 @@ public class ProviderManager {
 
       final var paramNamesFromProvider =
           missionTemplateFromProvider.parameters.stream().map(p -> p.paramName).toList();
-      log.warn("paramNamesFromProvider={}", paramNamesFromProvider);
+      log.trace("paramNamesFromProvider={}", paramNamesFromProvider);
 
       var currentParameters = parameterService.getParameters(provider.providerId, missionTplId);
       var currentParamNames = currentParameters.stream().map(p -> p.paramName).toList();
@@ -435,13 +436,13 @@ public class ProviderManager {
       var paramNamesToAdd = new HashSet<>(paramNamesFromProvider);
       paramNamesToAdd.removeAll(paramNamesToUpdate);
 
-      log.debug("paramNamesToUpdate={} paramNamesToAdd={}", paramNamesToUpdate, paramNamesToAdd);
+      log.trace("paramNamesToUpdate={} paramNamesToAdd={}", paramNamesToUpdate, paramNamesToAdd);
 
       // delete all params except the ones to be updated:
       var psDeleted =
           parameterService.deleteForMissionTemplateExcept(
               provider.providerId, missionTplId, paramNamesToUpdate.stream().toList());
-      log.debug("preUpdateMissionTpl: psDeleted=>{}", psDeleted);
+      log.trace("preUpdateMissionTpl: psDeleted=>{}", psDeleted);
 
       // do the updates
       paramNamesToUpdate.forEach(
@@ -464,7 +465,7 @@ public class ProviderManager {
 
     private Parameter createParameterFromProvider(
         Provider provider, String missionTplId, ParameterWithOrder paramWithOrder) {
-      log.warn(
+      log.trace(
           "paramWithOrder: name={} order={}",
           paramWithOrder.parameter.paramName,
           paramWithOrder.paramOrder);
