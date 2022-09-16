@@ -1,5 +1,6 @@
 2022-09
 
+- added parameter field to Argument (graphql)
 - added some provider summary fields (numActualMissionTemplates, numMissions, numAssets, etc)
 
 2022-08

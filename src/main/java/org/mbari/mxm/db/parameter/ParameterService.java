@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.DbUtl;
+import org.mbari.mxm.db.argument.Argument;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.support.DbSupport;
 
@@ -61,6 +62,32 @@ public class ParameterService {
 
     // and map tuples to corresponding Parameters:
     return tuples.stream().map(byTupleId::get).collect(Collectors.toList());
+  }
+
+  public List<Parameter> getParametersMultipleArguments(List<Argument> arguments) {
+
+    final var tuples =
+        arguments.stream()
+            .map(
+                a -> String.format("('%s', '%s', '%s')", a.providerId, a.missionTplId, a.paramName))
+            .collect(Collectors.toList());
+
+    var sql =
+        """
+      select * from parameters
+      where (provider_id, mission_tpl_id, param_name) in (<tuples>)
+      order by param_order
+      """;
+
+    return dbSupport
+        .getJdbi()
+        .withHandle(
+            handle ->
+                handle
+                    .createQuery(sql)
+                    .defineList("tuples", tuples)
+                    .mapToBean(Parameter.class)
+                    .list());
   }
 
   public Parameter getParameter(String providerId, String missionTplId, String paramName) {
