@@ -24,6 +24,11 @@ public class SPARouting {
 
   private static final String MXM_EXTERNAL_URL = System.getenv("MXM_EXTERNAL_URL");
 
+  /**
+   * Path used by the UI to retrieve the configuration.
+   */
+  public static final String CONFIG_JSON_PATH = "/mxmConfig.json";
+
   @ConfigProperty(name = "mxm.version")
   String mxmVersion;
 
@@ -46,7 +51,7 @@ public class SPARouting {
               }
 
               // provide server related config to the UI:
-              if (path.equals("/statics/config/config.json")) {
+              if (path.equals(CONFIG_JSON_PATH)) {
                 final String serverLoc =
                     Objects.requireNonNullElseGet(
                         MXM_EXTERNAL_URL,

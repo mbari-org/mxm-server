@@ -1,5 +1,6 @@
 2022-09
 
+- set `/mxmConfig.json` as the path for the UI to retrieve the configuration.
 - added MxmConfig for the UI
 - added parameter field to Argument (graphql)
 - added some provider summary fields (numActualMissionTemplates, numMissions, numAssets, etc)
