@@ -1,7 +1,7 @@
 package org.mbari.mxm;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.vertx.ext.web.Router;
-import java.util.LinkedHashMap;
 import java.util.Objects;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -51,22 +51,8 @@ public class SPARouting {
                     Objects.requireNonNullElseGet(
                         MXM_EXTERNAL_URL,
                         () -> rc.request().scheme() + "://" + rc.request().host());
-                final var graphqlUri = serverLoc + "/graphql";
-                log.debug("SPARouting: graphqlUri='{}'", graphqlUri);
 
-                LinkedHashMap<String, Object> config = new LinkedHashMap<>();
-                config.put("mxmVersion", mxmVersion);
-                var googleApiKey = System.getenv("GOOGLE_API_KEY");
-                if (googleApiKey != null) {
-                  config.put("googleApiKey", googleApiKey);
-                }
-                config.put("graphqlUri", graphqlUri);
-                config.put("graphqlSchema", serverLoc + "/graphql/schema.graphql");
-                config.put("graphqlUi", serverLoc + "/q/graphql-ui");
-                config.put("openapi", serverLoc + "/q/openapi");
-                config.put("openapiSchema", serverLoc + "/q/openapi");
-                config.put("swaggerUi", serverLoc + "/q/swagger-ui");
-
+                MxmConfig config = new MxmConfig(mxmVersion, serverLoc);
                 final var uiConfig = Utl.writeJson(config);
                 rc.response().putHeader("content-type", "application/json").end(uiConfig);
               } else {
@@ -74,5 +60,37 @@ public class SPARouting {
                 rc.next();
               }
             });
+  }
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  static class MxmConfig {
+    public final String mxmVersion;
+    public final String graphqlUri;
+    public final String websocketUrl;
+    public final String graphqlSchema;
+    public final String graphqlUi;
+    public final String openapi;
+    public final String openapiSchema;
+    public final String swaggerUi;
+    public final String repoUrl;
+    public final String learnMoreUrl;
+    public final String googleApiKey;
+
+    public MxmConfig(String mxmVersion, String serverLoc) {
+      this.mxmVersion = mxmVersion;
+      this.graphqlUri = serverLoc + "/graphql";
+      this.websocketUrl = this.graphqlUri.replaceFirst("^http", "ws");
+      this.graphqlSchema = serverLoc + "/graphql/schema.graphql";
+      this.graphqlUi = serverLoc + "/q/graphql-ui";
+      this.openapi = serverLoc + "/q/openapi";
+      this.openapiSchema = serverLoc + "/q/openapi";
+      this.swaggerUi = serverLoc + "/q/swagger-ui";
+      this.googleApiKey = System.getenv("GOOGLE_API_KEY");
+      this.repoUrl = "https://github.com/mbari-org/mxm";
+      this.learnMoreUrl =
+          "https://docs.google.com/document/d/1Fx8C92x4uB9dCx9SH7cpCscn8LqSZywyYm47y8TKDJY/";
+
+      log.debug("SPARouting: graphqlUri='{}'", this.graphqlUri);
+    }
   }
 }
