@@ -5,10 +5,10 @@ General user-oriented instructions is a TODO.
 
 The user-visible MXM version is the one set in `mxm-ui`'s `package.json` file.
 
-## `mbari/mxm-server`
+## `mbari/mxm`
 
-This image contains not only the mxm-server component,
-but also the mxm-ui component via the `quarkus-quinoa` extension.
+This image contains the mxm-server component and also the mxm-ui component,
+which is incorporated via the `quarkus-quinoa` extension.
 
 ### Building the image
 
@@ -20,7 +20,7 @@ In the following, assuming `MXM_VERSION` defines the version to be used.
 cd to/this/project/root/directory
 
 ./mvnw package
-docker build -f src/main/docker/Dockerfile.jvm -t mbari/mxm-server:${MXM_VERSION} .
+docker build -f src/main/docker/Dockerfile.jvm -t mbari/mxm:${MXM_VERSION} .
 ```
 
 ## `mbari/mxm-postgres:x.y.z`

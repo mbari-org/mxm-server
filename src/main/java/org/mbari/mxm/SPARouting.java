@@ -2,6 +2,7 @@ package org.mbari.mxm;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import java.util.Objects;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -22,11 +23,13 @@ public class SPARouting {
 
   private static final boolean historyMode = false;
 
+  /** Can be used in actual deployment to reflect external http address to the server. */
   private static final String MXM_EXTERNAL_URL = System.getenv("MXM_EXTERNAL_URL");
 
-  /**
-   * Path used by the UI to retrieve the configuration.
-   */
+  /** Can be used in actual deployment to reflect external ws address to the websockets endpoint. */
+  private static final String MXM_EXTERNAL_WS_URL = System.getenv("MXM_EXTERNAL_WS_URL");
+
+  /** Path used by the UI to retrieve the configuration. */
   public static final String CONFIG_JSON_PATH = "/mxmConfig.json";
 
   @ConfigProperty(name = "mxm.version")
@@ -52,12 +55,7 @@ public class SPARouting {
 
               // provide server related config to the UI:
               if (path.equals(CONFIG_JSON_PATH)) {
-                final String serverLoc =
-                    Objects.requireNonNullElseGet(
-                        MXM_EXTERNAL_URL,
-                        () -> rc.request().scheme() + "://" + rc.request().host());
-
-                MxmConfig config = new MxmConfig(mxmVersion, serverLoc);
+                MxmConfig config = new MxmConfig(mxmVersion, rc);
                 final var uiConfig = Utl.writeJson(config);
                 rc.response().putHeader("content-type", "application/json").end(uiConfig);
               } else {
@@ -81,10 +79,19 @@ public class SPARouting {
     public final String learnMoreUrl;
     public final String googleApiKey;
 
-    public MxmConfig(String mxmVersion, String serverLoc) {
+    public MxmConfig(String mxmVersion, RoutingContext rc) {
       this.mxmVersion = mxmVersion;
+
+      final String serverLoc =
+          Objects.requireNonNullElseGet(
+              MXM_EXTERNAL_URL, () -> rc.request().scheme() + "://" + rc.request().host());
+
       this.graphqlUri = serverLoc + "/graphql";
-      this.websocketUrl = this.graphqlUri.replaceFirst("^http", "ws");
+
+      this.websocketUrl =
+          Objects.requireNonNullElseGet(
+              MXM_EXTERNAL_WS_URL, () -> this.graphqlUri.replaceFirst("^http", "ws"));
+
       this.graphqlSchema = serverLoc + "/graphql/schema.graphql";
       this.graphqlUi = serverLoc + "/q/graphql-ui";
       this.openapi = serverLoc + "/q/openapi";
@@ -94,7 +101,8 @@ public class SPARouting {
       this.repoUrl = "https://github.com/mbari-org/mxm";
       this.learnMoreUrl = "https://docs.mbari.org/internal/mxm/";
 
-      log.debug("SPARouting: graphqlUri='{}'", this.graphqlUri);
+      log.debug(
+          "SPARouting: graphqlUri='{}' websocketUrl='{}'", this.graphqlUri, this.websocketUrl);
     }
   }
 }

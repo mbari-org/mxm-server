@@ -1,23 +1,24 @@
 2022-09
 
-- failed websocket connection against deployed server at http://mxm.mbari.org/graphql
-```
-With a request like this (note with some variation of the actual address while invoetigating the issue):
+- similarly as with `MXM_EXTERNAL_URL`, new env var `MXM_EXTERNAL_WS_URL` that 
+  can be used to specify the external URL for the websocket endpoint.
+- websocket connection starting to work when deploying server on the mxm machine.
+  - more testing ongoing.
+  - NOTE: interestingly, `websocat` seems to expose a bug in Quarkus:
+    With this invocation:
+  
+          websocat "ws://mxm.shore.mbari.org/ws/"    # which hangs forever btw
+  
+      the docker log shows:
+  
+          ... ERROR [io.qua.ver.cor.run.VertxCoreRecorder] (vert.x-eventloop-thread-0) Uncaught exception received by Vert.x:
+             java.lang.NullPointerException: Cannot invoke "String.hashCode()" because "<local5>" is null
+          at io.quarkus.smallrye.graphql.runtime.SmallRyeGraphQLOverWebSocketHandler.lambda$doHandle$4(SmallRyeGraphQLOverWebSocketHandler.java:38)
+          at io.vertx.ext.web.impl.HttpServerRequestWrapper.lambda$toWebSocket$0(HttpServerRequestWrapper.java:355)
+          at io.vertx.core.impl.future.FutureImpl$3.onSuccess(FutureImpl.java:141)
+          ...
 
-     websocat "ws://mxm.shore.mbari.org/ws/"    # which hangs forever btw
-
-[mxmadmin@mxm conf.d]$ docker logs -f mxm-server shows:
-
-... ERROR [io.qua.ver.cor.run.VertxCoreRecorder] (vert.x-eventloop-thread-0) Uncaught exception received by Vert.x:
-   java.lang.NullPointerException: Cannot invoke "String.hashCode()" because "<local5>" is null
-at io.quarkus.smallrye.graphql.runtime.SmallRyeGraphQLOverWebSocketHandler.lambda$doHandle$4(SmallRyeGraphQLOverWebSocketHandler.java:38)
-at io.vertx.ext.web.impl.HttpServerRequestWrapper.lambda$toWebSocket$0(HttpServerRequestWrapper.java:355)
-at io.vertx.core.impl.future.FutureImpl$3.onSuccess(FutureImpl.java:141)
-...
-```
-
-No obvious findings out there related with this, but upgraded quarkus to 2.12.3.Final (from 2.12.1.Final),
-still to be tested...
+      No obvious findings out there related with this.
 
 - set version 0.9.2 toward release with overhauled version of the UI
 - set `/mxmConfig.json` as the path for the UI to retrieve the configuration.
