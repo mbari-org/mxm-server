@@ -92,8 +92,7 @@ public class SPARouting {
       this.swaggerUi = serverLoc + "/q/swagger-ui";
       this.googleApiKey = System.getenv("GOOGLE_API_KEY");
       this.repoUrl = "https://github.com/mbari-org/mxm";
-      this.learnMoreUrl =
-          "https://docs.google.com/document/d/1Fx8C92x4uB9dCx9SH7cpCscn8LqSZywyYm47y8TKDJY/";
+      this.learnMoreUrl = "https://docs.mbari.org/internal/mxm/";
 
       log.debug("SPARouting: graphqlUri='{}'", this.graphqlUri);
     }

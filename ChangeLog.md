@@ -1,5 +1,6 @@
 2022-09
 
+- set version 0.9.2 toward release with overhauled version of the UI
 - set `/mxmConfig.json` as the path for the UI to retrieve the configuration.
 - added MxmConfig for the UI
 - added parameter field to Argument (graphql)

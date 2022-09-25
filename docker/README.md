@@ -14,11 +14,13 @@ but also the mxm-ui component via the `quarkus-quinoa` extension.
 
 It's assumed that the `mxm-server` and `mxm-ui` clones are sibling directories.
 
+In the following, assuming `MXM_VERSION` defines the version to be used.
+
 ```bash
 cd to/this/project/root/directory
 
 ./mvnw package
-docker build -f src/main/docker/Dockerfile.jvm -t mbari/mxm-server:0.9.1 .
+docker build -f src/main/docker/Dockerfile.jvm -t mbari/mxm-server:${MXM_VERSION} .
 ```
 
 ## `mbari/mxm-postgres:x.y.z`
