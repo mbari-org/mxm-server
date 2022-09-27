@@ -1,0 +1,10 @@
+/* file called smallrye-open-api-ui.css to be applied only to SwaggerUI */
+
+.download-url-wrapper {
+  visibility: hidden;
+}
+
+.swagger-ui .topbar {
+  padding: 8px 30px;
+  background-color: #05435f;
+}
