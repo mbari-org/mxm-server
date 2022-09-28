@@ -47,7 +47,7 @@
 #   no effect. If there is a memory constraint then `-Xms` is limited to the value set
 #   here. The default is 4096MB which means the calculated value of `-Xms` never will
 #   be greater than 4096MB. The value of this variable is expressed in MB (example: "4096")
-# - JAVA_DIAGNOSTICS: Set this to getAssetClass some diagnostics information to standard output
+# - JAVA_DIAGNOSTICS: Set this to get some diagnostics information to standard output
 #   when things are happening. This option, if set to true, will set
 #  `-XX:+UnlockDiagnosticVMOptions`. Disabled by default (example: "true").
 # - JAVA_DEBUG: If set remote debugging will be switched on. Disabled by default (example:
