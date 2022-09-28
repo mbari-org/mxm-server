@@ -1,5 +1,6 @@
 2022-09
 
+- adjust PostMissionPayload to use a List for the arguments
 - basic branding (only in swagger-ui)
 - similarly as with `MXM_EXTERNAL_URL`, new env var `MXM_EXTERNAL_WS_URL` that 
   can be used to specify the external URL for the websocket endpoint.

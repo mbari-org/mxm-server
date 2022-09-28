@@ -519,13 +519,11 @@ public class ProviderManager {
           argumentService.getArguments(mission.providerId, mission.missionTplId, mission.missionId);
 
       PostMissionPayload pmpl = new PostMissionPayload();
-
-      pmpl.arguments = new HashMap<>();
       args.forEach(
           a ->
-              pmpl.arguments.put(
-                  a.paramName,
-                  new PostMissionPayload.MissionArgValueAndUnits(a.paramValue, a.paramUnits)));
+              pmpl.arguments.add(
+                  new PostMissionPayload.MissionArgValueAndUnits(
+                      a.paramName, a.paramValue, a.paramUnits)));
 
       pmpl.missionTplId = mission.missionTplId;
       pmpl.assetId = mission.assetId;
