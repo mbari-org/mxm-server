@@ -23,8 +23,7 @@ public class ForAssetClass {
   @Inject ProviderService providerService;
 
   public List<List<Asset>> assets(@Source List<AssetClass> assetClasses) {
-    List<String> providerIds = assetClasses.stream().map(e -> e.providerId).collect(toList());
-    return assetService.getAssetsForProviderIds(providerIds);
+    return assetService.getAssetsMultipleForAssetClasses(assetClasses);
   }
 
   public List<Provider> provider(@Source List<AssetClass> assetClasses) {

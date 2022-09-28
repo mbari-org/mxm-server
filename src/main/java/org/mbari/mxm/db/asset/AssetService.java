@@ -8,6 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.DbUtl;
+import org.mbari.mxm.db.assetClass.AssetClass;
 import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.support.DbSupport;
 
@@ -78,6 +79,43 @@ public class AssetService {
               return assets.stream()
                   .collect(Collectors.groupingBy(Asset::getProviderId, Collectors.toList()));
             });
+  }
+
+  public List<List<Asset>> getAssetsMultipleForAssetClasses(List<AssetClass> assetClasses) {
+
+    final var tuples =
+        assetClasses.stream()
+            .map(e -> String.format("('%s', '%s')", e.providerId, e.className))
+            .collect(Collectors.toList());
+
+    var sql =
+        """
+    select * from assets
+    where (provider_id, class_name) in (<tuples>)
+    order by asset_id
+    """;
+
+    var flatList =
+        dbSupport
+            .getJdbi()
+            .withHandle(
+                handle ->
+                    handle
+                        .createQuery(sql)
+                        .defineList("tuples", tuples)
+                        .mapToBean(Asset.class)
+                        .list());
+
+    // group by "tuple id":
+    var byTupleId =
+        flatList.stream()
+            .collect(
+                Collectors.groupingBy(
+                    e -> String.format("('%s', '%s')", e.providerId, e.className),
+                    Collectors.toList()));
+
+    // and map tuples to corresponding Parameters:
+    return tuples.stream().map(byTupleId::get).collect(Collectors.toList());
   }
 
   public Asset getAsset(String providerId, String assetId) {
