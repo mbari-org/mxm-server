@@ -534,11 +534,11 @@ public class ProviderManager {
       log.debug("submitMission: pmpl={}", Utl.writeJson(pmpl));
       var res = mxmProviderClient.postMission(pmpl);
       log.debug("submitMission: res={}", Utl.writeJson(res));
-      if (MissionStatusType.SUBMITTED.name().equals(res.result.status)) {
+      if (MissionStatusType.SUBMITTED.name().equals(res.result().status)) {
         pl.missionStatus = MissionStatusType.SUBMITTED;
-        pl.providerMissionId = res.result.missionId;
+        pl.providerMissionId = res.result().missionId;
       } else {
-        log.warn("unexpected mission status: {}", res.result.status);
+        log.warn("unexpected mission status: {}", res.result().status);
       }
     }
 
@@ -551,12 +551,12 @@ public class ProviderManager {
 
       try {
         var ms = mxmProviderClient.getMissionStatus(providerMissionId);
-        if (ms.result.status == null) {
+        if (ms.result().status == null) {
           // no change in status (TODO this special null meaning is temporary)
           log.warn("retrieveMissionStatus: provider reported a null mission status");
           return;
         }
-        pl.missionStatus = MissionStatusType.valueOf(ms.result.status);
+        pl.missionStatus = MissionStatusType.valueOf(ms.result().status);
         pl.setUpdatedDate(OffsetDateTime.now());
       } catch (Exception e) {
         log.warn("retrieveMissionStatus: exception: {}", e.getMessage());

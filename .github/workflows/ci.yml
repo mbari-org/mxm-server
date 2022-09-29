@@ -14,5 +14,5 @@ jobs:
           version: 'latest'
           java-version: '17'
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and test
-        run: ./mvnw clean test
+      - name: Build, check format, and test
+        run: ./mvnw clean spotless:check test
