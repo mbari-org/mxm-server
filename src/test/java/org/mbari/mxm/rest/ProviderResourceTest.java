@@ -33,7 +33,7 @@ public class ProviderResourceTest extends BaseForTests {
           new Provider(
               providerId,
               String.format("https://%s.net", providerId),
-              ProviderApiType.REST0,
+              ProviderApiType.REST,
               "originalDescription",
               null,
               null,

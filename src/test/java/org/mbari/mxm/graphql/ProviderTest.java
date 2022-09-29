@@ -250,7 +250,7 @@ public class ProviderTest extends BaseForTests {
     // create:
     final var newPl = new Provider(providerId);
     newPl.setHttpEndpoint("http://localhost:8890/api");
-    newPl.setApiType(ProviderApiType.REST0);
+    newPl.setApiType(ProviderApiType.REST);
 
     final var created = createProvider(newPl);
     assertEquals(newPl.providerId, created.providerId);

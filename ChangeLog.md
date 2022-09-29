@@ -1,5 +1,6 @@
 2022-09
 
+- renamed ProviderApiType enum value to `REST` (from `REST0`)
 - fix `assets` member resolution for `AssetClass` (graphql)
 - adjust PostMissionPayload to use a List for the arguments
 - basic branding (only in swagger-ui)

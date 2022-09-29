@@ -29,7 +29,7 @@ public class MxmProviderClientRestTest {
   public static void init() {
     client =
         MxmProviderClientBuilder.create(
-            "TethysDash", "http://localhost:8888/api", ProviderApiType.REST0);
+            "TethysDash", "http://localhost:8888/api", ProviderApiType.REST);
   }
 
   @AfterAll

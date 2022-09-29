@@ -14,7 +14,7 @@ public final class MxmProviderClientBuilder {
    */
   public static MxmProviderClient create(
       String providerId, String httpEndpoint, ProviderApiType apiType) {
-    if (apiType != ProviderApiType.REST0) {
+    if (apiType != ProviderApiType.REST) {
       throw new IllegalArgumentException("Only the REST Provider API is supported.");
     }
     return new MxmProviderClientRest(providerId, httpEndpoint);

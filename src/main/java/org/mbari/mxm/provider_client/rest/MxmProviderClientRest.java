@@ -47,7 +47,7 @@ public class MxmProviderClientRest implements MxmProviderClient {
 
   @Override
   public ProviderApiType apiType() {
-    return ProviderApiType.REST0;
+    return ProviderApiType.REST;
   }
 
   @Override

@@ -1,5 +1,5 @@
 create type provider_api_type as enum (
-  'REST0',
+  'REST',
   'GRAPHQL'
   )
 ;
