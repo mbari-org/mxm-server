@@ -48,14 +48,6 @@ public class AssetClassService {
   }
 
   public List<AssetClass> getAssetClasses(List<Asset> assets) {
-    // Note: there could be multiple assets with the same class,
-    // so, a direct "mapping" would cause the following in such cases:
-    //
-    // SRGQL012000: Data Fetching Error:
-    //    org.dataloader.impl.DataLoaderAssertionException:
-    //    The size of the promised values MUST be the same size as the key list
-    //
-
     final var tuples =
         assets.stream()
             .map(a -> String.format("('%s', '%s')", a.providerId, a.className))
@@ -102,8 +94,6 @@ public class AssetClassService {
   public AssetClass createAssetClass(AssetClass pl) {
     return dbSupport.getJdbi().withExtension(AssetClassDao.class, dao -> dao.insertAssetClass(pl));
   }
-
-  private final AssetClassMapper assetClassMapper = new AssetClassMapper();
 
   public AssetClass updateAssetClass(AssetClass pl) {
     log.debug("updateAssetClass: pl={}", pl);

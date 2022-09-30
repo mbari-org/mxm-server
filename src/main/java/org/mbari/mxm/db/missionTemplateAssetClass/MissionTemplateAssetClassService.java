@@ -3,6 +3,8 @@ package org.mbari.mxm.db.missionTemplateAssetClass;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import org.mbari.mxm.db.assetClass.AssetClass;
+import org.mbari.mxm.db.assetClass.AssetClassService;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.support.DbSupport;
 
@@ -22,6 +25,8 @@ import org.mbari.mxm.db.support.DbSupport;
 public class MissionTemplateAssetClassService {
 
   @Inject DbSupport dbSupport;
+
+  @Inject AssetClassService assetClassService;
 
   public List<MissionTemplateAssetClass> getAllMissionTemplateAssetClasses() {
     return dbSupport
@@ -76,15 +81,16 @@ public class MissionTemplateAssetClassService {
 
     log.debug("tuples={}", tuples);
 
-    // FIXME this incorrect query
+    // TODO(low prio) a more efficient query.
+
     var sql =
         """
-      select mac.mission_tpl_id as mission_tpl_id, ac.*
-      from mission_tpl_asset_class mac, asset_classes ac
-      where (mac.provider_id, mac.mission_tpl_id) in (<tuples>);
+      select *
+      from mission_tpl_asset_class
+      where (provider_id, mission_tpl_id) in (<tuples>);
       """;
 
-    var flatList =
+    var missionTemplateAssetClasses =
         dbSupport
             .getJdbi()
             .withHandle(
@@ -92,26 +98,20 @@ public class MissionTemplateAssetClassService {
                     handle
                         .createQuery(sql)
                         .defineList("tuples", tuples)
-                        .registerRowMapper(assetClassWithMissionTplIdMapper)
-                        .mapToBean(AssetClassWithMissionTplId.class)
+                        .mapToBean(MissionTemplateAssetClass.class)
                         .list());
-    log.debug("flatList={}", flatList);
+    log.debug("missionTemplateAssetClasses={}", missionTemplateAssetClasses);
 
-    var byTupleId =
-        flatList.stream()
-            .collect(
-                Collectors.groupingBy(
-                    e -> String.format("('%s', '%s')", e.providerId, e.missionTplId),
-                    Collectors.toList()));
+    var byProviderIdMissionTplId = new HashMap<String, ArrayList<AssetClass>>();
 
-    return tuples.stream()
-        .map(byTupleId::get)
-        .map(
-            list ->
-                list == null
-                    ? null
-                    : list.stream().map(ac -> (AssetClass) ac).collect(Collectors.toList()))
-        .collect(Collectors.toList());
+    missionTemplateAssetClasses.forEach(
+        mac -> {
+          var ac = assetClassService.getAssetClass(mac.providerId, mac.assetClassName);
+          var tuple = String.format("('%s', '%s')", mac.providerId, mac.missionTplId);
+          byProviderIdMissionTplId.computeIfAbsent(tuple, k -> new ArrayList<>()).add(ac);
+        });
+
+    return tuples.stream().map(byProviderIdMissionTplId::get).collect(Collectors.toList());
   }
 
   public MissionTemplateAssetClass createMissionTemplateAssetClass(MissionTemplateAssetClass pl) {
