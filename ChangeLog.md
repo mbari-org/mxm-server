@@ -1,5 +1,7 @@
 2022-09
 
+- adding mission validation
+  - TODO better response model at graphql level
 - fix getAssetClassesMultiple
 - renamed ProviderApiType enum value to `REST` (from `REST0`)
 - fix `assets` member resolution for `AssetClass` (graphql)

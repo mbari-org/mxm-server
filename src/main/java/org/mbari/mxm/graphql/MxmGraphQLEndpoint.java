@@ -29,6 +29,7 @@ import org.mbari.mxm.db.provider.Provider;
 import org.mbari.mxm.db.provider.ProviderService;
 import org.mbari.mxm.db.unit.Unit;
 import org.mbari.mxm.db.unit.UnitService;
+import org.mbari.mxm.provider_client.responses.MissionValidationResponse;
 import org.mbari.mxm.provider_client.responses.PingResponse;
 
 @GraphQLApi
@@ -222,7 +223,7 @@ public class MxmGraphQLEndpoint {
   }
 
   ///////////////////////////////////////////////////////////////////
-  // MissionTemplateAssetClassServices
+  // MissionTemplateAssetClass
 
   @Query
   @Description("Get all mission template asset classes")
@@ -328,12 +329,23 @@ public class MxmGraphQLEndpoint {
   @Mutation
   @Description("Update a mission")
   public Mission updateMission(@Valid Mission pl) {
-    log.debug("updateMissionTemplate: pl={}", pl);
+    log.debug("updateMission: pl={}", pl);
     var provider = providerService.getProvider(pl.getProviderId());
     var pm = createProviderManager(provider);
 
     pm.preUpdateMission(provider, pl);
     var res = missionService.updateMission(pl);
+    pm.done();
+    return res;
+  }
+
+  @Mutation
+  @Description("Validate a mission against the provider")
+  public MissionValidationResponse validateMission(@Valid Mission pl) {
+    log.debug("validateMission: pl={}", pl);
+    var provider = providerService.getProvider(pl.getProviderId());
+    var pm = createProviderManager(provider);
+    var res = pm.validateMission(pl);
     pm.done();
     return res;
   }

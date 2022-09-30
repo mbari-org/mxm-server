@@ -25,6 +25,8 @@ public interface MxmProviderClient {
 
   UnitsResponse getUnits();
 
+  MissionValidationResponse validateMission(PostMissionPayload pl);
+
   MissionStatusResponse postMission(PostMissionPayload pl);
 
   MissionStatusResponse getMissionStatus(String missionId);

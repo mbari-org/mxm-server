@@ -37,6 +37,11 @@ public interface ProviderClientRestService {
   UnitsResponse getUnits();
 
   @POST
+  @Path("missions/validate")
+  @Consumes(MediaType.APPLICATION_JSON)
+  MissionValidationResponse validateMission(PostMissionPayload pl);
+
+  @POST
   @Path("missions")
   @Consumes(MediaType.APPLICATION_JSON)
   MissionStatusResponse postMission(PostMissionPayload pl);

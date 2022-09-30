@@ -29,10 +29,7 @@ import org.mbari.mxm.db.unit.UnitService;
 import org.mbari.mxm.graphql.ProviderPingException;
 import org.mbari.mxm.provider_client.MxmProviderClient;
 import org.mbari.mxm.provider_client.MxmProviderClientBuilder;
-import org.mbari.mxm.provider_client.responses.AssetClassesResponse;
-import org.mbari.mxm.provider_client.responses.MissionTemplateResponse;
-import org.mbari.mxm.provider_client.responses.PingResponse;
-import org.mbari.mxm.provider_client.responses.UnitsResponse;
+import org.mbari.mxm.provider_client.responses.*;
 import org.mbari.mxm.provider_client.rest.PostMissionPayload;
 
 @ApplicationScoped
@@ -514,7 +511,29 @@ public class ProviderManager {
       }
     }
 
+    public MissionValidationResponse validateMission(Mission mission) {
+      PostMissionPayload pmpl = preparePostMissionPayload(mission);
+      log.debug("validateMission: pmpl={}", Utl.writeJson(pmpl));
+      var res = mxmProviderClient.validateMission(pmpl);
+      log.debug("submitMission: res={}", Utl.writeJson(res));
+      return res;
+    }
+
     private void submitMission(Mission mission, Mission pl) {
+      PostMissionPayload pmpl = preparePostMissionPayload(mission);
+
+      log.debug("submitMission: pmpl={}", Utl.writeJson(pmpl));
+      var res = mxmProviderClient.postMission(pmpl);
+      log.debug("submitMission: res={}", Utl.writeJson(res));
+      if (MissionStatusType.SUBMITTED.name().equals(res.result().status)) {
+        pl.missionStatus = MissionStatusType.SUBMITTED;
+        pl.providerMissionId = res.result().missionId;
+      } else {
+        log.warn("unexpected mission status: {}", res.result().status);
+      }
+    }
+
+    private PostMissionPayload preparePostMissionPayload(Mission mission) {
       var args =
           argumentService.getArguments(mission.providerId, mission.missionTplId, mission.missionId);
 
@@ -530,16 +549,7 @@ public class ProviderManager {
       pmpl.description = mission.description;
       pmpl.schedType = mission.schedType == null ? null : mission.schedType.name();
       pmpl.schedDate = mission.schedDate == null ? null : mission.schedDate.toString();
-
-      log.debug("submitMission: pmpl={}", Utl.writeJson(pmpl));
-      var res = mxmProviderClient.postMission(pmpl);
-      log.debug("submitMission: res={}", Utl.writeJson(res));
-      if (MissionStatusType.SUBMITTED.name().equals(res.result().status)) {
-        pl.missionStatus = MissionStatusType.SUBMITTED;
-        pl.providerMissionId = res.result().missionId;
-      } else {
-        log.warn("unexpected mission status: {}", res.result().status);
-      }
+      return pmpl;
     }
 
     private void retrieveMissionStatus(String providerMissionId, Mission pl) {
