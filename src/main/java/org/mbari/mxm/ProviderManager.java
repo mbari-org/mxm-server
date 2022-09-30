@@ -331,7 +331,7 @@ public class ProviderManager {
       final var missionTplId = Utl.cleanPath(entry.missionTplId);
       final var isDirectory = missionTplId.endsWith("/");
       if (isDirectory) {
-        if (entry.entries.isEmpty()) {
+        if (entry.entries == null || entry.entries.isEmpty()) {
           deleteAllMissionTemplatesUnderDirectory(provider, missionTplId);
         } else {
           updateMissionTemplateDirectoryItself(provider, missionTplId);

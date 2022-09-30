@@ -44,6 +44,6 @@ public class ForMissionTemplate {
   }
 
   public List<List<AssetClass>> assetClasses(@Source List<MissionTemplate> missionTemplates) {
-    return missionTemplateAssetClassService.getAssetNamesMultiple(missionTemplates);
+    return missionTemplateAssetClassService.getAssetClassesMultiple(missionTemplates);
   }
 }

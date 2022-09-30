@@ -47,7 +47,7 @@ public class MissionTemplateAssetClassService {
             dao -> dao.getAssetClassNames(providerId, missionTplId));
   }
 
-  // Support for getAssetNamesMultiple(List<MissionTemplate> missionTemplates):
+  // Support for getAssetClassesMultiple(List<MissionTemplate> missionTemplates):
 
   static @Data @EqualsAndHashCode(callSuper = true) @RegisterForReflection @ToString(
       callSuper = true) public class AssetClassWithMissionTplId extends AssetClass {
@@ -68,7 +68,7 @@ public class MissionTemplateAssetClassService {
         }
       };
 
-  public List<List<AssetClass>> getAssetNamesMultiple(List<MissionTemplate> missionTemplates) {
+  public List<List<AssetClass>> getAssetClassesMultiple(List<MissionTemplate> missionTemplates) {
     final var tuples =
         missionTemplates.stream()
             .map(e -> String.format("('%s', '%s')", e.providerId, e.missionTplId))
@@ -76,6 +76,7 @@ public class MissionTemplateAssetClassService {
 
     log.debug("tuples={}", tuples);
 
+    // FIXME this incorrect query
     var sql =
         """
       select mac.mission_tpl_id as mission_tpl_id, ac.*
