@@ -1,7 +1,9 @@
 package org.mbari.mxm;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -9,9 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.argument.Argument;
 import org.mbari.mxm.db.argument.ArgumentService;
-import org.mbari.mxm.db.asset.Asset;
 import org.mbari.mxm.db.asset.AssetService;
-import org.mbari.mxm.db.assetClass.AssetClass;
 import org.mbari.mxm.db.assetClass.AssetClassService;
 import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.mission.MissionService;
@@ -29,7 +29,10 @@ import org.mbari.mxm.db.unit.UnitService;
 import org.mbari.mxm.graphql.ProviderPingException;
 import org.mbari.mxm.provider_client.MxmProviderClient;
 import org.mbari.mxm.provider_client.MxmProviderClientBuilder;
-import org.mbari.mxm.provider_client.responses.*;
+import org.mbari.mxm.provider_client.responses.MissionTemplateResponse;
+import org.mbari.mxm.provider_client.responses.MissionValidationResponse;
+import org.mbari.mxm.provider_client.responses.PingResponse;
+import org.mbari.mxm.provider_client.responses.UnitsResponse;
 import org.mbari.mxm.provider_client.rest.PostMissionPayload;
 
 @ApplicationScoped
@@ -109,11 +112,6 @@ public class ProviderManager {
     public void postInsertProvider(Provider provider) {
       log.debug("postInsertProvider: provider={}", provider);
 
-      // Asset Classes
-      var assetClasses = mxmProviderClient.getAssetClasses();
-      log.debug("postInsertProvider: assetClasses=>{}", assetClasses);
-      createAssetClasses(provider, assetClasses.result);
-
       // Units:
       if (provider.usesUnits) {
         getAndCreateUnits(provider);
@@ -121,37 +119,6 @@ public class ProviderManager {
 
       // MissionTpls:
       getAndCreateMissionTplsForDirectory(provider, "/");
-    }
-
-    private void createAssetClasses(
-        Provider provider, List<AssetClassesResponse.AssetClass> assetClasses) {
-      assetClasses.forEach(assetClass -> createAssetClass(provider, assetClass));
-    }
-
-    private void createAssetClass(Provider provider, AssetClassesResponse.AssetClass assetClass) {
-      log.debug("createAssetClass: assetClass=>{}", assetClass);
-      var ac =
-          assetClassService.createAssetClass(
-              new AssetClass(
-                  provider.providerId, assetClass.assetClassName, assetClass.description));
-      log.debug("createAssetClass: created=>{}", ac);
-
-      createAssets(provider, assetClass);
-    }
-
-    private void createAssets(Provider provider, AssetClassesResponse.AssetClass assetClass) {
-      assetClass.assets.forEach(asset -> createAsset(provider, assetClass, asset));
-    }
-
-    private void createAsset(
-        Provider provider,
-        AssetClassesResponse.AssetClass assetClass,
-        AssetClassesResponse.Asset a) {
-      log.debug("createAsset: a=>{}", a);
-      var asset = new Asset(provider.providerId, a.assetId);
-      asset.className = assetClass.assetClassName;
-      // TODO capture description in AssetClassesResponse.Asset
-      assetService.createAsset(asset);
     }
 
     private void getAndCreateMissionTplsForDirectory(Provider provider, String directory) {

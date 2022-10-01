@@ -11,9 +11,6 @@ public class AssetMapper implements RowMapper<Asset> {
   @Override
   public Asset map(ResultSet rs, StatementContext ctx) throws SQLException {
     return new Asset(
-        rs.getString("provider_id"),
-        rs.getString("class_name"),
-        rs.getString("asset_id"),
-        rs.getString("description"));
+        rs.getString("class_name"), rs.getString("asset_id"), rs.getString("description"));
   }
 }

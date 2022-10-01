@@ -66,7 +66,6 @@ public class MissionTemplateAssetClassService {
             throws SQLException {
           var e = new AssetClassWithMissionTplId();
           e.missionTplId = rs.getString("mission_tpl_id");
-          e.providerId = rs.getString("provider_id");
           e.className = rs.getString("class_name");
           e.description = rs.getString("description");
           return e;
@@ -106,7 +105,7 @@ public class MissionTemplateAssetClassService {
 
     missionTemplateAssetClasses.forEach(
         mac -> {
-          var ac = assetClassService.getAssetClass(mac.providerId, mac.assetClassName);
+          var ac = assetClassService.getAssetClass(mac.assetClassName);
           var tuple = String.format("('%s', '%s')", mac.providerId, mac.missionTplId);
           byProviderIdMissionTplId.computeIfAbsent(tuple, k -> new ArrayList<>()).add(ac);
         });

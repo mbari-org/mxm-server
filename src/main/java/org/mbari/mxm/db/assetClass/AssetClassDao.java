@@ -5,7 +5,6 @@ import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
-import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -19,32 +18,15 @@ public interface AssetClassDao {
 
   @SqlQuery("""
       select * from asset_classes
-      where provider_id = :providerId
+      where class_name  = :className
       """)
-  List<AssetClass> getAssetClasses(@Bind("providerId") String providerId);
-
-  @SqlQuery(
-      """
-      select * from asset_classes
-      where provider_id in (<providerIds>)
-      order by class_name
-      """)
-  List<AssetClass> getAssetClassesMultiple(@BindList("providerIds") List<String> providerIds);
-
-  @SqlQuery(
-      """
-      select * from asset_classes
-      where provider_id = :providerId
-        and class_name  = :className
-      """)
-  AssetClass getAssetClass(
-      @Bind("providerId") String providerId, @Bind("className") String className);
+  AssetClass getAssetClass(@Bind("className") String className);
 
   @SqlUpdate(
       """
       insert into asset_classes
-      (provider_id, class_name, description)
-      values (:providerId, :className, :description)
+      (class_name, description)
+      values (:className, :description)
       returning *
       """)
   @GetGeneratedKeys
@@ -52,11 +34,10 @@ public interface AssetClassDao {
 
   @SqlUpdate(
       """
-      delete from asset_classes where
-      provider_id = :providerId and class_name = :className
+      delete from asset_classes
+      where class_name = :className
       returning *
       """)
   @GetGeneratedKeys
-  AssetClass deleteAssetClass(
-      @Bind("providerId") String providerId, @Bind("className") String className);
+  AssetClass deleteAssetClass(@Bind("className") String className);
 }

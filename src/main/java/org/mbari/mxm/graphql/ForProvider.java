@@ -10,10 +10,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.Source;
-import org.mbari.mxm.db.asset.Asset;
-import org.mbari.mxm.db.asset.AssetService;
-import org.mbari.mxm.db.assetClass.AssetClass;
-import org.mbari.mxm.db.assetClass.AssetClassService;
 import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.mission.MissionService;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
@@ -26,38 +22,11 @@ import org.mbari.mxm.db.unit.UnitService;
 @RegisterForReflection
 @Unremovable
 public class ForProvider {
-  @Inject AssetClassService assetClassService;
-
-  @Inject AssetService assetService;
-
   @Inject MissionTemplateService missionTemplateService;
 
   @Inject MissionService missionService;
 
   @Inject UnitService unitService;
-
-  public List<List<AssetClass>> assetClasses(@Source List<Provider> providers) {
-    List<String> providerIds = providers.stream().map(e -> e.providerId).collect(toList());
-    var byProviderId = assetClassService.getAssetClassesMultiple(providerIds);
-    var res = new ArrayList<List<AssetClass>>();
-    for (String providerId : providerIds) {
-      res.add(byProviderId.get(providerId));
-    }
-    return res;
-  }
-
-  public List<Integer> numAssetClasses(@Source List<Provider> providers) {
-    return assetClasses(providers).stream().map(this::listSize).collect(toList());
-  }
-
-  public List<List<Asset>> assets(@Source List<Provider> providers) {
-    List<String> providerIds = providers.stream().map(e -> e.providerId).collect(toList());
-    return assetService.getAssetsForProviderIds(providerIds);
-  }
-
-  public List<Integer> numAssets(@Source List<Provider> providers) {
-    return assets(providers).stream().map(this::listSize).collect(toList());
-  }
 
   public List<List<MissionTemplate>> missionTemplates(@Source List<Provider> providers) {
     List<String> providerIds = providers.stream().map(e -> e.providerId).collect(toList());

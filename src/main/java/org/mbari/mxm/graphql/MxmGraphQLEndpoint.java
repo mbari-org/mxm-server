@@ -148,15 +148,8 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get an asset class")
-  public AssetClass assetClass(
-      @Name("providerId") String providerId, @Name("className") String className) {
-    return assetClassService.getAssetClass(providerId, className);
-  }
-
-  @Query
-  @Description("Get asset classes of a provider")
-  public List<AssetClass> assetClassesForProvider(@Name("providerId") String providerId) {
-    return assetClassService.getAssetClasses(providerId);
+  public AssetClass assetClass(@Name("className") String className) {
+    return assetClassService.getAssetClass(className);
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -170,14 +163,8 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get an asset")
-  public Asset asset(@Name("providerId") String providerId, @Name("assetId") String assetId) {
-    return assetService.getAsset(providerId, assetId);
-  }
-
-  @Query
-  @Description("Get assets of a provider")
-  public List<Asset> assetsForProvider(@Name("providerId") String providerId) {
-    return assetService.getAssetsForProvider(providerId);
+  public Asset asset(@Name("assetId") String assetId) {
+    return assetService.getAsset(assetId);
   }
 
   ///////////////////////////////////////////////////////////////////

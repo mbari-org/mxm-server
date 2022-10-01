@@ -16,11 +16,9 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AssetClass {
 
-  @NotNull public String providerId;
   @NotNull public String className;
 
-  public AssetClass(String providerId, String className) {
-    this.providerId = providerId;
+  public AssetClass(String className) {
     this.className = className;
   }
 

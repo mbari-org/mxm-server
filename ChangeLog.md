@@ -1,3 +1,11 @@
+2022-10
+
+- Model revision: `AssetClass` and `Asset` models are now by themselves, not determined by `Provider`.
+  - As before, provider continues to indicate the `AssetClass`es used by its mission templates.
+  - This is in preparation for eventual integration of the TrackingDB information *or* a similar common
+    place that defines the asset classes (types) and assets (platforms) referenceable by any provider.
+  - for convenience, adding some asset classes and assets at database setup time.
+
 2022-09
 
 - adding mission validation
