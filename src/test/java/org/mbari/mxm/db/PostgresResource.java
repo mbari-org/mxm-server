@@ -20,6 +20,8 @@ public class PostgresResource implements QuarkusTestResourceLifecycleManager {
           .withAccessToHost(true)
           .withClasspathResourceMapping(
               "mxm-schema.sql", "/docker-entrypoint-initdb.d/init.sql", BindMode.READ_ONLY)
+          .withClasspathResourceMapping(
+              "mxm-data.sql", "/docker-entrypoint-initdb.d/mxm-data.sql", BindMode.READ_ONLY)
       //      .waitingFor(new org.testcontainers.containers.wait.strategy.HttpWaitStrategy()
       //        .forStatusCode(200)
       //        .withStartupTimeout(java.time.Duration.ofSeconds(5))

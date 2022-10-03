@@ -9,16 +9,12 @@ import io.quarkus.test.common.ResourceArg;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import java.util.Collections;
-import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.mbari.mxm.BaseForTests;
 import org.mbari.mxm.db.PostgresResource;
-import org.mbari.mxm.db.asset.Asset;
-import org.mbari.mxm.db.assetClass.AssetClass;
 import org.mbari.mxm.db.provider.Provider;
 import org.mbari.mxm.db.provider.ProviderApiType;
-import org.mbari.mxm.db.unit.Unit;
 import org.mbari.mxm.provider_client.WireMockProviderRest;
 
 @QuarkusTest
@@ -30,42 +26,6 @@ import org.mbari.mxm.provider_client.WireMockProviderRest;
 @QuarkusTestResource(PostgresResource.class)
 @Slf4j
 public class ProviderTest extends BaseForTests {
-  private Unit getUnit(String unitName) throws JsonProcessingException {
-    var variables = new HashMap<String, Object>();
-    variables.put("unitName", unitName);
-    String requestBody =
-        bodyForRequest(
-            """
-    query unit($unitName: String!) {
-      unit(unitName: $unitName) {
-        unitName
-        abbreviation
-        baseUnit
-      }
-    }
-    """,
-            variables);
-
-    return given()
-        .body(requestBody)
-        .post("/graphql/")
-        .then()
-        .contentType(ContentType.JSON)
-        .statusCode(200)
-        .extract()
-        .body()
-        .jsonPath()
-        .getObject("data.unit", Unit.class);
-  }
-
-  @Test
-  public void units() throws JsonProcessingException {
-    final var Ah = getUnit("ampere_hour");
-    assertEquals("ampere_hour", Ah.unitName);
-    assertEquals("Ah", Ah.abbreviation);
-    assertEquals("ampere_second", Ah.baseUnit);
-  }
-
   private Provider createProvider(Provider pl) throws JsonProcessingException {
     String requestBody =
         bodyForRequest(
@@ -123,60 +83,6 @@ public class ProviderTest extends BaseForTests {
         .body()
         .jsonPath()
         .getObject("data.provider", Provider.class);
-  }
-
-  private AssetClass getAssetClass(String className) throws JsonProcessingException {
-    var variables = new HashMap<String, Object>();
-    variables.put("className", className);
-    String requestBody =
-        bodyForRequest(
-            """
-        query assetClass($className: String!) {
-          assetClass(className: $className) {
-            description
-          }
-        }
-        """,
-            variables);
-
-    return given()
-        .body(requestBody)
-        .post("/graphql/")
-        .then()
-        .contentType(ContentType.JSON)
-        .statusCode(200)
-        .extract()
-        .body()
-        .jsonPath()
-        .getObject("data.assetClass", AssetClass.class);
-  }
-
-  private Asset getAsset(String assetId) throws JsonProcessingException {
-    var variables = new HashMap<String, Object>();
-    variables.put("assetId", assetId);
-    String requestBody =
-        bodyForRequest(
-            """
-        query asset($assetId: String!) {
-          asset(assetId: $assetId) {
-            assetId
-            className
-            description
-          }
-        }
-        """,
-            variables);
-
-    return given()
-        .body(requestBody)
-        .post("/graphql/")
-        .then()
-        .contentType(ContentType.JSON)
-        .statusCode(200)
-        .extract()
-        .body()
-        .jsonPath()
-        .getObject("data.asset", Asset.class);
   }
 
   private Provider updateProvider(Provider pl) throws JsonProcessingException {
@@ -243,15 +149,6 @@ public class ProviderTest extends BaseForTests {
 
   @Test
   public void crud() throws JsonProcessingException {
-
-    // verify base entities (for now created upon database set-up):
-    final var ac = getAssetClass("LRAUV");
-    assertEquals(
-        "Long-Range Autonomous Underwater Vehicle".toLowerCase(), ac.description.toLowerCase());
-    final var sim = getAsset("sim");
-    assertEquals("sim", sim.assetId);
-    assertEquals("LRAUV", sim.className);
-
     final var providerId = "ProviderTest";
 
     final var deletePayload = new Provider(providerId);
