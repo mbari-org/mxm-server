@@ -30,6 +30,41 @@ import org.mbari.mxm.provider_client.WireMockProviderRest;
 @QuarkusTestResource(PostgresResource.class)
 @Slf4j
 public class ProviderTest extends BaseForTests {
+  private Unit getUnit(String unitName) throws JsonProcessingException {
+    var variables = new HashMap<String, Object>();
+    variables.put("unitName", unitName);
+    String requestBody =
+        bodyForRequest(
+            """
+    query unit($unitName: String!) {
+      unit(unitName: $unitName) {
+        unitName
+        abbreviation
+        baseUnit
+      }
+    }
+    """,
+            variables);
+
+    return given()
+        .body(requestBody)
+        .post("/graphql/")
+        .then()
+        .contentType(ContentType.JSON)
+        .statusCode(200)
+        .extract()
+        .body()
+        .jsonPath()
+        .getObject("data.unit", Unit.class);
+  }
+
+  @Test
+  public void units() throws JsonProcessingException {
+    final var Ah = getUnit("ampere_hour");
+    assertEquals("ampere_hour", Ah.unitName);
+    assertEquals("Ah", Ah.abbreviation);
+    assertEquals("ampere_second", Ah.baseUnit);
+  }
 
   private Provider createProvider(Provider pl) throws JsonProcessingException {
     String requestBody =
@@ -90,16 +125,14 @@ public class ProviderTest extends BaseForTests {
         .getObject("data.provider", Provider.class);
   }
 
-  private AssetClass getAssetClass(String providerId, String className)
-      throws JsonProcessingException {
+  private AssetClass getAssetClass(String className) throws JsonProcessingException {
     var variables = new HashMap<String, Object>();
-    variables.put("providerId", providerId);
     variables.put("className", className);
     String requestBody =
         bodyForRequest(
             """
-        query assetClass($providerId: String!, $className: String!) {
-          assetClass(providerId: $providerId, className: $className) {
+        query assetClass($className: String!) {
+          assetClass(className: $className) {
             description
           }
         }
@@ -118,15 +151,14 @@ public class ProviderTest extends BaseForTests {
         .getObject("data.assetClass", AssetClass.class);
   }
 
-  private Asset getAsset(String providerId, String assetId) throws JsonProcessingException {
+  private Asset getAsset(String assetId) throws JsonProcessingException {
     var variables = new HashMap<String, Object>();
-    variables.put("providerId", providerId);
     variables.put("assetId", assetId);
     String requestBody =
         bodyForRequest(
             """
-        query asset($providerId: String!, $assetId: String!) {
-          asset(providerId: $providerId, assetId: $assetId) {
+        query asset($assetId: String!) {
+          asset(assetId: $assetId) {
             assetId
             className
             description
@@ -145,35 +177,6 @@ public class ProviderTest extends BaseForTests {
         .body()
         .jsonPath()
         .getObject("data.asset", Asset.class);
-  }
-
-  private Unit getUnit(String providerId, String unitName) throws JsonProcessingException {
-    var variables = new HashMap<String, Object>();
-    variables.put("providerId", providerId);
-    variables.put("unitName", unitName);
-    String requestBody =
-        bodyForRequest(
-            """
-        query unit($providerId: String!, $unitName: String!) {
-          unit(providerId: $providerId, unitName: $unitName) {
-            unitName
-            abbreviation
-            baseUnit
-          }
-        }
-        """,
-            variables);
-
-    return given()
-        .body(requestBody)
-        .post("/graphql/")
-        .then()
-        .contentType(ContentType.JSON)
-        .statusCode(200)
-        .extract()
-        .body()
-        .jsonPath()
-        .getObject("data.unit", Unit.class);
   }
 
   private Provider updateProvider(Provider pl) throws JsonProcessingException {
@@ -240,6 +243,15 @@ public class ProviderTest extends BaseForTests {
 
   @Test
   public void crud() throws JsonProcessingException {
+
+    // verify base entities (for now created upon database set-up):
+    final var ac = getAssetClass("LRAUV");
+    assertEquals(
+        "Long-Range Autonomous Underwater Vehicle".toLowerCase(), ac.description.toLowerCase());
+    final var sim = getAsset("sim");
+    assertEquals("sim", sim.assetId);
+    assertEquals("LRAUV", sim.className);
+
     final var providerId = "ProviderTest";
 
     final var deletePayload = new Provider(providerId);
@@ -283,18 +295,6 @@ public class ProviderTest extends BaseForTests {
     assertEquals(upl.description, updated.description);
     assertEquals(upl.descriptionFormat, updated.descriptionFormat);
     assertTrue(updated.canValidate);
-
-    // verify generated entities upon the addition of the provider:
-    final var ac = getAssetClass(providerId, "LRAUV");
-    assertEquals("Long-Range Autonomous Underwater Vehicle", ac.description);
-    final var sim = getAsset(providerId, "sim");
-    assertEquals("sim", sim.assetId);
-    assertEquals("LRAUV", sim.className);
-    final var Ah = getUnit(providerId, "ampere_hour");
-    assertEquals("ampere_hour", Ah.unitName);
-    assertEquals("Ah", Ah.abbreviation);
-    assertEquals("ampere_second", Ah.baseUnit);
-    // TODO other entities
 
     // delete:
     final var deleted = deleteProvider(deletePayload);

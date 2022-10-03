@@ -16,11 +16,9 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Unit {
 
-  @NotNull public String providerId;
   @NotNull public String unitName;
 
-  public Unit(String providerId, String unitName) {
-    this.providerId = providerId;
+  public Unit(String unitName) {
     this.unitName = unitName;
   }
 

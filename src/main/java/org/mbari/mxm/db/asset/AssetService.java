@@ -1,8 +1,6 @@
 package org.mbari.mxm.db.asset;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -22,20 +20,13 @@ public class AssetService {
     return dbSupport.getJdbi().withExtension(AssetDao.class, AssetDao::getAllAssets);
   }
 
-  public List<Asset> getAssetsForProvider(String providerId) {
-    return dbSupport.getJdbi().withExtension(AssetDao.class, dao -> dao.getAssets(providerId));
-  }
-
   public List<Asset> getAssetsForMissionMultiple(List<Mission> missions) {
-    final var tuples =
-        missions.stream()
-            .map(a -> String.format("('%s', '%s')", a.providerId, a.assetId))
-            .collect(Collectors.toList());
+    final var assetIds =
+        missions.stream().map(a -> String.format("'%s'", a.assetId)).collect(Collectors.toList());
 
-    var sql =
-        """
+    var sql = """
       select * from assets
-      where (provider_id, asset_id) in (<tuples>)
+      where asset_id in (<assetIds>)
       """;
 
     var res =
@@ -45,53 +36,30 @@ public class AssetService {
                 handle ->
                     handle
                         .createQuery(sql)
-                        .defineList("tuples", tuples)
+                        .defineList("assetIds", assetIds)
                         .mapToBean(Asset.class)
                         .list());
 
-    log.debug("tuples({}) = {}", tuples.size(), tuples);
-    log.debug("res({}) = {}", res.size(), res);
+    var byAssetId =
+        res.stream()
+            .collect(
+                Collectors.groupingBy(
+                    ac -> String.format("'%s'", ac.assetId), Collectors.toList()));
 
-    if (tuples.size() != res.size()) {
-      // need to "align" for the result.
-      // 1) get a map to resolve AssetClass by the "tuple id":
-      var byTupleId =
-          res.stream()
-              .collect(
-                  Collectors.groupingBy(
-                      ac -> String.format("('%s', '%s')", ac.providerId, ac.assetId),
-                      Collectors.toList()));
-      // 2) then, map tuples to corresponding entity:
-      // (note that each map value is necessarily non-empty per the above grouping)
-      res = tuples.stream().map(p -> byTupleId.get(p).get(0)).collect(Collectors.toList());
-    }
-    return res;
-  }
-
-  public Map<String, List<Asset>> getAssetsMultiple(List<String> providerIds) {
-    return dbSupport
-        .getJdbi()
-        .withExtension(
-            AssetDao.class,
-            dao -> {
-              var assets = dao.getAssetsMultiple(providerIds);
-
-              return assets.stream()
-                  .collect(Collectors.groupingBy(Asset::getProviderId, Collectors.toList()));
-            });
+    return assetIds.stream().map(p -> byAssetId.get(p).get(0)).collect(Collectors.toList());
   }
 
   public List<List<Asset>> getAssetsMultipleForAssetClasses(List<AssetClass> assetClasses) {
 
-    final var tuples =
+    final var classNames =
         assetClasses.stream()
-            .map(e -> String.format("('%s', '%s')", e.providerId, e.className))
+            .map(e -> String.format("'%s'", e.className))
             .collect(Collectors.toList());
 
     var sql =
         """
     select * from assets
-    where (provider_id, class_name) in (<tuples>)
+    where class_name in (<classNames>)
     order by asset_id
     """;
 
@@ -102,26 +70,21 @@ public class AssetService {
                 handle ->
                     handle
                         .createQuery(sql)
-                        .defineList("tuples", tuples)
+                        .defineList("classNames", classNames)
                         .mapToBean(Asset.class)
                         .list());
 
-    // group by "tuple id":
-    var byTupleId =
+    var byClassName =
         flatList.stream()
             .collect(
                 Collectors.groupingBy(
-                    e -> String.format("('%s', '%s')", e.providerId, e.className),
-                    Collectors.toList()));
+                    e -> String.format("'%s'", e.className), Collectors.toList()));
 
-    // and map tuples to corresponding Parameters:
-    return tuples.stream().map(byTupleId::get).collect(Collectors.toList());
+    return classNames.stream().map(byClassName::get).collect(Collectors.toList());
   }
 
-  public Asset getAsset(String providerId, String assetId) {
-    return dbSupport
-        .getJdbi()
-        .withExtension(AssetDao.class, dao -> dao.getAsset(providerId, assetId));
+  public Asset getAsset(String assetId) {
+    return dbSupport.getJdbi().withExtension(AssetDao.class, dao -> dao.getAsset(assetId));
   }
 
   public Asset createAsset(Asset pl) {
@@ -136,7 +99,6 @@ public class AssetService {
   private Asset doUpdate(Asset pl) {
     var uDef =
         DbUtl.updateDef("assets", pl)
-            .where("providerId")
             .where("assetId")
             .set(pl.className, "className")
             .set(pl.description, "description");
@@ -156,19 +118,7 @@ public class AssetService {
                         }));
   }
 
-  public Asset deleteAsset(Asset pl) {
-    return dbSupport
-        .getJdbi()
-        .withExtension(AssetDao.class, dao -> dao.deleteAsset(pl.providerId, pl.assetId));
-  }
-
-  public List<List<Asset>> getAssetsForProviderIds(List<String> providerIds) {
-    var byProviderId = getAssetsMultiple(providerIds);
-    var res = new ArrayList<List<Asset>>();
-
-    for (String providerId : providerIds) {
-      res.add(byProviderId.get(providerId));
-    }
-    return res;
+  public Asset deleteAsset(String assetId) {
+    return dbSupport.getJdbi().withExtension(AssetDao.class, dao -> dao.deleteAsset(assetId));
   }
 }

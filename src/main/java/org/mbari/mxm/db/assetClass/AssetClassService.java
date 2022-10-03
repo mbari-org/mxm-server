@@ -1,7 +1,6 @@
 package org.mbari.mxm.db.assetClass;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -22,73 +21,31 @@ public class AssetClassService {
         .withExtension(AssetClassDao.class, AssetClassDao::getAllAssetClasses);
   }
 
-  public List<AssetClass> getAssetClasses(String providerId) {
+  public AssetClass getAssetClass(String className) {
     return dbSupport
         .getJdbi()
-        .withExtension(AssetClassDao.class, dao -> dao.getAssetClasses(providerId));
-  }
-
-  public Map<String, List<AssetClass>> getAssetClassesMultiple(List<String> providerIds) {
-    return dbSupport
-        .getJdbi()
-        .withExtension(
-            AssetClassDao.class,
-            dao -> {
-              var assetClasses = dao.getAssetClassesMultiple(providerIds);
-
-              return assetClasses.stream()
-                  .collect(Collectors.groupingBy(AssetClass::getProviderId, Collectors.toList()));
-            });
-  }
-
-  public AssetClass getAssetClass(String providerId, String className) {
-    return dbSupport
-        .getJdbi()
-        .withExtension(AssetClassDao.class, dao -> dao.getAssetClass(providerId, className));
+        .withExtension(AssetClassDao.class, dao -> dao.getAssetClass(className));
   }
 
   public List<AssetClass> getAssetClasses(List<Asset> assets) {
-    final var tuples =
-        assets.stream()
-            .map(a -> String.format("('%s', '%s')", a.providerId, a.className))
-            .collect(Collectors.toList());
+    final var classNames =
+        assets.stream().map(a -> String.format("'%s'", a.className)).collect(Collectors.toList());
 
-    // we could probably simplify to use actual different keys for the query below,
-    // but let's pass the whole list for now
     var sql =
         """
       select * from asset_classes
-      where (provider_id, class_name) in (<tuples>)
+      where class_name in (<classNames>)
       """;
 
-    var res =
-        dbSupport
-            .getJdbi()
-            .withHandle(
-                handle ->
-                    handle
-                        .createQuery(sql)
-                        .defineList("tuples", tuples)
-                        .mapToBean(AssetClass.class)
-                        .list());
-
-    log.debug("tuples({}) = {}", tuples.size(), tuples);
-    log.debug("res({}) = {}", res.size(), res);
-
-    if (tuples.size() != res.size()) {
-      // need to "align" for the result.
-      // 1) get a map to resolve AssetClass by the "tuple id":
-      var byTupleId =
-          res.stream()
-              .collect(
-                  Collectors.groupingBy(
-                      ac -> String.format("('%s', '%s')", ac.providerId, ac.className),
-                      Collectors.toList()));
-      // 2) then, map tuples to corresponding AssetClasses:
-      // (note that each map value is necessarily non-empty per the above grouping)
-      res = tuples.stream().map(p -> byTupleId.get(p).get(0)).collect(Collectors.toList());
-    }
-    return res;
+    return dbSupport
+        .getJdbi()
+        .withHandle(
+            handle ->
+                handle
+                    .createQuery(sql)
+                    .defineList("classNames", classNames)
+                    .mapToBean(AssetClass.class)
+                    .list());
   }
 
   public AssetClass createAssetClass(AssetClass pl) {
@@ -101,11 +58,7 @@ public class AssetClassService {
   }
 
   private AssetClass doUpdate(AssetClass pl) {
-    var uDef =
-        DbUtl.updateDef("assets", pl)
-            .where("providerId")
-            .where("className")
-            .set(pl.description, "description");
+    var uDef = DbUtl.updateDef("assets", pl).where("className").set(pl.description, "description");
 
     if (uDef.noSets()) {
       return pl;
@@ -122,10 +75,9 @@ public class AssetClassService {
                         }));
   }
 
-  public AssetClass deleteAssetClass(AssetClass pl) {
+  public AssetClass deleteAssetClass(String className) {
     return dbSupport
         .getJdbi()
-        .withExtension(
-            AssetClassDao.class, dao -> dao.deleteAssetClass(pl.providerId, pl.className));
+        .withExtension(AssetClassDao.class, dao -> dao.deleteAssetClass(className));
   }
 }

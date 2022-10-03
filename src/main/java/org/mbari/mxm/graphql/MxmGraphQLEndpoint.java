@@ -148,15 +148,17 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get an asset class")
-  public AssetClass assetClass(
-      @Name("providerId") String providerId, @Name("className") String className) {
-    return assetClassService.getAssetClass(providerId, className);
+  public AssetClass assetClass(@Name("className") String className) {
+    return assetClassService.getAssetClass(className);
   }
 
   @Query
-  @Description("Get asset classes of a provider")
+  @Description("Get the asset classes used by a provider")
   public List<AssetClass> assetClassesForProvider(@Name("providerId") String providerId) {
-    return assetClassService.getAssetClasses(providerId);
+    var list =
+        missionTemplateAssetClassService.getAssetClassesMultipleProviders(
+            List.of(String.format("'%s'", providerId)));
+    return list.isEmpty() ? List.of() : list.get(0);
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -170,14 +172,8 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get an asset")
-  public Asset asset(@Name("providerId") String providerId, @Name("assetId") String assetId) {
-    return assetService.getAsset(providerId, assetId);
-  }
-
-  @Query
-  @Description("Get assets of a provider")
-  public List<Asset> assetsForProvider(@Name("providerId") String providerId) {
-    return assetService.getAssetsForProvider(providerId);
+  public Asset asset(@Name("assetId") String assetId) {
+    return assetService.getAsset(assetId);
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -254,14 +250,8 @@ public class MxmGraphQLEndpoint {
 
   @Query
   @Description("Get a unit")
-  public Unit unit(@Name("providerId") String providerId, @Name("unitName") String unitName) {
-    return unitService.getUnit(providerId, unitName);
-  }
-
-  @Query
-  @Description("Get units of a provider")
-  public List<Unit> unitsForProvider(@Name("providerId") String providerId) {
-    return unitService.getUnits(providerId);
+  public Unit unit(@Name("unitName") String unitName) {
+    return unitService.getUnit(unitName);
   }
 
   ///////////////////////////////////////////////////////////////////

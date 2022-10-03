@@ -12,9 +12,6 @@ public class UnitMapper implements RowMapper<Unit> {
   @Override
   public Unit map(ResultSet rs, StatementContext ctx) throws SQLException {
     return new Unit(
-        rs.getString("provider_id"),
-        rs.getString("unit_name"),
-        rs.getString("abbreviation"),
-        rs.getString("base_unit"));
+        rs.getString("unit_name"), rs.getString("abbreviation"), rs.getString("base_unit"));
   }
 }

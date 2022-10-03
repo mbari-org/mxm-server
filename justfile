@@ -11,6 +11,10 @@ list:
 dev:
 	quarkus dev
 
+# ./mvnw clean
+clean:
+	./mvnw clean
+
 # Format code
 format:
 	./mvnw spotless:apply

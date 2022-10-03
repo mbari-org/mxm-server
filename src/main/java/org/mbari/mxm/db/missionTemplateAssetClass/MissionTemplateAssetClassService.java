@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
@@ -66,12 +67,49 @@ public class MissionTemplateAssetClassService {
             throws SQLException {
           var e = new AssetClassWithMissionTplId();
           e.missionTplId = rs.getString("mission_tpl_id");
-          e.providerId = rs.getString("provider_id");
           e.className = rs.getString("class_name");
           e.description = rs.getString("description");
           return e;
         }
       };
+
+  public List<List<AssetClass>> getAssetClassesMultipleProviders(List<String> providerIds) {
+    log.debug("providerIds={}", providerIds);
+
+    // TODO(low prio) a more efficient query.
+
+    var sql =
+        """
+    select *
+    from mission_tpl_asset_class
+    where provider_id in (<providerIds>);
+    """;
+
+    var missionTemplateAssetClasses =
+        dbSupport
+            .getJdbi()
+            .withHandle(
+                handle ->
+                    handle
+                        .createQuery(sql)
+                        .defineList("providerIds", providerIds)
+                        .mapToBean(MissionTemplateAssetClass.class)
+                        .list());
+    log.debug("missionTemplateAssetClasses={}", missionTemplateAssetClasses);
+
+    var byProviderId = new HashMap<String, HashSet<AssetClass>>();
+
+    missionTemplateAssetClasses.forEach(
+        mac -> {
+          var ac = assetClassService.getAssetClass(mac.assetClassName);
+          var tuple = String.format("'%s'", mac.providerId);
+          byProviderId.computeIfAbsent(tuple, k -> new HashSet<>()).add(ac);
+        });
+
+    return providerIds.stream()
+        .map(providerId -> byProviderId.get(providerId).stream().toList())
+        .collect(Collectors.toList());
+  }
 
   public List<List<AssetClass>> getAssetClassesMultiple(List<MissionTemplate> missionTemplates) {
     final var tuples =
@@ -106,7 +144,7 @@ public class MissionTemplateAssetClassService {
 
     missionTemplateAssetClasses.forEach(
         mac -> {
-          var ac = assetClassService.getAssetClass(mac.providerId, mac.assetClassName);
+          var ac = assetClassService.getAssetClass(mac.assetClassName);
           var tuple = String.format("('%s', '%s')", mac.providerId, mac.missionTplId);
           byProviderIdMissionTplId.computeIfAbsent(tuple, k -> new ArrayList<>()).add(ac);
         });

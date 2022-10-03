@@ -5,5 +5,9 @@ public enum MissionStatusType {
   SUBMITTED,
   QUEUED,
   RUNNING,
+  COMPLETED,
   TERMINATED,
+  FAILED,
+  CANCELLED,
+  UNKNOWN,
 }

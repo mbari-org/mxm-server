@@ -18,11 +18,7 @@ public class AssetClassCreatePayload {
   public String className;
   public String description;
 
-  public AssetClass toAssetClass(String providerId) {
-    return AssetClass.builder()
-        .providerId(providerId)
-        .className(className)
-        .description(description)
-        .build();
+  public AssetClass toAssetClass() {
+    return AssetClass.builder().className(className).description(description).build();
   }
 }

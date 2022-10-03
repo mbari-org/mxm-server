@@ -31,18 +31,6 @@ public class MxmEndpointTest extends BaseForTests {
              descriptionFormat
              httpEndpoint
              providerId
-             assetClasses {
-               className
-               description
-               assets {
-                 assetId
-                 description
-               }
-             }
-             assets {
-               assetId
-               description
-             }
            }
          }
          """);
@@ -68,18 +56,6 @@ public class MxmEndpointTest extends BaseForTests {
             canValidate
             httpEndpoint
             apiType
-            assetClasses {
-              className
-              description
-              assets {
-                assetId
-                description
-              }
-            }
-            assets {
-              assetId
-              description
-            }
           }
         }
         """,
@@ -103,7 +79,6 @@ public class MxmEndpointTest extends BaseForTests {
             """
         {
           allAssetClasses {
-            providerId
             className
           }
         }
@@ -129,7 +104,6 @@ public class MxmEndpointTest extends BaseForTests {
             """
         {
            allAssets {
-             providerId
              assetId
              className
            }
@@ -210,7 +184,6 @@ public class MxmEndpointTest extends BaseForTests {
             """
         {
             allUnits {
-              providerId
               unitName
             }
           }

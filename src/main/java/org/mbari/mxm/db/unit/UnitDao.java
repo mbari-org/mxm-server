@@ -5,7 +5,6 @@ import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
-import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -19,29 +18,15 @@ public interface UnitDao {
 
   @SqlQuery("""
       select * from units
-      where provider_id = :providerId
+      where unit_name = :unitName
       """)
-  List<Unit> getUnits(@Bind("providerId") String providerId);
-
-  @SqlQuery("""
-      select * from units
-      where provider_id in (<providerIds>)
-      """)
-  List<Unit> getUnitsMultiple(@BindList("providerIds") List<String> providerIds);
-
-  @SqlQuery(
-      """
-      select * from units
-      where provider_id = :providerId
-        and unit_name   = :unitName
-      """)
-  Unit getUnit(@Bind("providerId") String providerId, @Bind("unitName") String unitName);
+  Unit getUnit(@Bind("unitName") String unitName);
 
   @SqlUpdate(
       """
       insert into units
-      (provider_id, unit_name, abbreviation, base_unit)
-      values (:providerId, :unitName, :abbreviation, :baseUnit)
+      (unit_name, abbreviation, base_unit)
+      values (:unitName, :abbreviation, :baseUnit)
       returning *
       """)
   @GetGeneratedKeys
@@ -49,10 +34,10 @@ public interface UnitDao {
 
   @SqlUpdate(
       """
-      delete from units where
-      provider_id = :providerId and unit_name = :unitName
+      delete from units
+      where unit_name = :unitName
       returning *
       """)
   @GetGeneratedKeys
-  Unit deleteUnit(@Bind("providerId") String providerId, @Bind("unitName") String unitName);
+  Unit deleteUnit(@Bind("unitName") String unitName);
 }

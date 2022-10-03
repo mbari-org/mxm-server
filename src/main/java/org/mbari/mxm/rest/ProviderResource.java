@@ -8,10 +8,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.mbari.mxm.db.asset.AssetService;
-import org.mbari.mxm.db.assetClass.AssetClass;
-import org.mbari.mxm.db.assetClass.AssetClassCreatePayload;
-import org.mbari.mxm.db.assetClass.AssetClassService;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateCreatePayload;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
@@ -83,94 +79,6 @@ public class ProviderResource extends BaseResource {
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  // AssetClasses
-
-  @Inject AssetClassService assetClassService;
-
-  @GET
-  @Path("/{providerId}/assetClasses")
-  public Response getAssetClasses(@PathParam("providerId") String providerId) {
-    try {
-      List<AssetClass> list = assetClassService.getAssetClasses(providerId);
-      return Response.ok().entity(list).build();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
-  @GET
-  @Path("/{providerId}/assetClasses/{className}")
-  public Response getAssetClass(
-      @PathParam("providerId") String providerId, @PathParam("className") String className) {
-    var p = assetClassService.getAssetClass(providerId, className);
-    if (p == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(p).build();
-  }
-
-  @POST
-  @Path("/{providerId}/assetClasses")
-  public Response createAssetClass(
-      @PathParam("providerId") String providerId, AssetClassCreatePayload pl) {
-    var p = assetClassService.createAssetClass(pl.toAssetClass(providerId));
-    if (p == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(p).build();
-  }
-
-  @PUT
-  @Path("/{providerId}/assetClasses/{className}")
-  public Response updateAssetClass(
-      @PathParam("providerId") String providerId,
-      @PathParam("className") String className,
-      AssetClass pl) {
-    if (pl == null
-        || (pl.providerId != null && !pl.providerId.equals(providerId))
-        || (pl.className != null && !pl.className.equals(className))) {
-      return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-          .entity("Invalid updateAssetClass payload")
-          .build();
-    }
-    pl.providerId = providerId;
-    pl.className = className;
-    var p = assetClassService.updateAssetClass(pl);
-    if (p == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(p).build();
-  }
-
-  @DELETE
-  @Path("/{providerId}/assetClasses/{className}")
-  public Response deleteAssetClass(
-      @PathParam("providerId") String providerId, @PathParam("className") String className) {
-    var pl = new AssetClass(providerId, className);
-    var p = assetClassService.deleteAssetClass(pl);
-    if (p == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(p).build();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////
-  // Assets
-
-  @Inject AssetService assetService;
-
-  @GET
-  @Path("/{providerId}/assets")
-  public Response getAssets(@PathParam("providerId") String providerId) {
-    var p = assetService.getAssetsForProvider(providerId);
-    if (p == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(p).build();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////
   // MissionTemplates
 
   @Inject MissionTemplateService missionTemplateService;
@@ -221,7 +129,7 @@ public class ProviderResource extends BaseResource {
         || (pl.providerId != null && !pl.providerId.equals(providerId))
         || (pl.missionTplId != null && !pl.missionTplId.equals(missionTplId))) {
       return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-          .entity("Invalid updateAssetClass payload")
+          .entity("Invalid updateMissionTemplate payload")
           .build();
     }
     pl.providerId = providerId;

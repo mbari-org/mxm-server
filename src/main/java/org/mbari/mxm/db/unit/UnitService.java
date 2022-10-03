@@ -2,7 +2,6 @@ package org.mbari.mxm.db.unit;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,35 +19,16 @@ public class UnitService {
     return dbSupport.getJdbi().withExtension(UnitDao.class, UnitDao::getAllUnits);
   }
 
-  public List<Unit> getUnits(String providerId) {
-    return dbSupport.getJdbi().withExtension(UnitDao.class, dao -> dao.getUnits(providerId));
-  }
-
-  public Map<String, List<Unit>> getUnitsMultiple(List<String> providerIds) {
-    return dbSupport
-        .getJdbi()
-        .withExtension(
-            UnitDao.class,
-            dao -> {
-              var list = dao.getUnitsMultiple(providerIds);
-
-              return list.stream()
-                  .collect(Collectors.groupingBy(Unit::getProviderId, Collectors.toList()));
-            });
-  }
-
   public List<List<Unit>> getDerivedUnitsMultiple(List<Unit> units) {
-    var tuples =
-        units.stream().map(e -> String.format("('%s', '%s')", e.providerId, e.unitName)).toList();
+    var unitNames = units.stream().map(e -> String.format("'%s'", e.unitName)).toList();
 
     var sql =
         """
          select u2.*
          from units u, units u2
-         where (u.provider_id, u.unit_name) in (<tuples>)
-           and u.provider_id = u2.provider_id
+         where u.unit_name in (<unitNames>)
            and u.unit_name = u2.base_unit
-         order by u2.provider_id, u2.unit_name;
+         order by u2.unit_name;
       """;
 
     var flatList =
@@ -58,29 +38,33 @@ public class UnitService {
                 handle ->
                     handle
                         .createQuery(sql)
-                        .defineList("tuples", tuples)
+                        .defineList("unitNames", unitNames)
                         .mapToBean(Unit.class)
                         .list());
 
-    // here: by (providerId, baseUnit) tuples:
-    var byTupleId =
+    var byBaseUnit =
         flatList.stream()
             .collect(
-                Collectors.groupingBy(
-                    e -> String.format("('%s', '%s')", e.providerId, e.baseUnit),
-                    Collectors.toList()));
+                Collectors.groupingBy(e -> String.format("'%s'", e.baseUnit), Collectors.toList()));
 
     var res = new ArrayList<List<Unit>>();
-    for (String tuple : tuples) {
-      res.add(byTupleId.get(tuple));
+    for (String tuple : unitNames) {
+      res.add(byBaseUnit.get(tuple));
     }
     return res;
   }
 
-  public Unit getUnit(String providerId, String unitName) {
-    return dbSupport
-        .getJdbi()
-        .withExtension(UnitDao.class, dao -> dao.getUnit(providerId, unitName));
+  public Unit getUnit(String unitName) {
+    return dbSupport.getJdbi().withExtension(UnitDao.class, dao -> dao.getUnit(unitName));
+  }
+
+  public void createUnits(List<Unit> units) {
+    // first, create units without a base, then the others:
+
+    var unitsMap = units.stream().collect(Collectors.partitioningBy(u -> u.baseUnit == null));
+
+    unitsMap.get(true).forEach(this::createUnit);
+    unitsMap.get(false).forEach(this::createUnit);
   }
 
   public Unit createUnit(Unit pl) {
@@ -95,7 +79,6 @@ public class UnitService {
   private Unit doUpdate(Unit pl) {
     var uDef =
         DbUtl.updateDef("units", pl)
-            .where("providerId")
             .where("unitName")
             .set(pl.abbreviation, "abbreviation")
             .set(pl.baseUnit, "baseUnit");
@@ -116,8 +99,6 @@ public class UnitService {
   }
 
   public Unit deleteUnit(Unit pl) {
-    return dbSupport
-        .getJdbi()
-        .withExtension(UnitDao.class, dao -> dao.deleteUnit(pl.providerId, pl.unitName));
+    return dbSupport.getJdbi().withExtension(UnitDao.class, dao -> dao.deleteUnit(pl.unitName));
   }
 }

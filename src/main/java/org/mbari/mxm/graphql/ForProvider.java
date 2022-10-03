@@ -6,58 +6,28 @@ import io.quarkus.arc.Unremovable;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.Source;
-import org.mbari.mxm.db.asset.Asset;
-import org.mbari.mxm.db.asset.AssetService;
 import org.mbari.mxm.db.assetClass.AssetClass;
-import org.mbari.mxm.db.assetClass.AssetClassService;
 import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.mission.MissionService;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
+import org.mbari.mxm.db.missionTemplateAssetClass.MissionTemplateAssetClassService;
 import org.mbari.mxm.db.provider.Provider;
-import org.mbari.mxm.db.unit.Unit;
-import org.mbari.mxm.db.unit.UnitService;
 
 @ApplicationScoped
 @RegisterForReflection
 @Unremovable
 public class ForProvider {
-  @Inject AssetClassService assetClassService;
-
-  @Inject AssetService assetService;
-
   @Inject MissionTemplateService missionTemplateService;
 
+  @Inject MissionTemplateAssetClassService missionTemplateAssetClassService;
+
   @Inject MissionService missionService;
-
-  @Inject UnitService unitService;
-
-  public List<List<AssetClass>> assetClasses(@Source List<Provider> providers) {
-    List<String> providerIds = providers.stream().map(e -> e.providerId).collect(toList());
-    var byProviderId = assetClassService.getAssetClassesMultiple(providerIds);
-    var res = new ArrayList<List<AssetClass>>();
-    for (String providerId : providerIds) {
-      res.add(byProviderId.get(providerId));
-    }
-    return res;
-  }
-
-  public List<Integer> numAssetClasses(@Source List<Provider> providers) {
-    return assetClasses(providers).stream().map(this::listSize).collect(toList());
-  }
-
-  public List<List<Asset>> assets(@Source List<Provider> providers) {
-    List<String> providerIds = providers.stream().map(e -> e.providerId).collect(toList());
-    return assetService.getAssetsForProviderIds(providerIds);
-  }
-
-  public List<Integer> numAssets(@Source List<Provider> providers) {
-    return assets(providers).stream().map(this::listSize).collect(toList());
-  }
 
   public List<List<MissionTemplate>> missionTemplates(@Source List<Provider> providers) {
     List<String> providerIds = providers.stream().map(e -> e.providerId).collect(toList());
@@ -90,18 +60,17 @@ public class ForProvider {
     return missions(providers).stream().map(this::listSize).collect(toList());
   }
 
-  public List<List<Unit>> units(@Source List<Provider> providers) {
-    List<String> providerIds = providers.stream().map(e -> e.providerId).collect(toList());
-    var byProviderId = unitService.getUnitsMultiple(providerIds);
-    var res = new ArrayList<List<Unit>>();
-    for (String providerId : providerIds) {
-      res.add(byProviderId.get(providerId));
-    }
-    return res;
+  @Description("Asset classes used by this provider's mission templates")
+  public List<List<AssetClass>> assetClasses(@Source List<Provider> providers) {
+    final var providerIds =
+        providers.stream()
+            .map(e -> String.format("'%s'", e.providerId))
+            .collect(Collectors.toList());
+    return missionTemplateAssetClassService.getAssetClassesMultipleProviders(providerIds);
   }
 
-  public List<Integer> numUnits(@Source List<Provider> providers) {
-    return units(providers).stream().map(this::listSize).collect(toList());
+  public List<Integer> numAssetClasses(@Source List<Provider> providers) {
+    return assetClasses(providers).stream().map(this::listSize).collect(toList());
   }
 
   private <T> int listSize(List<T> list) {
