@@ -1,15 +1,14 @@
 package org.mbari.mxm.db.missionTemplateAssetClass;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import io.smallrye.graphql.api.Context;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.JsonString;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -35,6 +34,8 @@ public class MissionTemplateAssetClassService {
   @Inject MissionTemplateService missionTemplateService;
 
   @Inject ProviderService providerService;
+
+  @Inject Context context;
 
   public List<MissionTemplateAssetClass> getAllMissionTemplateAssetClasses() {
     return dbSupport
@@ -159,6 +160,24 @@ public class MissionTemplateAssetClassService {
     return tuples.stream().map(byProviderIdMissionTplId::get).collect(Collectors.toList());
   }
 
+  private static boolean selectedOnlyContainsSomeOf(Context context, String... names) {
+    log.debug("context={}", context);
+    final var jsonArray = context.getSelectedFields();
+    if (jsonArray.size() > names.length) {
+      return false;
+    }
+    // only pay attention to the fields that are strings:
+    if (jsonArray.stream().anyMatch(e -> !(e instanceof JsonString))) {
+      return false;
+    }
+    final var selectedFields = jsonArray.stream().map(e -> ((JsonString) e).getString()).toList();
+
+    var nameList = new HashSet<>(Arrays.asList(names));
+    var res = nameList.containsAll(selectedFields);
+    log.debug("only contains selectedFields={} => {}", selectedFields, res);
+    return res;
+  }
+
   public List<List<MissionTemplate>> getMissionTemplatesMultiple(List<AssetClass> assetClasses) {
     var missionTemplateAssetClasses = getMissionTemplateAssetClasses(assetClasses);
     log.debug("missionTemplateAssetClasses={}", missionTemplateAssetClasses);
@@ -168,14 +187,22 @@ public class MissionTemplateAssetClassService {
     // just ad hoc way to lessen query inefficiency below
     var retrievedMissionTemplatesByPK = new HashMap<String, MissionTemplate>();
 
+    // a direct response if only providerId and/or missionTplId are selected:
+    final var simple = selectedOnlyContainsSomeOf(context, "providerId", "missionTplId");
+
     missionTemplateAssetClasses.forEach(
         mac -> {
           var providerIdMissionTplId =
               String.format("('%s', '%s')", mac.providerId, mac.missionTplId);
+
           var mt =
               retrievedMissionTemplatesByPK.computeIfAbsent(
                   providerIdMissionTplId,
-                  k -> missionTemplateService.getMissionTemplate(mac.providerId, mac.missionTplId));
+                  k ->
+                      simple
+                          ? new MissionTemplate(mac.providerId, mac.missionTplId)
+                          : missionTemplateService.getMissionTemplate(
+                              mac.providerId, mac.missionTplId));
 
           if (mt != null) {
             byClassName.computeIfAbsent(mac.assetClassName, k -> new HashSet<>()).add(mt);
@@ -196,9 +223,12 @@ public class MissionTemplateAssetClassService {
 
     var byClassName = new HashMap<String, HashSet<Provider>>();
 
+    final var simple = selectedOnlyContainsSomeOf(context, "providerId");
+
     missionTemplateAssetClasses.forEach(
         mac -> {
-          var p = providerService.getProvider(mac.providerId);
+          var p =
+              simple ? new Provider(mac.providerId) : providerService.getProvider(mac.providerId);
           if (p != null) {
             byClassName.computeIfAbsent(mac.assetClassName, k -> new HashSet<>()).add(p);
           }

@@ -1,6 +1,7 @@
 2022-10
 
 - add `missionTemplates` and `providers` member resolution for `AssetClass` (graphql)
+  - with more efficient dispatch depending on selected fields
 - data sql scripts to initialize the database
   - `just update-sql-init-scripts` regenerates the ones that use entities from TethysDash:
     - Units of measure
