@@ -1,5 +1,12 @@
 2022-10
 
+- data sql scripts to initialize the database
+  - `just update-sql-init-scripts` regenerates the ones that use entities from TethysDash:
+    - Units of measure
+    - Set of LRAUV assets
+  - Other entities (Waveglider- and "Acme"- related) are manually entered in the scripts.
+  - The same set of init scripts is also used for the tests.
+
 - Model revision: 
   - `Unit` model now by itself
     - So, the set of units of measure is to be a common resource

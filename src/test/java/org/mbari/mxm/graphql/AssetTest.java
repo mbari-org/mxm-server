@@ -124,7 +124,7 @@ public class AssetTest extends BaseForTests {
 
   @Test
   public void assetClassInstances() throws JsonProcessingException {
-    assertThat(getAssetClassInstance("LRAUV")).hasSize(4);
+    assertThat(getAssetClassInstance("LRAUV")).hasSize(18);
     assertThat(getAssetClassInstance("Waveglider")).hasSize(4);
     assertThat(getAssetClassInstance("AcmeDevice")).hasSize(3);
     assertThat(getAssetClassInstance("FooPlat")).hasSize(2);

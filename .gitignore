@@ -1,3 +1,5 @@
+tmp/
+
 #Maven
 target/
 pom.xml.tag

@@ -5,32 +5,42 @@ import java.util.Collections;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.support.DbSupport;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.MountableFile;
 
 @Slf4j
 public class PostgresResource implements QuarkusTestResourceLifecycleManager {
 
   // TODO this could probably be simpler/more elegant, but it's working for now
-  static PostgreSQLContainer<?> db =
-      new PostgreSQLContainer<>("postgres:14")
-          .withDatabaseName("mxm_test")
-          .withUsername("mxm")
-          .withPassword("mxm")
-          .withAccessToHost(true)
-          .withClasspathResourceMapping(
-              "mxm-schema.sql", "/docker-entrypoint-initdb.d/init.sql", BindMode.READ_ONLY)
-          .withClasspathResourceMapping(
-              "mxm-data.sql", "/docker-entrypoint-initdb.d/mxm-data.sql", BindMode.READ_ONLY)
-      //      .waitingFor(new org.testcontainers.containers.wait.strategy.HttpWaitStrategy()
-      //        .forStatusCode(200)
-      //        .withStartupTimeout(java.time.Duration.ofSeconds(5))
-      //        )
+  private static PostgreSQLContainer<?> createPgContainer() {
+    var container =
+        new PostgreSQLContainer<>("postgres:14")
+            .withDatabaseName("mxm_test")
+            .withUsername("mxm")
+            .withPassword("mxm")
+            .withAccessToHost(true);
 
-      ;
+    // copy schema and data scripts:
+    container = copyFileToContainer(container, "mxm-00-schema.sql");
+    container = copyFileToContainer(container, "mxm-10-data-units.sql");
+    container = copyFileToContainer(container, "mxm-20-data-assetclasses.sql");
+    container = copyFileToContainer(container, "mxm-25-data-assets.sql");
+    container = copyFileToContainer(container, "mxm-25-data-assets-tethysdash.sql");
+    return container;
+  }
+
+  private static PostgreSQLContainer<?> copyFileToContainer(PostgreSQLContainer<?> c, String name) {
+    return c.withCopyFileToContainer(
+        MountableFile.forHostPath("docker/" + name), "/docker-entrypoint-initdb.d/" + name);
+  }
+
+  static PostgreSQLContainer<?> db = null;
 
   @Override
   public Map<String, String> start() {
+    if (db == null) {
+      db = createPgContainer();
+    }
     db.start();
     log.info("PostgresResource started: url='{}' running={}", db.getJdbcUrl(), db.isRunning());
 
@@ -42,7 +52,10 @@ public class PostgresResource implements QuarkusTestResourceLifecycleManager {
 
   @Override
   public void stop() {
-    log.info("PostgresResource stopping");
-    db.stop();
+    log.info("PostgresResource stopping db={}", db);
+    if (db != null) {
+      db.stop();
+      db = null;
+    }
   }
 }

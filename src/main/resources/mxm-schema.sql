@@ -1,1 +1,0 @@
-../../../docker/mxm-schema.sql

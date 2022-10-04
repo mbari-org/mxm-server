@@ -98,12 +98,10 @@ public class UnitTest extends BaseForTests {
 
   @Test
   public void derivedUnits() throws JsonProcessingException {
-    // test data minimal, the following for basic testing.
-
     final var meterDerived = getDerivedUnits("meter");
-    assertThat(meterDerived).hasSize(3);
+    assertThat(meterDerived).hasSize(7);
 
     final var radianDerived = getDerivedUnits("radian");
-    assertThat(radianDerived).hasSize(1);
+    assertThat(radianDerived).hasSize(4);
   }
 }

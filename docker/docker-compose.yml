@@ -1,10 +1,10 @@
 version: '3.6'
 
 services:
-  mxm-server:
-    container_name: mxm-server
+  mxm:
+    container_name: mxm
 
-    image: mbari/mxm:0.9.2
+    image: mbari/mxm:0.9.5
 
     ports:
       - "8080:8080"
@@ -24,7 +24,7 @@ services:
 
   mxm-postgres:
     container_name: mxm-postgres
-    image: mbari/mxm-postgres:0.9.2
+    image: mbari/mxm-postgres:0.9.5
 
     # ports: ["25432:5432"]
 

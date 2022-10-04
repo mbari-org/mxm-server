@@ -10,8 +10,6 @@ The user-visible MXM version is the one set in `mxm-ui`'s `package.json` file.
 This image contains the mxm-server component and also the mxm-ui component,
 which is incorporated via the `quarkus-quinoa` extension.
 
-### Building the image
-
 It's assumed that the `mxm-server` and `mxm-ui` clones are sibling directories.
 
 In the following, assuming `MXM_VERSION` defines the version to be used.
@@ -19,18 +17,25 @@ In the following, assuming `MXM_VERSION` defines the version to be used.
 ```bash
 cd to/this/project/root/directory
 
-./mvnw package
-docker build -f src/main/docker/Dockerfile.jvm -t mbari/mxm:${MXM_VERSION} .
+just mxm-image-build $MXM_VERSION
+just mxm-image-push  $MXM_VERSION
 ```
 
-## `mbari/mxm-postgres:x.y.z`
+## `mbari/mxm-postgres`
 
 The MXM Postgres image is manually created and published as needed.
 
+Note:
+
+- Basic entities are preloaded into the database in this image. 
+  Some if this information is taken from the TethysDash system.
+
+- Using the same `$MXM_VERSION` value in general, but this image is not
+  necessarily rebuilt with every new version of the main `mxm` image.
+
 ```bash
-cd docker
-docker build -f Dockerfile-postgres -t mbari/mxm-postgres:0.9.1 .
-docker push mbari/mxm-postgres:0.9.1
+just mxm-image-postgres-build $MXM_VERSION
+just mxm-image-postgres-push  $MXM_VERSION
 ```
 
 # Launching the MXM system
@@ -40,9 +45,10 @@ cd docker
 ```
 
 Edit the `setenv.sh` file to indicate
-the external URL where the MXM service will be accessible,
+the external URLs (HTTP and WS) where the MXM service will be accessible,
 the desired password for the "mxm" user in the database,
-and the host directory for the postgres database.
+the host directory for the postgres database,
+and other settings.
 
 Review `docker-compose.yml` for any other further adjustments.
 
