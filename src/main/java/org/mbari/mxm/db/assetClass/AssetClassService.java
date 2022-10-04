@@ -29,7 +29,11 @@ public class AssetClassService {
 
   public List<AssetClass> getAssetClasses(List<Asset> assets) {
     final var classNames =
-        assets.stream().map(a -> String.format("'%s'", a.className)).collect(Collectors.toList());
+        assets.stream()
+            .map(a -> String.format("'%s'", a.className))
+            .collect(Collectors.toSet())
+            .stream()
+            .toList();
 
     var sql =
         """
@@ -37,15 +41,19 @@ public class AssetClassService {
       where class_name in (<classNames>)
       """;
 
-    return dbSupport
-        .getJdbi()
-        .withHandle(
-            handle ->
-                handle
-                    .createQuery(sql)
-                    .defineList("classNames", classNames)
-                    .mapToBean(AssetClass.class)
-                    .list());
+    var assetClasses =
+        dbSupport
+            .getJdbi()
+            .withHandle(
+                handle ->
+                    handle
+                        .createQuery(sql)
+                        .defineList("classNames", classNames)
+                        .mapToBean(AssetClass.class)
+                        .list());
+
+    var byClassName = assetClasses.stream().collect(Collectors.toMap(ac -> ac.className, ac -> ac));
+    return assets.stream().map(a -> byClassName.get(a.className)).collect(Collectors.toList());
   }
 
   public AssetClass createAssetClass(AssetClass pl) {

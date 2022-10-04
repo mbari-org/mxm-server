@@ -5,10 +5,14 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.Source;
 import org.mbari.mxm.db.asset.Asset;
 import org.mbari.mxm.db.asset.AssetService;
 import org.mbari.mxm.db.assetClass.AssetClass;
+import org.mbari.mxm.db.missionTemplate.MissionTemplate;
+import org.mbari.mxm.db.missionTemplateAssetClass.MissionTemplateAssetClassService;
+import org.mbari.mxm.db.provider.Provider;
 
 @ApplicationScoped
 @RegisterForReflection
@@ -18,5 +22,17 @@ public class ForAssetClass {
 
   public List<List<Asset>> assets(@Source List<AssetClass> assetClasses) {
     return assetService.getAssetsMultipleForAssetClasses(assetClasses);
+  }
+
+  @Inject MissionTemplateAssetClassService missionTemplateAssetClassService;
+
+  @Description("Get the mission templates that operate on assets of this class")
+  public List<List<MissionTemplate>> missionTemplates(@Source List<AssetClass> assetClasses) {
+    return missionTemplateAssetClassService.getMissionTemplatesMultiple(assetClasses);
+  }
+
+  @Description("Get the providers that operate on assets of this class")
+  public List<List<Provider>> providers(@Source List<AssetClass> assetClasses) {
+    return missionTemplateAssetClassService.getProvidersMultiple(assetClasses);
   }
 }

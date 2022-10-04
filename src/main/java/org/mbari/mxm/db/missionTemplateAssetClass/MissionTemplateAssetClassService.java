@@ -19,6 +19,9 @@ import org.jdbi.v3.core.statement.StatementContext;
 import org.mbari.mxm.db.assetClass.AssetClass;
 import org.mbari.mxm.db.assetClass.AssetClassService;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
+import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
+import org.mbari.mxm.db.provider.Provider;
+import org.mbari.mxm.db.provider.ProviderService;
 import org.mbari.mxm.db.support.DbSupport;
 
 @ApplicationScoped
@@ -28,6 +31,10 @@ public class MissionTemplateAssetClassService {
   @Inject DbSupport dbSupport;
 
   @Inject AssetClassService assetClassService;
+
+  @Inject MissionTemplateService missionTemplateService;
+
+  @Inject ProviderService providerService;
 
   public List<MissionTemplateAssetClass> getAllMissionTemplateAssetClasses() {
     return dbSupport
@@ -150,6 +157,91 @@ public class MissionTemplateAssetClassService {
         });
 
     return tuples.stream().map(byProviderIdMissionTplId::get).collect(Collectors.toList());
+  }
+
+  public List<List<MissionTemplate>> getMissionTemplatesMultiple(List<AssetClass> assetClasses) {
+    var missionTemplateAssetClasses = getMissionTemplateAssetClasses(assetClasses);
+    log.debug("missionTemplateAssetClasses={}", missionTemplateAssetClasses);
+
+    var byClassName = new HashMap<String, HashSet<MissionTemplate>>();
+
+    // just ad hoc way to lessen query inefficiency below
+    var retrievedMissionTemplatesByPK = new HashMap<String, MissionTemplate>();
+
+    missionTemplateAssetClasses.forEach(
+        mac -> {
+          var providerIdMissionTplId =
+              String.format("('%s', '%s')", mac.providerId, mac.missionTplId);
+          var mt =
+              retrievedMissionTemplatesByPK.computeIfAbsent(
+                  providerIdMissionTplId,
+                  k -> missionTemplateService.getMissionTemplate(mac.providerId, mac.missionTplId));
+
+          if (mt != null) {
+            byClassName.computeIfAbsent(mac.assetClassName, k -> new HashSet<>()).add(mt);
+          }
+        });
+
+    return assetClasses.stream()
+        .map(
+            ac -> {
+              var set = byClassName.get(ac.className);
+              return set == null ? null : set.stream().toList();
+            })
+        .collect(Collectors.toList());
+  }
+
+  public List<List<Provider>> getProvidersMultiple(List<AssetClass> assetClasses) {
+    var missionTemplateAssetClasses = getMissionTemplateAssetClasses(assetClasses);
+
+    var byClassName = new HashMap<String, HashSet<Provider>>();
+
+    missionTemplateAssetClasses.forEach(
+        mac -> {
+          var p = providerService.getProvider(mac.providerId);
+          if (p != null) {
+            byClassName.computeIfAbsent(mac.assetClassName, k -> new HashSet<>()).add(p);
+          }
+        });
+
+    return assetClasses.stream()
+        .map(
+            ac -> {
+              var set = byClassName.get(ac.className);
+              return set == null ? null : set.stream().toList();
+            })
+        .collect(Collectors.toList());
+  }
+
+  private List<MissionTemplateAssetClass> getMissionTemplateAssetClasses(
+      List<AssetClass> assetClasses) {
+    final var classNames =
+        assetClasses.stream()
+            .map(e -> String.format("'%s'", e.className))
+            .collect(Collectors.toSet())
+            .stream()
+            .toList();
+
+    log.debug("classNames={}", classNames);
+
+    // TODO a more efficient query.
+
+    var sql =
+        """
+      select *
+      from mission_tpl_asset_class
+      where asset_class_name in (<classNames>);
+      """;
+
+    return dbSupport
+        .getJdbi()
+        .withHandle(
+            handle ->
+                handle
+                    .createQuery(sql)
+                    .defineList("classNames", classNames)
+                    .mapToBean(MissionTemplateAssetClass.class)
+                    .list());
   }
 
   public MissionTemplateAssetClass createMissionTemplateAssetClass(MissionTemplateAssetClass pl) {
