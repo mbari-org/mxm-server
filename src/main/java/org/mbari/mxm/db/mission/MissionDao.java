@@ -54,11 +54,11 @@ public interface MissionDao {
       insert into missions
       (provider_id, mission_tpl_id, mission_id,
        mission_status, asset_id, description, sched_type,
-        sched_date, start_date, end_date)
+        sched_date, start_date, end_date, updated_date)
       values
       (:providerId, :missionTplId, :missionId,
        :missionStatus, :assetId, :description, :schedType,
-        :schedDate, :startDate, :endDate)
+        :schedDate, :startDate, :endDate, :updatedDate)
       returning *
       """)
   @GetGeneratedKeys

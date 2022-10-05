@@ -117,6 +117,7 @@ public class ArgumentService {
   }
 
   public Argument createArgument(Argument pl) {
+    log.debug("createArgument: pl={}", pl);
     var res = dbSupport.getJdbi().withExtension(ArgumentDao.class, dao -> dao.insertArgument(pl));
     broadcastMissionUpdated(res);
     return res;
@@ -154,6 +155,7 @@ public class ArgumentService {
   }
 
   public Argument deleteArgument(Argument pl) {
+    log.debug("deleteArgument: pl={}", pl);
     var res =
         dbSupport
             .getJdbi()
@@ -166,10 +168,12 @@ public class ArgumentService {
   }
 
   private void broadcastMissionUpdated(Argument arg) {
+    log.debug("broadcastMissionUpdated: arg={}", arg);
     if (arg != null) {
       var m = missionService.getMission(arg.providerId, arg.missionTplId, arg.missionId);
       if (m != null) {
         m.setUpdatedDate(OffsetDateTime.now());
+        missionService.updateMission(m);
       }
       missionService.getBroadcaster().broadcastUpdated(m);
 

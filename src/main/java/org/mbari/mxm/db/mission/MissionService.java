@@ -1,5 +1,6 @@
 package org.mbari.mxm.db.mission;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -120,6 +121,9 @@ public class MissionService {
   }
 
   public Mission createMission(Mission pl) {
+    if (pl.updatedDate == null) {
+      pl.updatedDate = OffsetDateTime.now();
+    }
     var res = dbSupport.getJdbi().withExtension(MissionDao.class, dao -> dao.insertMission(pl));
 
     if (res != null) {
@@ -130,7 +134,9 @@ public class MissionService {
 
   public Mission updateMission(Mission pl) {
     log.debug("updateMission: pl={}", pl);
-
+    if (pl.updatedDate == null) {
+      pl.updatedDate = OffsetDateTime.now();
+    }
     var res = doUpdate(pl);
 
     if (res != null) {
