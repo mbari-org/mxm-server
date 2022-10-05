@@ -4,7 +4,10 @@ services:
   mxm:
     container_name: mxm
 
-    image: mbari/mxm:0.9.5
+    ## for convenience, no explicit version so CD is facilitated
+    ## especially during development.
+    ## NOTE: actual docker-compose.yml is adjusted as needed on `mxm`.
+    image: mbari/mxm
 
     ports:
       - "8080:8080"
@@ -24,7 +27,7 @@ services:
 
   mxm-postgres:
     container_name: mxm-postgres
-    image: mbari/mxm-postgres:0.9.5
+    image: mbari/mxm-postgres:0.9.6
 
     # ports: ["25432:5432"]
 
@@ -36,5 +39,5 @@ services:
     environment:
       # POSTGRES_USER: will trigger the creation of the "mxm" user
       # and the "mxm" database upon initial run of the container:
-      POSTGRES_USER: mxm
+      POSTGRES_USER: "mxm"
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
