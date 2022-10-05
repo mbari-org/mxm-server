@@ -212,7 +212,7 @@ public class MxmGraphQLEndpoint {
     var provider = providerService.getProvider(pl.getProviderId());
     var pm = createProviderManager(provider);
 
-    pm.preUpdateMissionTpl(provider, pl);
+    pm.preUpdateMissionTemplate(provider, pl);
     var res = missionTemplateService.updateMissionTemplate(pl);
     pm.done();
     return res;

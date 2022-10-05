@@ -100,27 +100,27 @@ public class ProviderManager {
     public void postInsertProvider(Provider provider) {
       log.debug("postInsertProvider: provider={}", provider);
 
-      getAndCreateMissionTplsForDirectory(provider, "/");
+      getAndCreateMissionTemplatesForDirectory(provider, "/");
     }
 
-    private void getAndCreateMissionTplsForDirectory(Provider provider, String directory) {
+    private void getAndCreateMissionTemplatesForDirectory(Provider provider, String directory) {
       assert directory.endsWith("/");
 
       // create a MissionTemplate entry for the directory itself:
-      getAndCreateMissionTpl(provider, directory);
+      getAndCreateMissionTemplate(provider, directory);
 
       // get all directory entries, recursively as specified in MXM Provider API:
       // TODO consistent path name handling
       final var subDir = directory.replaceFirst("^/+", "");
       var missionTplListing = mxmProviderClient.getMissionTemplates(subDir);
       if (missionTplListing.result.entries != null) {
-        createMissionTplsForDirectoryEntries(provider, missionTplListing.result.entries);
+        createMissionTemplatesForDirectoryEntries(provider, missionTplListing.result.entries);
       } else {
-        log.warn("getAndCreateMissionTplsForDirectory: no entries for subDir='{}'", subDir);
+        log.warn("getAndCreateMissionTemplatesForDirectory: no entries for subDir='{}'", subDir);
       }
     }
 
-    private void createMissionTplsForDirectoryEntries(
+    private void createMissionTemplatesForDirectoryEntries(
         Provider provider, List<MissionTemplateResponse.MissionTemplate> entries) {
       entries.forEach(
           entry -> {
@@ -137,7 +137,7 @@ public class ProviderManager {
 
             if (isDirectory) {
               if (entry.entries != null && entry.entries.size() > 0) {
-                createMissionTplsForDirectoryEntries(provider, entry.entries);
+                createMissionTemplatesForDirectoryEntries(provider, entry.entries);
               }
             } else {
               // just add the associated asset classes to the mission template:
@@ -148,7 +148,7 @@ public class ProviderManager {
           });
     }
 
-    private void getAndCreateMissionTpl(Provider provider, String missionTplId) {
+    private void getAndCreateMissionTemplate(Provider provider, String missionTplId) {
       missionTplId = Utl.cleanPath(missionTplId);
       final var isDirectory = missionTplId.endsWith("/");
 
@@ -160,7 +160,7 @@ public class ProviderManager {
         missionTemplateService.createMissionTemplate(missionTemplate);
       } else {
         // actual template, get info from provider as needed:
-        log.debug("getAndCreateMissionTpl: missionTplId='{}'", missionTplId);
+        log.debug("getAndCreateMissionTemplate: missionTplId='{}'", missionTplId);
         var response = mxmProviderClient.getMissionTemplate(missionTplId);
         var missionTemplateFromProvider = response.result;
         createActualMissionTemplate(provider, missionTemplate, missionTemplateFromProvider);
@@ -215,8 +215,8 @@ public class ProviderManager {
     }
 
     /** Refreshes mission template information from the provider. */
-    public void preUpdateMissionTpl(Provider provider, MissionTemplate pl) {
-      log.debug("preUpdateMissionTpl: missionTemplate={}", pl);
+    public void preUpdateMissionTemplate(Provider provider, MissionTemplate pl) {
+      log.debug("preUpdateMissionTemplate: missionTemplate={}", pl);
       final var missionTplId = pl.missionTplId;
       if (missionTplId.endsWith("/")) {
         updateMissionTemplateDirectory(provider, missionTplId);
@@ -239,7 +239,7 @@ public class ProviderManager {
 
     private void deleteAllMissionTemplatesUnderDirectory(Provider provider, String missionTplId) {
       var res = missionTemplateService.deleteDirectoryRecursive(provider.providerId, missionTplId);
-      log.debug("preUpdateMissionTpl: no templates under {}, res=>{}", missionTplId, res);
+      log.debug("preUpdateMissionTemplate: no templates under {}, res=>{}", missionTplId, res);
     }
 
     private void updateMissionTemplateDirectoryItself(Provider provider, String missionTplId) {
@@ -301,7 +301,7 @@ public class ProviderManager {
       var acsDeleted =
           missionTemplateAssetClassService.deleteForMissionTemplate(
               provider.providerId, missionTplId);
-      log.trace("preUpdateMissionTpl: acsDeleted=>{}", acsDeleted);
+      log.trace("preUpdateMissionTemplate: acsDeleted=>{}", acsDeleted);
       if (missionTemplateFromProvider.assetClassNames != null) {
         createAssociatedAssetClasses(
             provider, missionTemplate, missionTemplateFromProvider.assetClassNames);
@@ -327,7 +327,7 @@ public class ProviderManager {
         // just remove any parameters that may have been previously captured:
         var psDeleted =
             parameterService.deleteForMissionTemplate(provider.providerId, missionTplId);
-        log.debug("preUpdateMissionTpl: psDeleted=>{}", psDeleted);
+        log.debug("preUpdateMissionTemplate: psDeleted=>{}", psDeleted);
         return;
       }
 
@@ -369,7 +369,7 @@ public class ProviderManager {
       var psDeleted =
           parameterService.deleteForMissionTemplateExcept(
               provider.providerId, missionTplId, paramNamesToUpdate.stream().toList());
-      log.trace("preUpdateMissionTpl: psDeleted=>{}", psDeleted);
+      log.trace("preUpdateMissionTemplate: psDeleted=>{}", psDeleted);
 
       // do the updates
       paramNamesToUpdate.forEach(
