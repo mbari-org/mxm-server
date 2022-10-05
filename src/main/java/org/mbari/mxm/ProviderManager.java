@@ -221,8 +221,23 @@ public class ProviderManager {
       if (missionTplId.endsWith("/")) {
         updateMissionTemplateDirectory(provider, missionTplId);
       } else {
-        updateActualMissionTemplate(provider, missionTplId);
+        updateActualMissionTemplate(provider, pl);
       }
+    }
+
+    private void updateActualMissionTemplate(Provider provider, MissionTemplate pl) {
+      log.debug("refreshing template missionTplId='{}'", pl.missionTplId);
+      var response = mxmProviderClient.getMissionTemplate(pl.missionTplId);
+      var missionTemplateFromProvider = response.result;
+
+      // update mission template itself:
+      pl.description = missionTemplateFromProvider.description;
+      pl.retrievedAt = OffsetDateTime.now();
+      missionTemplateService.updateMissionTemplate(pl);
+
+      recreateAssociatedAssetClasses(provider, pl.missionTplId, pl, missionTemplateFromProvider);
+
+      refreshAssociatedParameters(provider, pl.missionTplId, missionTemplateFromProvider);
     }
 
     private void updateMissionTemplateDirectory(Provider provider, String missionTplId) {
@@ -265,12 +280,12 @@ public class ProviderManager {
           updateMissionTemplateDirectoryEntries(provider, entry.entries);
         }
       } else {
-        updateActualMissionTemplate(provider, missionTplId);
+        updateActualMissionTemplateById(provider, missionTplId);
       }
     }
 
-    private void updateActualMissionTemplate(Provider provider, String missionTplId) {
-      log.debug("refreshing template missionTplId='{}'", missionTplId);
+    private void updateActualMissionTemplateById(Provider provider, String missionTplId) {
+      log.debug("refreshing template by missionTplId='{}'", missionTplId);
       var response = mxmProviderClient.getMissionTemplate(missionTplId);
       var missionTemplateFromProvider = response.result;
 
@@ -327,7 +342,8 @@ public class ProviderManager {
         // just remove any parameters that may have been previously captured:
         var psDeleted =
             parameterService.deleteForMissionTemplate(provider.providerId, missionTplId);
-        log.debug("preUpdateMissionTemplate: psDeleted=>{}", psDeleted);
+        log.debug(
+            "refreshAssociatedParameters: preUpdateMissionTemplate: psDeleted=>{}", psDeleted);
         return;
       }
 

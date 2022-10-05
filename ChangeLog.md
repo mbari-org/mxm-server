@@ -1,5 +1,6 @@
 2022-10
 
+- capture members upon mutation updateMissionTemplate (for actual template)
 - add `MxmException` class toward improved error handling, in particular when interacting
   with external providers, such as for connection issues or db violations, etc.
 

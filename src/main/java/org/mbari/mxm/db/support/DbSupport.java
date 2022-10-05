@@ -28,7 +28,7 @@ public class DbSupport {
 
   public Jdbi getJdbi() {
     if (jdbi == null) {
-      log.warn("DbSupport: jdbcUrl='{}' username='{}'", jdbcUrl, username);
+      log.debug("DbSupport: jdbcUrl='{}' username='{}'", jdbcUrl, username);
       if (username != null && password != null) {
         jdbi = Jdbi.create(jdbcUrl, username, password);
       } else {
