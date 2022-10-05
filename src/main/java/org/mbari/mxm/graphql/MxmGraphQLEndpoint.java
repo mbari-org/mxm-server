@@ -29,6 +29,9 @@ import org.mbari.mxm.db.provider.Provider;
 import org.mbari.mxm.db.provider.ProviderService;
 import org.mbari.mxm.db.unit.Unit;
 import org.mbari.mxm.db.unit.UnitService;
+import org.mbari.mxm.graphql.exc.DbViolationException;
+import org.mbari.mxm.graphql.exc.MxmException;
+import org.mbari.mxm.graphql.exc.ProviderFailureException;
 import org.mbari.mxm.provider_client.responses.MissionValidationResponse;
 import org.mbari.mxm.provider_client.responses.PingResponse;
 
@@ -81,7 +84,32 @@ public class MxmGraphQLEndpoint {
   @Description("Ping a provider endpoint")
   public PingResponse pingProvider(@Valid Provider pl) throws ProviderPingException {
     var pm = createProviderManager(pl);
-    return pm.ping();
+    PingResponse pr;
+    try {
+      pr = pm.ping();
+    } catch (Exception e) {
+      throw new ProviderFailureException(
+          String.format(
+              """
+          Failure while trying to ping provider.
+
+          The provider service may be down (%s).
+          If the problem persists, please contact the provider administrator.
+          """,
+              pl.httpEndpoint),
+          e);
+    }
+    if (pr.result.datetime == null) {
+      throw new ProviderFailureException(
+          String.format(
+              """
+          Provider did not return expected ping response.
+
+          Provider service: %s.
+          """,
+              pl.httpEndpoint));
+    }
+    return pr;
   }
 
   @Mutation
@@ -89,11 +117,14 @@ public class MxmGraphQLEndpoint {
   public Provider createProvider(@Valid Provider pl) {
     var pm = createProviderManager(pl);
     pm.preInsertProvider(pl);
-    var created = providerService.createProvider(pl);
-    pm.postInsertProvider(created);
-    pm.done();
-
-    return created;
+    try {
+      var created = providerService.createProvider(pl);
+      pm.postInsertProvider(created);
+      pm.done();
+      return created;
+    } catch (Exception e) {
+      throw handleException(pl, "registering provider", e);
+    }
   }
 
   @Subscription
@@ -211,11 +242,14 @@ public class MxmGraphQLEndpoint {
     log.debug("updateMissionTemplate: pl={}", pl);
     var provider = providerService.getProvider(pl.getProviderId());
     var pm = createProviderManager(provider);
-
-    pm.preUpdateMissionTemplate(provider, pl);
-    var res = missionTemplateService.updateMissionTemplate(pl);
-    pm.done();
-    return res;
+    try {
+      pm.preUpdateMissionTemplate(provider, pl);
+      var res = missionTemplateService.updateMissionTemplate(pl);
+      pm.done();
+      return res;
+    } catch (Exception e) {
+      throw handleException(provider, "refreshing mission template from provider", e);
+    }
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -323,10 +357,14 @@ public class MxmGraphQLEndpoint {
     var provider = providerService.getProvider(pl.getProviderId());
     var pm = createProviderManager(provider);
 
-    pm.preUpdateMission(provider, pl);
-    var res = missionService.updateMission(pl);
-    pm.done();
-    return res;
+    try {
+      pm.preUpdateMission(provider, pl);
+      var res = missionService.updateMission(pl);
+      pm.done();
+      return res;
+    } catch (Exception e) {
+      throw handleException(provider, "refreshing mission from provider", e);
+    }
   }
 
   @Mutation
@@ -335,9 +373,13 @@ public class MxmGraphQLEndpoint {
     log.debug("validateMission: pl={}", pl);
     var provider = providerService.getProvider(pl.getProviderId());
     var pm = createProviderManager(provider);
-    var res = pm.validateMission(pl);
-    pm.done();
-    return res;
+    try {
+      var res = pm.validateMission(pl);
+      pm.done();
+      return res;
+    } catch (Exception e) {
+      throw handleException(provider, "validating mission against provider", e);
+    }
   }
 
   @Mutation
@@ -422,5 +464,41 @@ public class MxmGraphQLEndpoint {
   @Description("Delete a argument")
   public Argument deleteArgument(Argument pl) {
     return argumentService.deleteArgument(pl);
+  }
+
+  ///////////////////////////////////////////////////////////////
+
+  // Already functional but somewhat ad hoc
+  private MxmException handleException(Provider provider, String activity, Exception e) {
+    Throwable thr = e;
+    while (thr != null) {
+      if (thr instanceof org.postgresql.util.PSQLException) {
+        // likely a foreign key constraint violation
+        throw new DbViolationException(
+            String.format(
+                """
+                Failure while %s.
+
+                A database violation may have occurred caused by a reference to an invalid/missing
+                entity by this provider. Please report this issue.
+
+                Exception: %s
+                """,
+                activity, thr.getMessage()),
+            e);
+      }
+      thr = thr.getCause();
+    }
+
+    return new ProviderFailureException(
+        String.format(
+            """
+          Failure while trying to ping provider.
+
+          The provider service may be down (%s).
+          If the problem persists, please contact the provider administrator.
+          """,
+            provider.httpEndpoint),
+        e);
   }
 }

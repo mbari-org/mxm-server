@@ -1,5 +1,8 @@
 2022-10
 
+- add `MxmException` class toward improved error handling, in particular when interacting
+  with external providers, such as for connection issues or db violations, etc.
+
 - add `missionTemplates` and `providers` member resolution for `AssetClass` (graphql)
   - with more efficient dispatch depending on selected fields
 - data sql scripts to initialize the database
