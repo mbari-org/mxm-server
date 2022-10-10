@@ -47,7 +47,7 @@ public interface ProviderClientRestService {
   MissionStatusResponse postMission(PostMissionPayload pl);
 
   @GET
-  @Path("mission/{missionId: .*}")
+  @Path("missions/{missionId: .*}")
   @Consumes(MediaType.APPLICATION_JSON)
   MissionStatusResponse getMissionStatus(@PathParam("missionId") String missionId);
 }

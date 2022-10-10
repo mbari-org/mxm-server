@@ -1,5 +1,6 @@
 2022-10
 
+- more consistent route naming: `GET missions/{missionId: .*}` - 
 - capture members upon mutation updateMissionTemplate (for actual template)
 - add `MxmException` class toward improved error handling, in particular when interacting
   with external providers, such as for connection issues or db violations, etc.
