@@ -107,7 +107,7 @@ create type mission_status_type as enum (
   'COMPLETED',
   'TERMINATED',
   'FAILED',
-  'CANCELLED',
+  'CANCELED',
   'UNKNOWN'
   )
 ;

@@ -8,6 +8,6 @@ public enum MissionStatusType {
   COMPLETED,
   TERMINATED,
   FAILED,
-  CANCELLED,
+  CANCELED,
   UNKNOWN,
 }
