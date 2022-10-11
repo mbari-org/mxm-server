@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.JsonString;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -117,6 +118,53 @@ public class MissionTemplateAssetClassService {
     return providerIds.stream()
         .map(providerId -> byProviderId.get(providerId).stream().toList())
         .collect(Collectors.toList());
+  }
+
+  @AllArgsConstructor
+  @RegisterForReflection
+  @ToString
+  public static class NumAssetClassesByProviderId {
+    public String providerId;
+    public int count;
+  }
+
+  private static List<String> uniqueQuotedProviderIds(List<Provider> providers) {
+    return providers.stream()
+        .map(e -> String.format("'%s'", e.providerId))
+        .collect(Collectors.toSet())
+        .stream()
+        .toList();
+  }
+
+  public List<Integer> getNumAssetClassesMultipleProviders(List<Provider> providers) {
+    final var quotedProviderIds = uniqueQuotedProviderIds(providers);
+    log.debug("getNumAssetClassesMultipleProviders quotedProviderIds={}", quotedProviderIds);
+
+    var sql =
+        """
+        select provider_id, count(asset_class_name)
+        from mission_tpl_asset_class
+        where provider_id in (<quotedProviderIds>)
+        group by provider_id;
+        """;
+
+    var counters =
+        dbSupport
+            .getJdbi()
+            .withHandle(
+                handle ->
+                    handle
+                        .createQuery(sql)
+                        .defineList("quotedProviderIds", quotedProviderIds)
+                        .map(
+                            (rs, ctx) ->
+                                new NumAssetClassesByProviderId(
+                                    rs.getString("provider_id"), rs.getInt("count")))
+                        .list());
+
+    var byProviderId = counters.stream().collect(Collectors.toMap(c -> c.providerId, c -> c.count));
+
+    return providers.stream().map(p -> byProviderId.get(p.providerId)).collect(Collectors.toList());
   }
 
   public List<List<AssetClass>> getAssetClassesMultiple(List<MissionTemplate> missionTemplates) {

@@ -1,5 +1,6 @@
 2022-10
 
+- more efficient query for `Provider`s `numAssetClasses` resolution
 - more consistent route naming: `GET missions/{missionId: .*}` - 
 - capture members upon mutation updateMissionTemplate (for actual template)
 - add `MxmException` class toward improved error handling, in particular when interacting

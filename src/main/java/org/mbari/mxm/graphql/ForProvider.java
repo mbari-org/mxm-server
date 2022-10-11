@@ -70,7 +70,7 @@ public class ForProvider {
   }
 
   public List<Integer> numAssetClasses(@Source List<Provider> providers) {
-    return assetClasses(providers).stream().map(this::listSize).collect(toList());
+    return missionTemplateAssetClassService.getNumAssetClassesMultipleProviders(providers);
   }
 
   private <T> int listSize(List<T> list) {
