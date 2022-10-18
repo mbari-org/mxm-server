@@ -142,7 +142,7 @@ public class MissionTemplateAssetClassService {
 
     var sql =
         """
-        select provider_id, count(asset_class_name)
+        select provider_id, count(distinct(asset_class_name))
         from mission_tpl_asset_class
         where provider_id in (<quotedProviderIds>)
         group by provider_id;

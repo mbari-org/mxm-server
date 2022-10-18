@@ -1,5 +1,6 @@
 2022-10
 
+- fixed query for getNumAssetClassesMultipleProviders
 - update quarkus to 2.13.2.Final and quinoa to 1.2.2
 - more efficient query for `Provider`s `numAssetClasses` resolution
 - more consistent route naming: `GET missions/{missionId: .*}` - 
