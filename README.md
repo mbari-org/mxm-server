@@ -46,4 +46,17 @@ quarkus dev
 - Type 'd' to open Dev UI in your browser (from which to open GraphQL UI and other tools)
 - Etc.
 
+### Quinoa
+
+Supported by the [Quarkus Quinoa extension](https://github.com/quarkiverse/quarkus-quinoa),
+this server is able to launch the UI (mxm-ui) component both during development
+(ie., `quarkus dev` also launches `quasar dev`) and in production.
+In both cases, the UI code is assumed located at `../mxm-ui`.
+
+### Contributing
+
+Make sure all tests are passing and also run `./mvnw spotless:apply` before committing.
+
+## Initial setup notes
+
 Some initial setup notes [here](misc/initial-setup.md).
