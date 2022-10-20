@@ -25,7 +25,7 @@ test:
 
 # Show version
 version:
-	@head -n 10 pom.xml | rg "<version>(.*)</version>" -r '$1'
+	@head -n 10 pom.xml | rg "<version>(.*)</version>" -or '$1'
 
 ################################################################
 ## Docker images
