@@ -1,5 +1,6 @@
 2022-10
 
+- read version from pom.xml; update quarkus to 2.13.3.Final
 - fixed query for getNumAssetClassesMultipleProviders
 - update quarkus to 2.13.2.Final and quinoa to 1.2.2
 - more efficient query for `Provider`s `numAssetClasses` resolution

@@ -23,6 +23,10 @@ format:
 test:
 	./mvnw test
 
+# Show version
+version:
+	@head -n 10 pom.xml | rg "<version>(.*)</version>" -r '$1'
+
 ################################################################
 ## Docker images
 

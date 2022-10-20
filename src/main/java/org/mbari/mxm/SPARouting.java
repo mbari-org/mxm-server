@@ -32,7 +32,7 @@ public class SPARouting {
   /** Path used by the UI to retrieve the configuration. */
   public static final String CONFIG_JSON_PATH = "/mxmConfig.json";
 
-  @ConfigProperty(name = "mxm.version")
+  @ConfigProperty(name = "quarkus.application.version")
   String mxmVersion;
 
   public void init(@Observes Router router) {
