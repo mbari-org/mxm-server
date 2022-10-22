@@ -135,6 +135,16 @@ public class ProviderManager {
       }
     }
 
+    private void createMissionTemplate(MissionTemplate missionTemplate) {
+      missionTemplateService.createMissionTemplate(missionTemplate);
+      broadcastProgress(missionTemplate.missionTplId);
+    }
+
+    private void updateMissionTemplate(MissionTemplate missionTemplate) {
+      missionTemplateService.updateMissionTemplate(missionTemplate);
+      broadcastProgress(missionTemplate.missionTplId);
+    }
+
     private void createMissionTemplatesForDirectoryEntries(
         Provider provider, List<MissionTemplateResponse.MissionTemplate> entries) {
       entries.forEach(
@@ -148,8 +158,7 @@ public class ProviderManager {
             missionTemplate.retrievedAt = isDirectory ? OffsetDateTime.now() : null;
 
             // create this entry:
-            missionTemplateService.createMissionTemplate(missionTemplate);
-            broadcastProgress(missionTemplate.missionTplId);
+            createMissionTemplate(missionTemplate);
 
             if (isDirectory) {
               if (entry.entries != null && entry.entries.size() > 0) {
@@ -173,7 +182,7 @@ public class ProviderManager {
 
       if (isDirectory) {
         // no info needed from provider, just create the entry:
-        missionTemplateService.createMissionTemplate(missionTemplate);
+        createMissionTemplate(missionTemplate);
       } else {
         // actual template, get info from provider as needed:
         log.debug("getAndCreateMissionTemplate: missionTplId='{}'", missionTplId);
@@ -190,7 +199,7 @@ public class ProviderManager {
       missionTemplate.description = missionTemplateFromProvider.description;
       missionTemplate.retrievedAt = OffsetDateTime.now();
 
-      missionTemplateService.createMissionTemplate(missionTemplate);
+      createMissionTemplate(missionTemplate);
 
       if (missionTemplateFromProvider.assetClassNames != null) {
         createAssociatedAssetClasses(
@@ -250,7 +259,7 @@ public class ProviderManager {
       // update mission template itself:
       pl.description = missionTemplateFromProvider.description;
       pl.retrievedAt = OffsetDateTime.now();
-      missionTemplateService.updateMissionTemplate(pl);
+      updateMissionTemplate(pl);
 
       recreateAssociatedAssetClasses(provider, pl.missionTplId, pl, missionTemplateFromProvider);
 
@@ -276,9 +285,8 @@ public class ProviderManager {
 
     private void updateMissionTemplateDirectoryItself(Provider provider, String missionTplId) {
       // just the retrievedAt timestamp:
-      missionTemplateService.updateMissionTemplate(
+      updateMissionTemplate(
           new MissionTemplate(provider.providerId, missionTplId, null, OffsetDateTime.now()));
-      broadcastProgress(missionTplId);
     }
 
     private void updateMissionTemplateDirectoryEntries(
@@ -312,7 +320,7 @@ public class ProviderManager {
       MissionTemplate missionTemplate = new MissionTemplate(provider.providerId, missionTplId);
       missionTemplate.description = missionTemplateFromProvider.description;
       missionTemplate.retrievedAt = OffsetDateTime.now();
-      missionTemplateService.updateMissionTemplate(missionTemplate);
+      updateMissionTemplate(missionTemplate);
 
       recreateAssociatedAssetClasses(
           provider, missionTplId, missionTemplate, missionTemplateFromProvider);
