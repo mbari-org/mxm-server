@@ -1,5 +1,7 @@
 2022-10
 
+- new `ProviderCreate` as proper payload for provider registration
+- moved `For*` classes to a separate package `ext` ("extended fields")
 - bump jdbi version to 3.34.0
 - read version from pom.xml; update quarkus to 2.13.3.Final
 - fixed query for getNumAssetClassesMultipleProviders

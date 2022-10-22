@@ -32,6 +32,7 @@ import org.mbari.mxm.db.unit.UnitService;
 import org.mbari.mxm.graphql.exc.DbViolationException;
 import org.mbari.mxm.graphql.exc.MxmException;
 import org.mbari.mxm.graphql.exc.ProviderFailureException;
+import org.mbari.mxm.graphql.input.ProviderCreate;
 import org.mbari.mxm.provider_client.responses.MissionValidationResponse;
 import org.mbari.mxm.provider_client.responses.PingResponse;
 
@@ -113,22 +114,25 @@ public class MxmGraphQLEndpoint {
   }
 
   @Mutation
-  @Description("Create a new provider")
-  public Provider createProvider(@Valid Provider pl) {
-    var pm = createProviderManager(pl);
-    pm.preInsertProvider(pl);
+  @Description("Register a new provider")
+  public Provider createProvider(@Valid ProviderCreate pl) {
+    var provider = new Provider(pl.providerId);
+    provider.setHttpEndpoint(pl.httpEndpoint);
+    provider.setApiType(pl.apiType);
+    var pm = createProviderManager(provider);
+    pm.preInsertProvider(provider);
     try {
-      var created = providerService.createProvider(pl);
+      var created = providerService.createProvider(provider);
       pm.postInsertProvider(created);
       pm.done();
       return created;
     } catch (Exception e) {
-      throw handleException(pl, "registering provider", e);
+      throw handleException(pl.httpEndpoint, "registering provider", e);
     }
   }
 
   @Subscription
-  @Description("Get notified when a provider is created")
+  @Description("Get notified when a provider registration has completed")
   public Multi<Provider> providerCreated() {
     return providerService.getBroadcaster().createProcessor(Broadcaster.EventType.CREATED);
   }
@@ -248,7 +252,7 @@ public class MxmGraphQLEndpoint {
       pm.done();
       return res;
     } catch (Exception e) {
-      throw handleException(provider, "refreshing mission template from provider", e);
+      throw handleException(provider.httpEndpoint, "refreshing mission template from provider", e);
     }
   }
 
@@ -363,7 +367,7 @@ public class MxmGraphQLEndpoint {
       pm.done();
       return res;
     } catch (Exception e) {
-      throw handleException(provider, "refreshing mission from provider", e);
+      throw handleException(provider.httpEndpoint, "refreshing mission from provider", e);
     }
   }
 
@@ -378,7 +382,7 @@ public class MxmGraphQLEndpoint {
       pm.done();
       return res;
     } catch (Exception e) {
-      throw handleException(provider, "validating mission against provider", e);
+      throw handleException(provider.httpEndpoint, "validating mission against provider", e);
     }
   }
 
@@ -469,7 +473,7 @@ public class MxmGraphQLEndpoint {
   ///////////////////////////////////////////////////////////////
 
   // Already functional but somewhat ad hoc
-  private MxmException handleException(Provider provider, String activity, Exception e) {
+  private MxmException handleException(String httpEndpoint, String activity, Exception e) {
     Throwable thr = e;
     while (thr != null) {
       if (thr instanceof org.postgresql.util.PSQLException) {
@@ -498,7 +502,7 @@ public class MxmGraphQLEndpoint {
           The provider service may be down (%s).
           If the problem persists, please contact the provider administrator.
           """,
-            provider.httpEndpoint),
+            httpEndpoint),
         e);
   }
 }

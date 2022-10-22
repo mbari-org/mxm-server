@@ -15,6 +15,7 @@ import org.mbari.mxm.BaseForTests;
 import org.mbari.mxm.db.PostgresResource;
 import org.mbari.mxm.db.provider.Provider;
 import org.mbari.mxm.db.provider.ProviderApiType;
+import org.mbari.mxm.graphql.input.ProviderCreate;
 import org.mbari.mxm.provider_client.WireMockProviderRest;
 
 @QuarkusTest
@@ -26,11 +27,11 @@ import org.mbari.mxm.provider_client.WireMockProviderRest;
 @QuarkusTestResource(PostgresResource.class)
 @Slf4j
 public class ProviderTest extends BaseForTests {
-  private Provider createProvider(Provider pl) throws JsonProcessingException {
+  private Provider createProvider(ProviderCreate pl) throws JsonProcessingException {
     String requestBody =
         bodyForRequest(
             """
-            mutation($pl: ProviderInput!) {
+            mutation($pl: ProviderCreateInput!) {
               createProvider(pl: $pl) {
                 providerId
                 apiType
@@ -157,10 +158,12 @@ public class ProviderTest extends BaseForTests {
     assertNull(deleteProvider(deletePayload));
 
     // create:
-    final var newPl = new Provider(providerId);
-    newPl.setHttpEndpoint("http://localhost:8890/api");
-    newPl.setApiType(ProviderApiType.REST);
-
+    final var newPl =
+        ProviderCreate.builder()
+            .providerId(providerId)
+            .httpEndpoint("http://localhost:8890/api")
+            .apiType(ProviderApiType.REST)
+            .build();
     final var created = createProvider(newPl);
     assertEquals(newPl.providerId, created.providerId);
     assertEquals(newPl.apiType, created.apiType);

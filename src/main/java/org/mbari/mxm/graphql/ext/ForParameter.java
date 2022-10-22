@@ -1,4 +1,4 @@
-package org.mbari.mxm.graphql;
+package org.mbari.mxm.graphql.ext;
 
 import static java.util.stream.Collectors.toList;
 

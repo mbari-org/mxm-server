@@ -1,4 +1,4 @@
-package org.mbari.mxm.graphql;
+package org.mbari.mxm.graphql.ext;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.runtime.annotations.RegisterForReflection;
