@@ -1,5 +1,6 @@
 2022-10
 
+- report progress during mission template(s) update
 - new subscription to report progress during provider registration
 - new `ProviderCreate` as proper payload for provider registration
 - moved `For*` classes to a separate package `ext` ("extended fields")

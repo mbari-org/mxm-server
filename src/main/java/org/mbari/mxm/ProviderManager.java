@@ -69,9 +69,19 @@ public class ProviderManager {
       providerProgress = ProviderProgress.builder().providerId(providerId).build();
     }
 
+    private void broadcastProgress() {
+      providerService.getProgressBroadcaster().broadcast(providerProgress);
+    }
+
     private void broadcastProgress(String message) {
       providerProgress.message = message;
-      providerService.getProgressBroadcaster().broadcast(providerProgress);
+      broadcastProgress();
+    }
+
+    private void broadcastProgress(String message, Double percentComplete) {
+      providerProgress.message = message;
+      providerProgress.percentComplete = percentComplete;
+      broadcastProgress();
     }
 
     public PingResponse ping() throws ProviderPingException {
@@ -108,7 +118,7 @@ public class ProviderManager {
 
     public void postInsertProvider(Provider provider) {
       log.debug("postInsertProvider: provider={}", provider);
-      broadcastProgress("Provider entry created");
+      broadcastProgress("Provider entry created", null);
       getAndCreateMissionTemplatesFromRoot(provider);
     }
 
@@ -223,6 +233,7 @@ public class ProviderManager {
     /** Refreshes mission template information from the provider. */
     public void preUpdateMissionTemplate(Provider provider, MissionTemplate pl) {
       log.debug("preUpdateMissionTemplate: missionTemplate={}", pl);
+      broadcastProgress("Updating " + pl.missionTplId, null);
       final var missionTplId = pl.missionTplId;
       if (missionTplId.endsWith("/")) {
         updateMissionTemplateDirectory(provider, missionTplId);
@@ -267,6 +278,7 @@ public class ProviderManager {
       // just the retrievedAt timestamp:
       missionTemplateService.updateMissionTemplate(
           new MissionTemplate(provider.providerId, missionTplId, null, OffsetDateTime.now()));
+      broadcastProgress(missionTplId);
     }
 
     private void updateMissionTemplateDirectoryEntries(
@@ -288,6 +300,7 @@ public class ProviderManager {
       } else {
         updateActualMissionTemplateById(provider, missionTplId);
       }
+      broadcastProgress(missionTplId);
     }
 
     private void updateActualMissionTemplateById(Provider provider, String missionTplId) {
