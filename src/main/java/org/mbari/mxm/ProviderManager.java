@@ -21,7 +21,9 @@ import org.mbari.mxm.db.parameter.Parameter;
 import org.mbari.mxm.db.parameter.ParameterService;
 import org.mbari.mxm.db.provider.Provider;
 import org.mbari.mxm.db.provider.ProviderApiType;
+import org.mbari.mxm.db.provider.ProviderService;
 import org.mbari.mxm.graphql.ProviderPingException;
+import org.mbari.mxm.graphql.ProviderProgress;
 import org.mbari.mxm.provider_client.MxmProviderClient;
 import org.mbari.mxm.provider_client.MxmProviderClientBuilder;
 import org.mbari.mxm.provider_client.responses.MissionTemplateResponse;
@@ -32,6 +34,8 @@ import org.mbari.mxm.provider_client.rest.PostMissionPayload;
 @ApplicationScoped
 @Slf4j
 public class ProviderManager {
+
+  @Inject ProviderService providerService;
 
   @Inject MissionTemplateService missionTemplateService;
 
@@ -46,23 +50,28 @@ public class ProviderManager {
   public PMInstance createInstance(
       String providerId, String httpEndpoint, ProviderApiType apiType) {
 
-    var instance = new PMInstance();
-    instance.setMxmProviderClient(providerId, httpEndpoint, apiType);
-    return instance;
+    return new PMInstance(providerId, httpEndpoint, apiType);
   }
 
   public class PMInstance {
 
-    private MxmProviderClient mxmProviderClient;
+    private final MxmProviderClient mxmProviderClient;
+    private final ProviderProgress providerProgress;
 
-    public void setMxmProviderClient(
-        String providerId, String httpEndpoint, ProviderApiType apiType) {
+    PMInstance(String providerId, String httpEndpoint, ProviderApiType apiType) {
       log.debug(
-          "setMxmProviderClient: providerId={}, httpEndpoint={}, apiType={}",
+          "PMInstance: providerId={}, httpEndpoint={}, apiType={}",
           providerId,
           httpEndpoint,
           apiType);
       mxmProviderClient = MxmProviderClientBuilder.create(providerId, httpEndpoint, apiType);
+
+      providerProgress = ProviderProgress.builder().providerId(providerId).build();
+    }
+
+    private void broadcastProgress(String message) {
+      providerProgress.message = message;
+      providerService.getProgressBroadcaster().broadcast(providerProgress);
     }
 
     public PingResponse ping() throws ProviderPingException {
@@ -99,24 +108,20 @@ public class ProviderManager {
 
     public void postInsertProvider(Provider provider) {
       log.debug("postInsertProvider: provider={}", provider);
-
-      getAndCreateMissionTemplatesForDirectory(provider, "/");
+      broadcastProgress("Provider entry created");
+      getAndCreateMissionTemplatesFromRoot(provider);
     }
 
-    private void getAndCreateMissionTemplatesForDirectory(Provider provider, String directory) {
-      assert directory.endsWith("/");
-
+    private void getAndCreateMissionTemplatesFromRoot(Provider provider) {
       // create a MissionTemplate entry for the directory itself:
-      getAndCreateMissionTemplate(provider, directory);
+      getAndCreateMissionTemplate(provider, "/");
 
       // get all directory entries, recursively as specified in MXM Provider API:
-      // TODO consistent path name handling
-      final var subDir = directory.replaceFirst("^/+", "");
-      var missionTplListing = mxmProviderClient.getMissionTemplates(subDir);
+      var missionTplListing = mxmProviderClient.getMissionTemplates("");
       if (missionTplListing.result.entries != null) {
         createMissionTemplatesForDirectoryEntries(provider, missionTplListing.result.entries);
       } else {
-        log.warn("getAndCreateMissionTemplatesForDirectory: no entries for subDir='{}'", subDir);
+        log.warn("getAndCreateMissionTemplatesFromRoot: no entries");
       }
     }
 
@@ -134,6 +139,7 @@ public class ProviderManager {
 
             // create this entry:
             missionTemplateService.createMissionTemplate(missionTemplate);
+            broadcastProgress(missionTemplate.missionTplId);
 
             if (isDirectory) {
               if (entry.entries != null && entry.entries.size() > 0) {

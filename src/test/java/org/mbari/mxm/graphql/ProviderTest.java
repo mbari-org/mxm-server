@@ -15,7 +15,6 @@ import org.mbari.mxm.BaseForTests;
 import org.mbari.mxm.db.PostgresResource;
 import org.mbari.mxm.db.provider.Provider;
 import org.mbari.mxm.db.provider.ProviderApiType;
-import org.mbari.mxm.graphql.input.ProviderCreate;
 import org.mbari.mxm.provider_client.WireMockProviderRest;
 
 @QuarkusTest

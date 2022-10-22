@@ -1,5 +1,6 @@
 2022-10
 
+- new subscription to report progress during provider registration
 - new `ProviderCreate` as proper payload for provider registration
 - moved `For*` classes to a separate package `ext` ("extended fields")
 - bump jdbi version to 3.34.0

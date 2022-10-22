@@ -32,7 +32,6 @@ import org.mbari.mxm.db.unit.UnitService;
 import org.mbari.mxm.graphql.exc.DbViolationException;
 import org.mbari.mxm.graphql.exc.MxmException;
 import org.mbari.mxm.graphql.exc.ProviderFailureException;
-import org.mbari.mxm.graphql.input.ProviderCreate;
 import org.mbari.mxm.provider_client.responses.MissionValidationResponse;
 import org.mbari.mxm.provider_client.responses.PingResponse;
 
@@ -156,6 +155,13 @@ public class MxmGraphQLEndpoint {
   @Description("Get notified when a provider is updated")
   public Multi<Provider> providerUpdated() {
     return providerService.getBroadcaster().createProcessor(Broadcaster.EventType.UPDATED);
+  }
+
+  @Subscription
+  @Description("Get notified while interactions with a provider are performed")
+  public Multi<ProviderProgress> providerProgress(@Name("providerId") String providerId) {
+    log.debug("providerProgress: providerId='{}'", providerId);
+    return providerService.getProgressBroadcaster().createProcessor(Utl.primaryKey(providerId));
   }
 
   @Subscription

@@ -6,9 +6,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import lombok.Getter;
 import org.mbari.mxm.Broadcaster;
+import org.mbari.mxm.ProgressBroadcaster;
 import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.DbUtl;
 import org.mbari.mxm.db.support.DbSupport;
+import org.mbari.mxm.graphql.ProviderProgress;
 
 @ApplicationScoped
 @lombok.extern.slf4j.Slf4j
@@ -25,6 +27,19 @@ public class ProviderService {
         }
 
         public String getPrimaryKey(Provider e) {
+          return Utl.primaryKey(e.providerId);
+        }
+      };
+
+  @Getter
+  private final ProgressBroadcaster<ProviderProgress> progressBroadcaster =
+      new ProgressBroadcaster<>() {
+        @Override
+        public String getEntityName() {
+          return ProviderProgress.class.getSimpleName();
+        }
+
+        public String getPrimaryKey(ProviderProgress e) {
           return Utl.primaryKey(e.providerId);
         }
       };

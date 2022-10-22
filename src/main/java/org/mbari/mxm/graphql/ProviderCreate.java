@@ -1,4 +1,4 @@
-package org.mbari.mxm.graphql.input;
+package org.mbari.mxm.graphql;
 
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
