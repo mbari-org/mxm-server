@@ -1,5 +1,8 @@
 2022-10
 
+- performance fix in refresh of "directory mission template": the operation was taking way longer than
+  expected and this was because the detailed info per template was also being loaded, but only the basic
+  description is needed.  Only when a proper template is refreshed is when all the details are needed.
 - report progress during mission template(s) update
 - new subscription to report progress during provider registration
 - new `ProviderCreate` as proper payload for provider registration

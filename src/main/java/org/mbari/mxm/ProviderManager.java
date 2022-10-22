@@ -291,41 +291,20 @@ public class ProviderManager {
 
     private void updateMissionTemplateDirectoryEntries(
         Provider provider, List<MissionTemplateResponse.MissionTemplate> entries) {
-      entries.forEach(entry -> updateMissionTemplateDirectoryEntry(provider, entry));
-    }
-
-    private void updateMissionTemplateDirectoryEntry(
-        Provider provider, MissionTemplateResponse.MissionTemplate entry) {
-      final var missionTplId = Utl.cleanPath(entry.missionTplId);
-      final var isDirectory = missionTplId.endsWith("/");
-      if (isDirectory) {
-        if (entry.entries == null || entry.entries.isEmpty()) {
-          deleteAllMissionTemplatesUnderDirectory(provider, missionTplId);
-        } else {
-          updateMissionTemplateDirectoryItself(provider, missionTplId);
-          updateMissionTemplateDirectoryEntries(provider, entry.entries);
-        }
-      } else {
-        updateActualMissionTemplateById(provider, missionTplId);
-      }
-      broadcastProgress(missionTplId);
-    }
-
-    private void updateActualMissionTemplateById(Provider provider, String missionTplId) {
-      log.debug("refreshing template by missionTplId='{}'", missionTplId);
-      var response = mxmProviderClient.getMissionTemplate(missionTplId);
-      var missionTemplateFromProvider = response.result;
-
-      // update mission template itself:
-      MissionTemplate missionTemplate = new MissionTemplate(provider.providerId, missionTplId);
-      missionTemplate.description = missionTemplateFromProvider.description;
-      missionTemplate.retrievedAt = OffsetDateTime.now();
-      updateMissionTemplate(missionTemplate);
-
-      recreateAssociatedAssetClasses(
-          provider, missionTplId, missionTemplate, missionTemplateFromProvider);
-
-      refreshAssociatedParameters(provider, missionTplId, missionTemplateFromProvider);
+      entries.forEach(
+          entry -> {
+            final var missionTplId = Utl.cleanPath(entry.missionTplId);
+            final var isDirectory = missionTplId.endsWith("/");
+            if (isDirectory) {
+              if (entry.entries == null || entry.entries.isEmpty()) {
+                deleteAllMissionTemplatesUnderDirectory(provider, missionTplId);
+              } else {
+                updateMissionTemplateDirectoryItself(provider, missionTplId);
+                updateMissionTemplateDirectoryEntries(provider, entry.entries);
+              }
+            }
+            broadcastProgress(missionTplId);
+          });
     }
 
     private void recreateAssociatedAssetClasses(
