@@ -13,6 +13,7 @@ import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.DbUtl;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.support.DbSupport;
+import org.mbari.mxm.rest.MissionStatus;
 
 @ApplicationScoped
 @Slf4j
@@ -139,6 +140,22 @@ public class MissionService {
     }
     var res = doUpdate(pl);
 
+    if (res != null) {
+      broadcaster.broadcastUpdated(res);
+    }
+    return res;
+  }
+
+  public Mission missionStatusReported(String providerId, MissionStatus missionStatus) {
+    log.warn("missionStatusReported: providerId='{}' missionStatus={}", providerId, missionStatus);
+    var mission = getMission(providerId, missionStatus.missionTplId, missionStatus.missionId);
+    if (mission == null) {
+      log.warn("missionStatusReported: mission not found for missionStatus={}", missionStatus);
+      return null;
+    }
+    mission.updatedDate = OffsetDateTime.now();
+    var res = doUpdate(mission);
+    log.warn("missionStatusReported: mission updated={}", res);
     if (res != null) {
       broadcaster.broadcastUpdated(res);
     }

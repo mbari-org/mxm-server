@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 public class PostMissionPayload {
 
   public String missionTplId;
+  public String missionId;
   public String assetId;
   public String description;
   public String schedType;

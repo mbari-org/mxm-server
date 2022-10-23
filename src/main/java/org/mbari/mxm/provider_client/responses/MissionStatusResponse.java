@@ -6,8 +6,11 @@ public record MissionStatusResponse(PMResponse result) {
 
   @Data
   public static class PMResponse {
-    // captured as `providerMissionId` in MXM mission model
     public String missionId;
     public String status;
+
+    public String missionTplId;
+
+    public String providerMissionId;
   }
 }

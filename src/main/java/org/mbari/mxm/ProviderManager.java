@@ -500,7 +500,7 @@ public class ProviderManager {
       log.debug("submitMission: res={}", Utl.writeJson(res));
       if (MissionStatusType.SUBMITTED.name().equals(res.result().status)) {
         pl.missionStatus = MissionStatusType.SUBMITTED;
-        pl.providerMissionId = res.result().missionId;
+        pl.providerMissionId = res.result().providerMissionId;
       } else {
         log.warn("unexpected mission status: {}", res.result().status);
       }
@@ -518,6 +518,7 @@ public class ProviderManager {
                       a.paramName, a.paramValue, a.paramUnits)));
 
       pmpl.missionTplId = mission.missionTplId;
+      pmpl.missionId = mission.missionId;
       pmpl.assetId = mission.assetId;
       pmpl.description = mission.description;
       pmpl.schedType = mission.schedType == null ? null : mission.schedType.name();

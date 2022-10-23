@@ -1,5 +1,6 @@
 2022-10
 
+- handle missionStatus reported from provider
 - external provider can now "asynchronously" notify the service about events
   - this is based on new MxmInfo that is indicated to provider upon registration
   - provider uses the associated endpoint to notify the service as desired

@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
+import org.mbari.mxm.db.mission.MissionService;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateCreatePayload;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
@@ -23,6 +24,8 @@ import org.mbari.mxm.db.provider.ProviderService;
 public class ProviderResource extends BaseResource {
 
   @Inject ProviderService service;
+
+  @Inject MissionService missionService;
 
   @GET
   public Response getProviders() {
@@ -62,9 +65,8 @@ public class ProviderResource extends BaseResource {
   @Operation(summary = "Used by the provider to inform MXM about a mission status update")
   @APIResponseSchema(MissionStatus.class)
   public Response missionStatus(@PathParam("providerId") String providerId, MissionStatus pl) {
-    // TODO propagate effect
-    log.warn("POST missionStatus: providerId='{}' pl={}", providerId, pl);
-    return Response.ok(pl).build();
+    var res = missionService.missionStatusReported(providerId, pl);
+    return Response.ok(res).build();
   }
 
   @PUT
