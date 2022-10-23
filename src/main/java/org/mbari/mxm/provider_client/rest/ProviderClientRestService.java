@@ -16,6 +16,11 @@ public interface ProviderClientRestService {
   @Path("info")
   GeneralInfoResponse getGeneralInfo();
 
+  @POST
+  @Path("mxmInfo")
+  @Consumes(MediaType.APPLICATION_JSON)
+  MxmInfo postMxmInfo(MxmInfo pl);
+
   @GET
   @Path("assetclasses")
   AssetClassesResponse getAssetClasses();

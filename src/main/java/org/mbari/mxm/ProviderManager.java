@@ -29,6 +29,7 @@ import org.mbari.mxm.provider_client.MxmProviderClientBuilder;
 import org.mbari.mxm.provider_client.responses.MissionTemplateResponse;
 import org.mbari.mxm.provider_client.responses.MissionValidationResponse;
 import org.mbari.mxm.provider_client.responses.PingResponse;
+import org.mbari.mxm.provider_client.rest.MxmInfo;
 import org.mbari.mxm.provider_client.rest.PostMissionPayload;
 
 @ApplicationScoped
@@ -47,6 +48,8 @@ public class ProviderManager {
 
   @Inject ArgumentService argumentService;
 
+  private static final String MXM_EXTERNAL_URL = System.getenv("MXM_EXTERNAL_URL");
+
   public PMInstance createInstance(
       String providerId, String httpEndpoint, ProviderApiType apiType) {
 
@@ -58,6 +61,8 @@ public class ProviderManager {
     private final MxmProviderClient mxmProviderClient;
     private final ProviderProgress providerProgress;
 
+    private final MxmInfo mxmInfo;
+
     PMInstance(String providerId, String httpEndpoint, ProviderApiType apiType) {
       log.debug(
           "PMInstance: providerId={}, httpEndpoint={}, apiType={}",
@@ -67,6 +72,11 @@ public class ProviderManager {
       mxmProviderClient = MxmProviderClientBuilder.create(providerId, httpEndpoint, apiType);
 
       providerProgress = ProviderProgress.builder().providerId(providerId).build();
+
+      // TODO for now, assuming MXM_EXTERNAL_URL defined.
+      mxmInfo = new MxmInfo();
+      mxmInfo.missionStatusEndpoint =
+          String.format("%s/providers/%s/missionStatus", MXM_EXTERNAL_URL, providerId);
     }
 
     private void broadcastProgress() {
@@ -105,6 +115,17 @@ public class ProviderManager {
       var infoResponse = mxmProviderClient.getGeneralInfo();
       var info = infoResponse.result;
       log.debug("preInsertProvider: info=>{}", info);
+
+      // TODO similarly, try/catch while updating test providers
+      try {
+        var res = mxmProviderClient.postMxmInfo(mxmInfo);
+        log.warn("preInsertProvider: postMxmInfo mxmInfo={} =>{}", mxmInfo, res);
+      } catch (Exception e) {
+        log.warn(
+            "preInsertProvider: error posting mxmInfo provider={}: {}",
+            provider.providerId,
+            e.getMessage());
+      }
 
       provider.description = info.providerDescription;
       provider.descriptionFormat = info.descriptionFormat;

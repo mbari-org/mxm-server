@@ -65,6 +65,11 @@ public class MxmProviderClientRest implements MxmProviderClient {
   }
 
   @Override
+  public MxmInfo postMxmInfo(MxmInfo pl) {
+    return service.postMxmInfo(pl);
+  }
+
+  @Override
   public AssetClassesResponse getAssetClasses() {
     return service.getAssetClasses();
   }

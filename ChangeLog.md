@@ -1,5 +1,10 @@
 2022-10
 
+- external provider can now "asynchronously" notify the service about events
+  - this is based on new MxmInfo that is indicated to provider upon registration
+  - provider uses the associated endpoint to notify the service as desired
+    (for now, for basic mission status updates)
+  - TODO more organized handling, perhaps a common endpoint for this purpose..
 - performance fix in refresh of "directory mission template": the operation was taking way longer than
   expected and this was because the detailed info per template was also being loaded, but only the basic
   description is needed.  Only when a proper template is refreshed is when all the details are needed.

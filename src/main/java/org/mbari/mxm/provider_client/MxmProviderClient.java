@@ -3,6 +3,7 @@ package org.mbari.mxm.provider_client;
 import org.mbari.mxm.db.provider.ProviderApiType;
 import org.mbari.mxm.graphql.ProviderPingException;
 import org.mbari.mxm.provider_client.responses.*;
+import org.mbari.mxm.provider_client.rest.MxmInfo;
 import org.mbari.mxm.provider_client.rest.PostMissionPayload;
 
 public interface MxmProviderClient {
@@ -16,6 +17,8 @@ public interface MxmProviderClient {
   PingResponse ping() throws ProviderPingException;
 
   GeneralInfoResponse getGeneralInfo();
+
+  MxmInfo postMxmInfo(MxmInfo pl);
 
   AssetClassesResponse getAssetClasses();
 
