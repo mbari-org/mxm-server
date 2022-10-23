@@ -1,5 +1,7 @@
 2022-10
 
+- db: although *derived*, adding for convenience couple units as *base* that some LRAUV missions use
+  This helps avoid the associated constraint violation. 
 - handle missionStatus reported from provider
 - external provider can now "asynchronously" notify the service about events
   - this is based on new MxmInfo that is indicated to provider upon registration
