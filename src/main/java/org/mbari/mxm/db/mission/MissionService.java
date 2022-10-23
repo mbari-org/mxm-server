@@ -154,6 +154,12 @@ public class MissionService {
       return null;
     }
     mission.updatedDate = OffsetDateTime.now();
+    if (missionStatus.status != null) {
+      mission.missionStatus = missionStatus.status;
+    }
+    // TODO handle other fields as they are incorporated (data, asset status,..)
+    // TODO also move to a common place for reuse in explicit request/response for status.
+
     var res = doUpdate(mission);
     log.warn("missionStatusReported: mission updated={}", res);
     if (res != null) {
