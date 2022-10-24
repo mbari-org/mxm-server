@@ -1,5 +1,33 @@
 2022-10
 
+- noting BackPressureFailure as follows:
+  - in GraphQL UI, have an active `missionUpdated` subscription including `arguments` member:
+      ```graphql
+      subscription missionUpdated {
+        missionUpdated {
+          updatedDate
+          arguments {
+            paramName
+            paramValue
+          }
+        }
+      }
+      ```
+  - in mxm-ui, do any argument change
+  - exception reported on the quarkus console:
+      ```
+      ERROR [io.sma.graphql] (..) SRGQL012000: Data Fetching Error:
+               io.smallrye.mutiny.subscription.BackPressureFailure:
+                    Could not emit item downstream due to lack of requests
+      ```
+    
+  Note that all goes OK above if the `arguments` member is not included in the subscription.
+  Maybe some lack of backpressure handling in GraphQL UI?
+  I say "reported" because the stacktrace is printed out by the library, not
+  exposed to the caller of `onNext` (in Broadcaster).
+  I wanted to add a try/catch for a more graceful display but apparently there's no way.
+  TODO(low prio) revisit this at some point.
+
 - db: although *derived*, adding for convenience couple units as *base* that some LRAUV missions use
   This helps avoid the associated constraint violation. 
 - handle missionStatus reported from provider
