@@ -1,5 +1,7 @@
 2022-10
 
+- note edits re `mbari/mxm` image build and CD (watchtower) with major-minor tag
+
 - noting BackPressureFailure as follows:
   - in GraphQL UI, have an active `missionUpdated` subscription including `arguments` member:
       ```graphql

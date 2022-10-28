@@ -7,6 +7,9 @@ The user-visible MXM version is the one set in `mxm-ui`'s `package.json` file.
 
 ## `mbari/mxm`
 
+**NOTE**: Parent GitHub repo `mbari-org/mxm` takes care of building and publishing this image.
+The following instructions are for reference only.
+
 This image contains the mxm-server component and also the mxm-ui component,
 which is incorporated via the `quarkus-quinoa` extension.
 
@@ -28,7 +31,7 @@ The MXM Postgres image is manually created and published as needed.
 Note:
 
 - Basic entities are preloaded into the database in this image. 
-  Some if this information is taken from the TethysDash system.
+  Some of this information is taken from the TethysDash system.
 
 - Using the same `$MXM_VERSION` value in general, but this image is not
   necessarily rebuilt with every new version of the main `mxm` image.

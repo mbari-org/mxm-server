@@ -4,10 +4,8 @@ services:
   mxm:
     container_name: mxm
 
-    ## for convenience, no explicit version so CD is facilitated
-    ## especially during development.
-    ## NOTE: actual docker-compose.yml is adjusted as needed on `mxm`.
-    image: mbari/mxm
+    ## only with major-minor as the tag to facilitate automated CD with that version prefix
+    image: mbari/mxm:0.9
 
     ports:
       - "8080:8080"
