@@ -25,7 +25,7 @@ import org.mbari.mxm.db.provider.ProviderService;
 @Slf4j
 public class ProviderResource extends BaseResource {
   // special id only for internal testing purposes
-  static final String PROVIDER_ID = "__test_prov__";
+  static final String TEST_PROVIDER_ID = "__test_prov__";
 
   @Inject ProviderService service;
 
@@ -50,7 +50,7 @@ public class ProviderResource extends BaseResource {
   @APIResponseSchema(MissionStatus.class)
   public Response missionStatus(@PathParam("providerId") String providerId, MissionStatus pl) {
 
-    if (providerId.equals(PROVIDER_ID)) {
+    if (providerId.equals(TEST_PROVIDER_ID)) {
       var res =
           Mission.builder()
               .providerId(providerId)

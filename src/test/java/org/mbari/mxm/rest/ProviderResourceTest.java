@@ -20,7 +20,7 @@ public class ProviderResourceTest extends BaseForTests {
     ms.providerMissionId = "789";
     ms.status = MissionStatusType.RUNNING;
 
-    var path = String.format("/providers/%s/missionStatus", ProviderResource.PROVIDER_ID);
+    var path = String.format("/providers/%s/missionStatus", ProviderResource.TEST_PROVIDER_ID);
     var extractable =
         given()
             .contentType("application/json")
@@ -35,7 +35,7 @@ public class ProviderResourceTest extends BaseForTests {
 
     var res = extractable.jsonPath().getObject("", Mission.class);
 
-    assertThat(res.providerId).isEqualTo(ProviderResource.PROVIDER_ID);
+    assertThat(res.providerId).isEqualTo(ProviderResource.TEST_PROVIDER_ID);
     assertThat(res.missionTplId).isEqualTo(ms.missionTplId);
     assertThat(res.missionId).isEqualTo(ms.missionId);
     assertThat(res.missionStatus).isEqualTo(ms.status);
