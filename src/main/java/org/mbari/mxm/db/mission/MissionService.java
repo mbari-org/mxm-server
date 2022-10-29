@@ -148,16 +148,6 @@ public class MissionService {
 
   public Mission missionStatusReported(String providerId, MissionStatus missionStatus) {
     log.warn("missionStatusReported: providerId='{}' missionStatus={}", providerId, missionStatus);
-
-    if (providerId.equals("__test_provider__")) {
-      return Mission.builder()
-          .providerId(providerId)
-          .missionTplId(missionStatus.missionTplId)
-          .missionId(missionStatus.missionId)
-          .missionStatus(MissionStatusType.RUNNING)
-          .build();
-    }
-
     var mission = getMission(providerId, missionStatus.missionTplId, missionStatus.missionId);
     if (mission == null) {
       log.warn("missionStatusReported: mission not found for missionStatus={}", missionStatus);

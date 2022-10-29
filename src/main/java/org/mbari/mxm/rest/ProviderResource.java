@@ -32,6 +32,7 @@ public class ProviderResource extends BaseResource {
   @Inject MissionService missionService;
 
   @POST
+  @Operation(summary = "Register a provider")
   public Response createProvider(Provider pl) {
     if (pl == null || pl.providerId == null || pl.apiType == null) {
       return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
@@ -49,7 +50,7 @@ public class ProviderResource extends BaseResource {
   @APIResponseSchema(MissionStatus.class)
   public Response missionStatus(@PathParam("providerId") String providerId, MissionStatus pl) {
 
-    if (providerId.equals("__test_provider__")) {
+    if (providerId.equals(PROVIDER_ID)) {
       var res =
           Mission.builder()
               .providerId(providerId)
@@ -66,6 +67,7 @@ public class ProviderResource extends BaseResource {
 
   @PUT
   @Path("/{providerId}")
+  @Operation(summary = "Update a provider")
   public Response updateProvider(@PathParam("providerId") String providerId, Provider pl) {
     if (pl == null || (pl.providerId != null && !pl.providerId.equals(providerId))) {
       return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
@@ -80,6 +82,7 @@ public class ProviderResource extends BaseResource {
 
   @DELETE
   @Path("/{providerId}")
+  @Operation(summary = "Delete a provider")
   public Response deleteProvider(@PathParam("providerId") String providerId) {
     var pl = new Provider(providerId);
     var res = service.deleteProvider(pl);
@@ -94,6 +97,7 @@ public class ProviderResource extends BaseResource {
 
   @POST
   @Path("/{providerId}/missionTemplates")
+  @Operation(summary = "Register a mission template")
   public Response createMissionTemplate(
       @PathParam("providerId") String providerId, MissionTemplateCreatePayload pl) {
     var p = missionTemplateService.createMissionTemplate(pl.toMissionTemplate(providerId));
@@ -105,6 +109,7 @@ public class ProviderResource extends BaseResource {
 
   @PUT
   @Path("/{providerId}/missionTemplates/{missionTplId}")
+  @Operation(summary = "Update a mission template")
   public Response updateMissionTemplate(
       @PathParam("providerId") String providerId,
       @PathParam("missionTplId") String missionTplId,
@@ -127,6 +132,7 @@ public class ProviderResource extends BaseResource {
 
   @DELETE
   @Path("/{providerId}/missionTemplates/{missionTplId}")
+  @Operation(summary = "Delete a mission template")
   public Response deleteMissionTemplate(
       @PathParam("providerId") String providerId, @PathParam("missionTplId") String missionTplId) {
     var pl = new MissionTemplate(providerId, missionTplId);
