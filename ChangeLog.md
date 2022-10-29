@@ -1,5 +1,9 @@
 2022-10
 
+- adjusting REST API as it's only intended for external provider use.
+  - at the moment, mainly `POST .../missionStatus`
+  - TODO adjustments for provider to register or re-register itself 
+
 - note edits re `mbari/mxm` image build and CD (watchtower) with major-minor tag
 
 - noting BackPressureFailure as follows:

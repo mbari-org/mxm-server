@@ -2,7 +2,6 @@ package org.mbari.mxm.rest;
 
 import static javax.ws.rs.core.Response.Status.CREATED;
 
-import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -10,43 +9,27 @@ import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
+import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.mission.MissionService;
+import org.mbari.mxm.db.mission.MissionStatusType;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateCreatePayload;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
 import org.mbari.mxm.db.provider.Provider;
 import org.mbari.mxm.db.provider.ProviderService;
 
+/** REST API for use by external providers. */
 @Path("/providers")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Slf4j
 public class ProviderResource extends BaseResource {
+  // special id only for internal testing purposes
+  static final String PROVIDER_ID = "__test_prov__";
 
   @Inject ProviderService service;
 
   @Inject MissionService missionService;
-
-  @GET
-  public Response getProviders() {
-    try {
-      List<Provider> providers = service.getProviders();
-      return Response.ok().entity(providers).build();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
-  @GET
-  @Path("/{providerId}")
-  public Response getProviderById(@PathParam("providerId") String providerId) {
-    var p = service.getProvider(providerId);
-    if (p == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(p).build();
-  }
 
   @POST
   public Response createProvider(Provider pl) {
@@ -65,6 +48,18 @@ public class ProviderResource extends BaseResource {
   @Operation(summary = "Used by the provider to inform MXM about a mission status update")
   @APIResponseSchema(MissionStatus.class)
   public Response missionStatus(@PathParam("providerId") String providerId, MissionStatus pl) {
+
+    if (providerId.equals("__test_provider__")) {
+      var res =
+          Mission.builder()
+              .providerId(providerId)
+              .missionTplId(pl.missionTplId)
+              .missionId(pl.missionId)
+              .missionStatus(MissionStatusType.RUNNING)
+              .build();
+      return Response.ok(res).build();
+    }
+
     var res = missionService.missionStatusReported(providerId, pl);
     return Response.ok(res).build();
   }
@@ -96,31 +91,6 @@ public class ProviderResource extends BaseResource {
   // MissionTemplates
 
   @Inject MissionTemplateService missionTemplateService;
-
-  @GET
-  @Path("/{providerId}/missionTemplates")
-  public Response getMissionTemplates(@PathParam("providerId") String providerId) {
-    log.debug("getMissionTemplates: providerId={}", providerId);
-    try {
-      var list = missionTemplateService.getMissionTemplates(providerId);
-      return Response.ok().entity(list).build();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
-  @GET
-  @Path("/{providerId}/missionTemplates/{missionTplId}")
-  public Response getMissionTemplate(
-      @PathParam("providerId") String providerId, @PathParam("missionTplId") String missionTplId) {
-    log.debug("getMissionTemplate: providerId={}, missionTplId={}", providerId, missionTplId);
-    var p = missionTemplateService.getMissionTemplate(providerId, missionTplId);
-    if (p == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(p).build();
-  }
 
   @POST
   @Path("/{providerId}/missionTemplates")

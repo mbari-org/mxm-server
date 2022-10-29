@@ -1,57 +1,43 @@
 package org.mbari.mxm.rest;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.quarkus.test.junit.QuarkusTest;
-import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.mbari.mxm.BaseForTests;
-import org.mbari.mxm.db.provider.Provider;
-import org.mbari.mxm.db.provider.ProviderApiType;
+import org.mbari.mxm.db.mission.Mission;
+import org.mbari.mxm.db.mission.MissionStatusType;
 
 @QuarkusTest
 public class ProviderResourceTest extends BaseForTests {
 
-  private void post(Provider pl) {
-    given()
-        .contentType("application/json")
-        .body(pl)
-        .when()
-        .post("/providers")
-        .then()
-        .statusCode(201);
-  }
-
   @Test
-  public void testSomeRequests() {
-    // insertAssetClass some:
-    var providerIds = Arrays.asList("Q1", "Q2");
+  public void postMissionStatus() {
+    var ms = new MissionStatus();
+    ms.missionTplId = "123";
+    ms.missionId = "456";
+    ms.providerMissionId = "789";
+    ms.status = MissionStatusType.RUNNING;
 
-    for (String providerId : providerIds) {
-      post(
-          new Provider(
-              providerId,
-              String.format("https://%s.net", providerId),
-              ProviderApiType.REST,
-              "originalDescription",
-              null,
-              null,
-              null,
-              null,
-              null));
-    }
+    var path = String.format("/providers/%s/missionStatus", ProviderResource.PROVIDER_ID);
+    var extractable =
+        given()
+            .contentType("application/json")
+            .body(ms)
+            .when()
+            .post(path)
+            .then()
+            .statusCode(200)
+            .extract();
 
-    var r1 = given().when().get("/providers").then().statusCode(200);
+    // System.out.printf("asPrettyString=%s\n", extractable.asPrettyString());
 
-    for (String name : providerIds) {
-      r1.body(containsString(name));
-    }
+    var res = extractable.jsonPath().getObject("", Mission.class);
 
-    for (String providerId : providerIds) {
-      given().when().delete("/providers/" + providerId).then().statusCode(200);
-
-      given().when().get("/providers/" + providerId).then().statusCode(404);
-    }
+    assertThat(res.providerId).isEqualTo(ProviderResource.PROVIDER_ID);
+    assertThat(res.missionTplId).isEqualTo(ms.missionTplId);
+    assertThat(res.missionId).isEqualTo(ms.missionId);
+    assertThat(res.missionStatus).isEqualTo(ms.status);
   }
 }
