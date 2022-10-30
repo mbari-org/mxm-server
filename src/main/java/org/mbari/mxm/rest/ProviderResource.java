@@ -8,10 +8,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
 import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.mission.MissionService;
-import org.mbari.mxm.db.mission.MissionStatusType;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateCreatePayload;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
@@ -24,12 +22,7 @@ import org.mbari.mxm.db.provider.ProviderService;
 @Consumes(MediaType.APPLICATION_JSON)
 @Slf4j
 public class ProviderResource extends BaseResource {
-  // special id only for internal testing purposes
-  static final String TEST_PROVIDER_ID = "__test_prov__";
-
   @Inject ProviderService service;
-
-  @Inject MissionService missionService;
 
   @POST
   @Operation(summary = "Register a provider")
@@ -42,27 +35,6 @@ public class ProviderResource extends BaseResource {
     var res = service.createProvider(pl);
     log.debug("createProvider: pl={} =>{}", pl, res);
     return Response.ok(pl).status(CREATED).build();
-  }
-
-  @POST
-  @Path("/{providerId}/missionStatus")
-  @Operation(summary = "Used by the provider to inform MXM about a mission status update")
-  @APIResponseSchema(MissionStatus.class)
-  public Response missionStatus(@PathParam("providerId") String providerId, MissionStatus pl) {
-
-    if (providerId.equals(TEST_PROVIDER_ID)) {
-      var res =
-          Mission.builder()
-              .providerId(providerId)
-              .missionTplId(pl.missionTplId)
-              .missionId(pl.missionId)
-              .missionStatus(MissionStatusType.RUNNING)
-              .build();
-      return Response.ok(res).build();
-    }
-
-    var res = missionService.missionStatusReported(providerId, pl);
-    return Response.ok(res).build();
   }
 
   @PUT
@@ -104,7 +76,7 @@ public class ProviderResource extends BaseResource {
     if (p == null) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
-    return Response.ok(p).build();
+    return Response.ok(p).status(CREATED).build();
   }
 
   @PUT
@@ -137,6 +109,66 @@ public class ProviderResource extends BaseResource {
       @PathParam("providerId") String providerId, @PathParam("missionTplId") String missionTplId) {
     var pl = new MissionTemplate(providerId, missionTplId);
     var p = missionTemplateService.deleteMissionTemplate(pl);
+    if (p == null) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    return Response.ok(p).build();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // Missions
+
+  @Inject MissionService missionService;
+
+  @POST
+  @Path("/{providerId}/missionTemplates/{missionTplId}/missions")
+  @Operation(summary = "Submit a new mission")
+  public Response createMission(
+      @PathParam("providerId") String providerId,
+      @PathParam("missionTplId") String missionTplId,
+      Mission pl) {
+    if (pl == null
+        || (pl.providerId != null && !pl.providerId.equals(providerId))
+        || (pl.missionTplId != null && !pl.missionTplId.equals(missionTplId))) {
+      return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
+          .entity("Invalid createMission payload")
+          .build();
+    }
+    pl.providerId = providerId;
+    var p = missionService.createMission(pl);
+    if (p == null) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    return Response.ok(p).status(CREATED).build();
+  }
+
+  @PUT
+  @Path("/{providerId}/missionTemplates/{missionTplId}/missions/{missionId}/status")
+  @Operation(summary = "Report mission status update")
+  public Response updateMission(
+      @PathParam("providerId") String providerId,
+      @PathParam("missionTplId") String missionTplId,
+      @PathParam("missionId") String missionId,
+      MissionStatus pl) {
+
+    if (pl == null) {
+      return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
+          .entity("Invalid createMission payload")
+          .build();
+    }
+    var res = missionService.missionStatusReported(providerId, missionTplId, missionId, pl);
+    return Response.ok(res).build();
+  }
+
+  @DELETE
+  @Path("/{providerId}/missionTemplates/{missionTplId}/missions/{missionId}")
+  @Operation(summary = "Delete a mission")
+  public Response deleteMission(
+      @PathParam("providerId") String providerId,
+      @PathParam("missionTplId") String missionTplId,
+      @PathParam("missionId") String missionId) {
+    var mission = new Mission(providerId, missionTplId, missionId);
+    var p = missionService.deleteMission(mission);
     if (p == null) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }

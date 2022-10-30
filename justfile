@@ -46,6 +46,23 @@ mxm-image-postgres-push version:
   docker push mbari/mxm-postgres:{{version}}
 
 ################################################################
+## Misc utilities
+
+## (occassionally, the launched UI on 8086 (via quarkus dev) seems to not be
+## released after exiting quarkus; so this helps find the PID and kill it)
+# What process is listening on a port?
+lsof port='8086':
+  #!/usr/bin/env bash
+  tmp=$(mktemp)
+  lsof -nP -iTCP:{{port}} > $tmp 2>/dev/null
+  if [ "$?" -eq "0" ]; then
+    rg LISTEN $tmp
+  else
+    echo "No process listening on port {{port}}"
+  fi
+
+
+################################################################
 ## Recipes to get some data for DB initialization scripts,
 ## prior to updating the 'mbari/mxm-postgres' image.
 

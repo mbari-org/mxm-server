@@ -1,8 +1,11 @@
 2022-10
 
-- adjusting REST API as it's only intended for external provider use.
-  - at the moment, mainly `POST .../missionStatus`
-  - TODO adjustments for provider to register or re-register itself 
+- REST API revision to reflect intended use only by external provider to:
+  - register/update provider
+  - create/update mission templates 
+  - create/update missions
+  - report mission status
+      - TODO continue revising mission status handling
 
 - note edits re `mbari/mxm` image build and CD (watchtower) with major-minor tag
 

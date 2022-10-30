@@ -13,9 +13,7 @@ import org.mbari.mxm.db.mission.MissionStatusType;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MissionStatus {
-  public String missionTplId;
-  public String missionId;
-
-  public String providerMissionId;
   public MissionStatusType status;
+
+  // TODO other elements
 }

@@ -4,10 +4,12 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.mbari.mxm.db.argument.Argument;
 import org.mbari.mxm.db.argument.ArgumentService;
 import org.mbari.mxm.db.mission.Mission;
@@ -30,7 +32,7 @@ import org.mbari.mxm.provider_client.responses.MissionTemplateResponse;
 import org.mbari.mxm.provider_client.responses.MissionValidationResponse;
 import org.mbari.mxm.provider_client.responses.PingResponse;
 import org.mbari.mxm.provider_client.rest.MxmInfo;
-import org.mbari.mxm.provider_client.rest.PostMissionPayload;
+import org.mbari.mxm.provider_client.rest.PostMissionRequest;
 
 @ApplicationScoped
 @Slf4j
@@ -48,7 +50,11 @@ public class ProviderManager {
 
   @Inject ArgumentService argumentService;
 
+  // TODO more standard way to handle mxm.external.url/MXM_EXTERNAL_URL
   private static final String MXM_EXTERNAL_URL = System.getenv("MXM_EXTERNAL_URL");
+
+  @ConfigProperty(name = "mxm.external.url")
+  String mxmExternalUrl;
 
   public PMInstance createInstance(
       String providerId, String httpEndpoint, ProviderApiType apiType) {
@@ -73,10 +79,10 @@ public class ProviderManager {
 
       providerProgress = ProviderProgress.builder().providerId(providerId).build();
 
-      // TODO for now, assuming MXM_EXTERNAL_URL defined.
+      // TODO factor handling of this with wrt SPARouting
+      final var serverLoc = Objects.requireNonNullElseGet(MXM_EXTERNAL_URL, () -> mxmExternalUrl);
       mxmInfo = new MxmInfo();
-      mxmInfo.missionStatusEndpoint =
-          String.format("%s/providers/%s/missionStatus", MXM_EXTERNAL_URL, providerId);
+      mxmInfo.mxmRestEndpoint = serverLoc;
     }
 
     private void broadcastProgress() {
@@ -485,7 +491,7 @@ public class ProviderManager {
     }
 
     public MissionValidationResponse validateMission(Mission mission) {
-      PostMissionPayload pmpl = preparePostMissionPayload(mission);
+      PostMissionRequest pmpl = preparePostMissionPayload(mission);
       log.debug("validateMission: pmpl={}", Utl.writeJson(pmpl));
       var res = mxmProviderClient.validateMission(pmpl);
       log.debug("submitMission: res={}", Utl.writeJson(res));
@@ -493,7 +499,7 @@ public class ProviderManager {
     }
 
     private void submitMission(Mission mission, Mission pl) {
-      PostMissionPayload pmpl = preparePostMissionPayload(mission);
+      PostMissionRequest pmpl = preparePostMissionPayload(mission);
 
       log.debug("submitMission: pmpl={}", Utl.writeJson(pmpl));
       var res = mxmProviderClient.postMission(pmpl);
@@ -506,17 +512,18 @@ public class ProviderManager {
       }
     }
 
-    private PostMissionPayload preparePostMissionPayload(Mission mission) {
+    private PostMissionRequest preparePostMissionPayload(Mission mission) {
       var args =
           argumentService.getArguments(mission.providerId, mission.missionTplId, mission.missionId);
 
-      PostMissionPayload pmpl = new PostMissionPayload();
+      PostMissionRequest pmpl = new PostMissionRequest();
       args.forEach(
           a ->
               pmpl.arguments.add(
-                  new PostMissionPayload.MissionArgValueAndUnits(
+                  new PostMissionRequest.MissionArgValueAndUnits(
                       a.paramName, a.paramValue, a.paramUnits)));
 
+      pmpl.providerId = mission.providerId;
       pmpl.missionTplId = mission.missionTplId;
       pmpl.missionId = mission.missionId;
       pmpl.assetId = mission.assetId;

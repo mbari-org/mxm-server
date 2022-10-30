@@ -44,12 +44,12 @@ public interface ProviderClientRestService {
   @POST
   @Path("missions/validate")
   @Consumes(MediaType.APPLICATION_JSON)
-  MissionValidationResponse validateMission(PostMissionPayload pl);
+  MissionValidationResponse validateMission(PostMissionRequest pl);
 
   @POST
   @Path("missions")
   @Consumes(MediaType.APPLICATION_JSON)
-  MissionStatusResponse postMission(PostMissionPayload pl);
+  PostMissionResponse postMission(PostMissionRequest pl);
 
   @GET
   @Path("missions/{missionId: .*}")

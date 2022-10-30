@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 
-public class PostMissionPayload {
+public class PostMissionRequest {
 
+  public String providerId;
   public String missionTplId;
   public String missionId;
   public String assetId;

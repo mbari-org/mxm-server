@@ -4,7 +4,7 @@ import org.mbari.mxm.db.provider.ProviderApiType;
 import org.mbari.mxm.graphql.ProviderPingException;
 import org.mbari.mxm.provider_client.responses.*;
 import org.mbari.mxm.provider_client.rest.MxmInfo;
-import org.mbari.mxm.provider_client.rest.PostMissionPayload;
+import org.mbari.mxm.provider_client.rest.PostMissionRequest;
 
 public interface MxmProviderClient {
 
@@ -28,9 +28,9 @@ public interface MxmProviderClient {
 
   UnitsResponse getUnits();
 
-  MissionValidationResponse validateMission(PostMissionPayload pl);
+  MissionValidationResponse validateMission(PostMissionRequest pl);
 
-  MissionStatusResponse postMission(PostMissionPayload pl);
+  PostMissionResponse postMission(PostMissionRequest pl);
 
   MissionStatusResponse getMissionStatus(String missionId);
 

@@ -94,7 +94,7 @@ public class SPARouting {
 
       this.graphqlSchema = serverLoc + "/graphql/schema.graphql";
       this.graphqlUi = serverLoc + "/q/graphql-ui";
-      this.openapi = serverLoc + "/q/openapi";
+      this.openapi = serverLoc;
       this.openapiSchema = serverLoc + "/q/openapi";
       this.swaggerUi = serverLoc + "/q/swagger-ui";
       this.googleApiKey = System.getenv("GOOGLE_API_KEY");
