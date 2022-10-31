@@ -102,6 +102,7 @@ public class UnitTest extends BaseForTests {
     assertThat(meterDerived).hasSize(7);
 
     final var radianDerived = getDerivedUnits("radian");
-    assertThat(radianDerived).hasSize(4);
+    // actually 4, but we added 'psu' to the database
+    assertThat(radianDerived).hasSize(5);
   }
 }
