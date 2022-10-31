@@ -1,5 +1,23 @@
 2022-10
 
+- discovered `/`-encoding related issue when the provider makes requests to the MXM service
+  on `mxm`, which involves an apache proxy pass. In concrete, our missionTemplateId's have `/`,
+  which are in general to be transparently encoded/decoded by requester and server; however,
+  this gets broken by the proxy pass. Example, from my computer:
+  ```
+  http put 'http://mxm.shore.mbari.org/providers/provider-example@mxm/missionTemplates/%2FmtA.tl/missions/AAAA/status' Content-type:application/json status=RUNNING
+  ```
+  returns:
+  ```
+  HTTP/1.1 404 Not Found`
+  Server: Apache/2.4.6
+  ...
+  The requested URL /providers/provider-example@mxm/missionTemplates//mtA.tl/missions/AAAA/status was not found on this server
+  ```
+  Quickly tried `ProxyPass / http://localhost:8080/ nocanon` but this didn't seem to make any difference.
+  So, workaround is for the requester to replace `/` for `:` in the missionTemplateId PathParam,
+  and for MXM to recover the '/' prior to further processing.
+
 - build/push postgres image 0.9.82
 - broadcast mission status updates as they are reported from provider
   - TODO(low prio): also upon mission submission itself

@@ -165,6 +165,8 @@ public class ProviderResource extends BaseResource {
 
     log.warn("PUT updateMission {}", Utl.writeJson(pl));
 
+    // workaround for slash-encoding/proxypass issue
+    missionTplId = missionTplId.replaceAll(":", "/");
     pl.missionTplId = missionTplId;
     pl.missionId = missionId;
     var res = missionService.missionStatusReported(providerId, missionTplId, missionId, pl.status);
