@@ -13,7 +13,6 @@ import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.DbUtl;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.support.DbSupport;
-import org.mbari.mxm.rest.MissionStatus;
 
 @ApplicationScoped
 @Slf4j
@@ -146,16 +145,26 @@ public class MissionService {
     return res;
   }
 
-  public Mission missionStatusReported(String providerId, MissionStatus missionStatus) {
-    log.warn("missionStatusReported: providerId='{}' missionStatus={}", providerId, missionStatus);
-    var mission = getMission(providerId, missionStatus.missionTplId, missionStatus.missionId);
+  public Mission missionStatusReported(
+      String providerId, String missionTplId, String missionId, MissionStatusType status) {
+    log.warn(
+        "missionStatusReported: providerId='{}' missionTplId='{}' missionId='{}' status='{}'",
+        providerId,
+        missionTplId,
+        missionId,
+        status);
+    var mission = getMission(providerId, missionTplId, missionId);
     if (mission == null) {
-      log.warn("missionStatusReported: mission not found for missionStatus={}", missionStatus);
+      log.warn(
+          "missionStatusReported: mission not found for providerId='{}' missionTplId='{}' missionId='{}'",
+          providerId,
+          missionTplId,
+          missionId);
       return null;
     }
     mission.updatedDate = OffsetDateTime.now();
-    if (missionStatus.status != null) {
-      mission.missionStatus = missionStatus.status;
+    if (status != null) {
+      mission.missionStatus = status;
     }
     // TODO handle other fields as they are incorporated (data, asset status,..)
     // TODO also move to a common place for reuse in explicit request/response for status.

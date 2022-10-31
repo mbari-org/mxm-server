@@ -5,7 +5,7 @@
 
 create table if not exists asset_classes
 (
-  class_name varchar not null,
+  class_name  varchar not null,
   description varchar,
   primary key (class_name)
 )
@@ -151,5 +151,18 @@ create table if not exists arguments
   foreign key (provider_id, mission_tpl_id, mission_id) references missions on update cascade on delete cascade,
   foreign key (provider_id, mission_tpl_id, param_name) references parameters on update cascade on delete cascade,
   primary key (provider_id, mission_tpl_id, mission_id, param_name)
+)
+;
+
+create table if not exists mission_status_updates
+(
+  provider_id    varchar                  not null,
+  mission_tpl_id varchar                  not null check (mission_tpl_id !~ '^.*/$'),
+  mission_id     varchar                  not null,
+
+  update_date    timestamp with time zone not null,
+  status         mission_status_type      not null,
+
+  foreign key (provider_id, mission_tpl_id, mission_id) references missions on update cascade on delete cascade
 )
 ;

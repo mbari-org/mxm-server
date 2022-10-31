@@ -1,5 +1,9 @@
 2022-10
 
+- added MissionStatusUpdate model and initial associated handling
+  - extended field `missionStatusUpdates` for `Mission` (graphql)
+  - TODO subscription seems to be working but not completely(?)
+  - TODO update postgres image with the new table
 - MissionStatus with list of statusUpdates
 - REST API revision to reflect intended use only by external provider to:
   - register/update provider

@@ -494,7 +494,7 @@ public class ProviderManager {
       PostMissionRequest pmpl = preparePostMissionPayload(mission);
       log.debug("validateMission: pmpl={}", Utl.writeJson(pmpl));
       var res = mxmProviderClient.validateMission(pmpl);
-      log.debug("submitMission: res={}", Utl.writeJson(res));
+      log.debug("validateMission: res={}", Utl.writeJson(res));
       return res;
     }
 

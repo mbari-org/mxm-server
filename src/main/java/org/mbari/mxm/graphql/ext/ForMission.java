@@ -13,6 +13,8 @@ import org.mbari.mxm.db.argument.ArgumentService;
 import org.mbari.mxm.db.asset.Asset;
 import org.mbari.mxm.db.asset.AssetService;
 import org.mbari.mxm.db.mission.Mission;
+import org.mbari.mxm.db.missionStatusUpdate.MissionStatusUpdate;
+import org.mbari.mxm.db.missionStatusUpdate.MissionStatusUpdateService;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
 import org.mbari.mxm.db.provider.Provider;
@@ -45,5 +47,11 @@ public class ForMission {
 
   public List<List<Argument>> arguments(@Source List<Mission> missions) {
     return argumentService.getArgumentsMultiple(missions);
+  }
+
+  @Inject MissionStatusUpdateService missionStatusUpdateService;
+
+  public List<List<MissionStatusUpdate>> missionStatusUpdates(@Source List<Mission> missions) {
+    return missionStatusUpdateService.getMissionStatusUpdatesMultiple(missions);
   }
 }

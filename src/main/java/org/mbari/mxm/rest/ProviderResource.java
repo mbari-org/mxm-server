@@ -11,6 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.mission.MissionService;
+import org.mbari.mxm.db.missionStatusUpdate.MissionStatusUpdateService;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateCreatePayload;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
@@ -143,6 +144,8 @@ public class ProviderResource extends BaseResource {
     return Response.ok(p).status(CREATED).build();
   }
 
+  @Inject MissionStatusUpdateService missionStatusUpdateService;
+
   @PUT
   @Path("/{providerId}/missionTemplates/{missionTplId}/missions/{missionId}/status")
   @Operation(summary = "Report mission status update")
@@ -164,7 +167,8 @@ public class ProviderResource extends BaseResource {
 
     pl.missionTplId = missionTplId;
     pl.missionId = missionId;
-    var res = missionService.missionStatusReported(providerId, pl);
+    var res = missionService.missionStatusReported(providerId, missionTplId, missionId, pl.status);
+    missionStatusUpdateService.missionStatusReported(res, pl.statusUpdates);
     return Response.ok(res).build();
   }
 
