@@ -25,7 +25,7 @@ services:
 
   mxm-postgres:
     container_name: mxm-postgres
-    image: mbari/mxm-postgres:0.9.6
+    image: mbari/mxm-postgres:0.9
 
     # ports: ["25432:5432"]
 

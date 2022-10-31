@@ -43,7 +43,9 @@ mxm-image-postgres-build version: update-sql-init-scripts
 
 # Push mbari/mxm-postgres image
 mxm-image-postgres-push version:
-  docker push mbari/mxm-postgres:{{version}}
+  docker push      mbari/mxm-postgres:{{version}}
+  docker image tag mbari/mxm-postgres:{{version}} mbari/mxm-postgres:0.9
+  docker push      mbari/mxm-postgres:0.9
 
 ################################################################
 ## Misc utilities

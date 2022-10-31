@@ -205,3 +205,5 @@ insert into units (unit_name, abbreviation, base_unit) values ('revolution_per_s
 insert into units (unit_name, abbreviation, base_unit) values ('sigma_t', 'kg/m3-1000)', 'kilogram_per_cubic_meter');
 insert into units (unit_name, abbreviation, base_unit) values ('tonne', 't', 'kilogram');
 insert into units (unit_name, abbreviation, base_unit) values ('watt_hour', 'Wh', 'joule');
+insert into units (unit_name, abbreviation, base_unit) values ('arcdeg', 'arcdeg', 'radian');
+insert into units (unit_name, abbreviation, base_unit) values ('psu', 'psu', 'kilogram_per_kilogram');
