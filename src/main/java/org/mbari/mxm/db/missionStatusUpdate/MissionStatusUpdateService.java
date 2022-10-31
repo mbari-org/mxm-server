@@ -20,21 +20,21 @@ public class MissionStatusUpdateService {
   @Inject MissionService missionService;
   @Inject ProviderService providerService;
 
+  public List<MissionStatusUpdate> getMissionStatusUpdates(Mission mission) {
+    return dbSupport
+        .getJdbi()
+        .withExtension(
+            MissionStatusUpdateDao.class,
+            dao ->
+                dao.getMissionStatusUpdates(
+                    mission.getProviderId(), mission.getMissionTplId(), mission.getMissionId()));
+  }
+
   public List<List<MissionStatusUpdate>> getMissionStatusUpdatesMultiple(List<Mission> missions) {
     // TODO make this more efficient
-
     ArrayList<List<MissionStatusUpdate>> res = new ArrayList<>();
     for (Mission mission : missions) {
-      res.add(
-          dbSupport
-              .getJdbi()
-              .withExtension(
-                  MissionStatusUpdateDao.class,
-                  dao ->
-                      dao.getMissionStatusUpdates(
-                          mission.getProviderId(),
-                          mission.getMissionTplId(),
-                          mission.getMissionId())));
+      res.add(getMissionStatusUpdates(mission));
     }
     return res;
   }
@@ -42,9 +42,10 @@ public class MissionStatusUpdateService {
   public void missionStatusReported(
       Mission mission, List<MissionStatus.StatusUpdate> statusUpdates) {
 
-    var del_res =
-        deleteMissionStatusUpdates(mission.providerId, mission.missionTplId, mission.missionId);
-    log.warn("del_res: {}", del_res);
+    // delete all for the mission:
+    deleteMissionStatusUpdates(mission.providerId, mission.missionTplId, mission.missionId);
+
+    // now insert the updates:
     for (MissionStatus.StatusUpdate statusUpdate : statusUpdates) {
       var msu =
           new MissionStatusUpdate(
@@ -55,8 +56,10 @@ public class MissionStatusUpdateService {
               statusUpdate.status);
 
       var msu_res = createMissionStatusUpdate(msu);
-      log.warn("msu_res: {}", msu_res);
+      log.trace("msu_res: {}", msu_res);
     }
+    log.trace("inserted {}", statusUpdates.size());
+
     broadcastMissionUpdated(mission);
   }
 
@@ -74,11 +77,15 @@ public class MissionStatusUpdateService {
         providerId,
         missionTplId,
         missionId);
-    return dbSupport
-        .getJdbi()
-        .withExtension(
-            MissionStatusUpdateDao.class,
-            dao -> dao.deleteMissionStatusUpdates(providerId, missionTplId, missionId));
+
+    var res =
+        dbSupport
+            .getJdbi()
+            .withExtension(
+                MissionStatusUpdateDao.class,
+                dao -> dao.deleteMissionStatusUpdates(providerId, missionTplId, missionId));
+    log.trace("deleteMissionStatusUpdates: res={}", res);
+    return res;
   }
 
   private void broadcastMissionUpdated(Mission mission) {

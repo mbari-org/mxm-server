@@ -370,6 +370,11 @@ public class MxmGraphQLEndpoint {
     try {
       pm.preUpdateMission(provider, pl);
       var res = missionService.updateMission(pl);
+
+      // not critical but attempt to broadcast mission status update here
+      // (in particular, upon just submitting the mission)
+      // was triggering subscription related issues.
+
       pm.done();
       return res;
     } catch (Exception e) {

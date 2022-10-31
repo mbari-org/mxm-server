@@ -1,5 +1,7 @@
 2022-10
 
+- broadcast mission status updates as they are reported from provider
+  - TODO(low prio): also upon mission submission itself
 - added MissionStatusUpdate model and initial associated handling
   - extended field `missionStatusUpdates` for `Mission` (graphql)
   - TODO subscription seems to be working but not completely(?)

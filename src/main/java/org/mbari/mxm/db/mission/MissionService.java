@@ -147,12 +147,14 @@ public class MissionService {
 
   public Mission missionStatusReported(
       String providerId, String missionTplId, String missionId, MissionStatusType status) {
+
     log.warn(
         "missionStatusReported: providerId='{}' missionTplId='{}' missionId='{}' status='{}'",
         providerId,
         missionTplId,
         missionId,
         status);
+
     var mission = getMission(providerId, missionTplId, missionId);
     if (mission == null) {
       log.warn(
@@ -171,9 +173,7 @@ public class MissionService {
 
     var res = doUpdate(mission);
     log.warn("missionStatusReported: mission updated={}", res);
-    if (res != null) {
-      broadcaster.broadcastUpdated(res);
-    }
+    // broadcast done by the caller via missionStatusUpdateService
     return res;
   }
 

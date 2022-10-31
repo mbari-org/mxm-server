@@ -1,10 +1,7 @@
 package org.mbari.mxm;
 
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import lombok.AllArgsConstructor;
@@ -504,11 +501,13 @@ public class ProviderManager {
       log.debug("submitMission: pmpl={}", Utl.writeJson(pmpl));
       var res = mxmProviderClient.postMission(pmpl);
       log.debug("submitMission: res={}", Utl.writeJson(res));
-      if (MissionStatusType.SUBMITTED == res.result().status) {
+
+      final var status = res.result().getStatus();
+      if (MissionStatusType.SUBMITTED == status) {
         pl.missionStatus = MissionStatusType.SUBMITTED;
         pl.providerMissionId = res.result().providerMissionId;
       } else {
-        log.warn("unexpected mission status: {}", res.result().status);
+        log.warn("unexpected mission status: {}", status);
       }
     }
 
