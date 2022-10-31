@@ -18,6 +18,18 @@
   So, workaround is for the requester to replace `/` for `:` in the missionTemplateId PathParam,
   and for MXM to recover the '/' prior to further processing.
 
+    NOTE: The following apache settings ended up working so the encoded slashes do reach the MXM service:
+    ```apache
+    AllowEncodedSlashes NoDecode
+    ProxyPass /  http://localhost:8080/  nocanon
+    ```
+    Conclusion:
+  
+    - I'll keep those adjusted apache settings but also the workaround for the time being.
+      Revisit this at some point.
+      (`nocanon` seems discouraged in general; also see https://stackoverflow.com/a/4443129/830737)
+    - Would of course need to document this to provider implementors if sticking with the workaround. 
+ 
 - build/push postgres image 0.9.82
 - broadcast mission status updates as they are reported from provider
   - TODO(low prio): also upon mission submission itself
