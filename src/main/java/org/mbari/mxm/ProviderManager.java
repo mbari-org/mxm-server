@@ -504,7 +504,7 @@ public class ProviderManager {
       log.debug("submitMission: pmpl={}", Utl.writeJson(pmpl));
       var res = mxmProviderClient.postMission(pmpl);
       log.debug("submitMission: res={}", Utl.writeJson(res));
-      if (MissionStatusType.SUBMITTED.name().equals(res.result().status)) {
+      if (MissionStatusType.SUBMITTED == res.result().status) {
         pl.missionStatus = MissionStatusType.SUBMITTED;
         pl.providerMissionId = res.result().providerMissionId;
       } else {

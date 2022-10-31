@@ -1,5 +1,6 @@
 2022-10
 
+- MissionStatus with list of statusUpdates
 - REST API revision to reflect intended use only by external provider to:
   - register/update provider
   - create/update mission templates 

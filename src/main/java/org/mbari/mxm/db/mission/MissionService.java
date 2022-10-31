@@ -146,10 +146,9 @@ public class MissionService {
     return res;
   }
 
-  public Mission missionStatusReported(
-      String providerId, String missionTplId, String missionId, MissionStatus missionStatus) {
+  public Mission missionStatusReported(String providerId, MissionStatus missionStatus) {
     log.warn("missionStatusReported: providerId='{}' missionStatus={}", providerId, missionStatus);
-    var mission = getMission(providerId, missionTplId, missionId);
+    var mission = getMission(providerId, missionStatus.missionTplId, missionStatus.missionId);
     if (mission == null) {
       log.warn("missionStatusReported: mission not found for missionStatus={}", missionStatus);
       return null;

@@ -85,16 +85,25 @@ public class ProviderResourceTest extends BaseForTests {
   }
 
   private void postMission() {
-    given()
-        .contentType("application/json")
-        .body(missionCreatePayload)
-        .when()
-        .post(
-            "/providers/{providerId}/missionTemplates/{missionTplId}/missions",
-            providerId,
-            missionTplId)
-        .then()
-        .statusCode(201);
+    var res =
+        given()
+            .contentType("application/json")
+            .body(missionCreatePayload)
+            .when()
+            .post(
+                "/providers/{providerId}/missionTemplates/{missionTplId}/missions",
+                providerId,
+                missionTplId)
+            .then()
+            .statusCode(201)
+            .extract()
+            .jsonPath()
+            .getObject("", Mission.class);
+
+    assertThat(res.providerId).isEqualTo(providerId);
+    assertThat(res.missionTplId).isEqualTo(missionTplId);
+    assertThat(res.missionId).isEqualTo(missionId);
+    assertThat(res.missionStatus).isEqualTo(MissionStatusType.SUBMITTED);
   }
 
   private void putMissionStatus(MissionStatusType missionStatus) {

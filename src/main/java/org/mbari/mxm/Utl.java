@@ -1,8 +1,11 @@
 package org.mbari.mxm;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,5 +38,10 @@ public class Utl {
   }
 
   private static final ObjectWriter objectWriter =
-      new ObjectMapper().writerWithDefaultPrettyPrinter();
+      JsonMapper.builder()
+          .addModule(new JavaTimeModule())
+          .build()
+          .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+          .setDateFormat(new StdDateFormat())
+          .writerWithDefaultPrettyPrinter();
 }

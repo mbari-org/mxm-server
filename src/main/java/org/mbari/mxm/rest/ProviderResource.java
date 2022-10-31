@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.mission.MissionService;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
@@ -151,12 +152,19 @@ public class ProviderResource extends BaseResource {
       @PathParam("missionId") String missionId,
       MissionStatus pl) {
 
-    if (pl == null) {
+    if (pl == null
+        || (pl.missionTplId != null && !pl.missionTplId.equals(missionTplId))
+        || (pl.missionId != null && !pl.missionId.equals(missionId))) {
       return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-          .entity("Invalid createMission payload")
+          .entity("Invalid mission status payload")
           .build();
     }
-    var res = missionService.missionStatusReported(providerId, missionTplId, missionId, pl);
+
+    log.warn("PUT updateMission {}", Utl.writeJson(pl));
+
+    pl.missionTplId = missionTplId;
+    pl.missionId = missionId;
+    var res = missionService.missionStatusReported(providerId, pl);
     return Response.ok(res).build();
   }
 
