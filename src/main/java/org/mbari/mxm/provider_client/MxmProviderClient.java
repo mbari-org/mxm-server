@@ -14,11 +14,9 @@ public interface MxmProviderClient {
 
   ProviderApiType apiType();
 
-  PingResponse ping() throws ProviderPingException;
+  PingResponse ping(MxmInfo pl) throws ProviderPingException;
 
   GeneralInfoResponse getGeneralInfo();
-
-  MxmInfo postMxmInfo(MxmInfo pl);
 
   AssetClassesResponse getAssetClasses();
 

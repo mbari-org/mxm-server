@@ -98,7 +98,7 @@ public class ProviderManager {
     }
 
     public PingResponse ping() throws ProviderPingException {
-      return mxmProviderClient.ping();
+      return mxmProviderClient.ping(mxmInfo);
     }
 
     public void preInsertProvider(Provider provider) {
@@ -106,7 +106,7 @@ public class ProviderManager {
 
       // TODO this try/catch is mainly for the TFT@TSAUV provider, which doesn't support `ping` yet
       try {
-        var pong = mxmProviderClient.ping();
+        var pong = mxmProviderClient.ping(mxmInfo);
         log.debug("preInsertProvider: ping=>{}", pong);
       } catch (ProviderPingException e) {
         log.warn(
@@ -118,17 +118,6 @@ public class ProviderManager {
       var infoResponse = mxmProviderClient.getGeneralInfo();
       var info = infoResponse.result;
       log.debug("preInsertProvider: info=>{}", info);
-
-      // TODO similarly, try/catch while updating test providers
-      try {
-        var res = mxmProviderClient.postMxmInfo(mxmInfo);
-        log.warn("preInsertProvider: postMxmInfo mxmInfo={} =>{}", mxmInfo, res);
-      } catch (Exception e) {
-        log.warn(
-            "preInsertProvider: error posting mxmInfo provider={}: {}",
-            provider.providerId,
-            e.getMessage());
-      }
 
       provider.description = info.providerDescription;
       provider.descriptionFormat = info.descriptionFormat;

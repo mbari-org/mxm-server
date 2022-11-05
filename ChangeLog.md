@@ -1,3 +1,7 @@
+2022-11
+
+- ping request now with MxmInfo payload (`POST /mxmInfo` removed in Provider API)
+
 2022-10
 
 - discovered `/`-encoding related issue when the provider makes requests to the MXM service

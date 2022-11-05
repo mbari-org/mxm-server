@@ -1,11 +1,13 @@
 package org.mbari.mxm.provider_client;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.common.ResourceArg;
 import io.quarkus.test.junit.QuarkusTest;
+import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mbari.mxm.db.provider.ProviderApiType;
 import org.mbari.mxm.graphql.ProviderPingException;
+import org.mbari.mxm.provider_client.rest.MxmInfo;
 
 @QuarkusTest
 @QuarkusTestResource(
@@ -39,8 +42,13 @@ public class MxmProviderClientRestTest {
 
   @Test
   public void testPingEndpoint() throws ProviderPingException {
-    var response = client.ping();
+    var mxmInfo = new MxmInfo();
+    mxmInfo.mxmRestEndpoint = "http://foo.example/api";
+    var response = client.ping(mxmInfo);
     assertNotNull(response.result.datetime);
+
+    var datetime = OffsetDateTime.parse(response.result.datetime);
+    assertThat(datetime).isAfter(OffsetDateTime.now().minusSeconds(10));
   }
 
   @Test

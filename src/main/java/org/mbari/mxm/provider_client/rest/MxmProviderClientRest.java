@@ -51,9 +51,9 @@ public class MxmProviderClientRest implements MxmProviderClient {
   }
 
   @Override
-  public PingResponse ping() throws ProviderPingException {
+  public PingResponse ping(MxmInfo pl) throws ProviderPingException {
     try {
-      return service.ping();
+      return service.ping(pl);
     } catch (Exception e) {
       throw new ProviderPingException(providerId, httpEndpoint, e);
     }
@@ -62,11 +62,6 @@ public class MxmProviderClientRest implements MxmProviderClient {
   @Override
   public GeneralInfoResponse getGeneralInfo() {
     return service.getGeneralInfo();
-  }
-
-  @Override
-  public MxmInfo postMxmInfo(MxmInfo pl) {
-    return service.postMxmInfo(pl);
   }
 
   @Override

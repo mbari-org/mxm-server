@@ -254,11 +254,11 @@ public class MxmGraphQLEndpoint {
     var pm = createProviderManager(provider);
     try {
       pm.preUpdateMissionTemplate(provider, pl);
-      var res = missionTemplateService.updateMissionTemplate(pl);
-      pm.done();
-      return res;
+      return missionTemplateService.updateMissionTemplate(pl);
     } catch (Exception e) {
       throw handleException(provider.httpEndpoint, "refreshing mission template from provider", e);
+    } finally {
+      pm.done();
     }
   }
 
@@ -369,16 +369,14 @@ public class MxmGraphQLEndpoint {
 
     try {
       pm.preUpdateMission(provider, pl);
-      var res = missionService.updateMission(pl);
-
+      return missionService.updateMission(pl);
       // not critical but attempt to broadcast mission status update here
       // (in particular, upon just submitting the mission)
       // was triggering subscription related issues.
-
-      pm.done();
-      return res;
     } catch (Exception e) {
       throw handleException(provider.httpEndpoint, "refreshing mission from provider", e);
+    } finally {
+      pm.done();
     }
   }
 
@@ -389,11 +387,11 @@ public class MxmGraphQLEndpoint {
     var provider = providerService.getProvider(pl.getProviderId());
     var pm = createProviderManager(provider);
     try {
-      var res = pm.validateMission(pl);
-      pm.done();
-      return res;
+      return pm.validateMission(pl);
     } catch (Exception e) {
       throw handleException(provider.httpEndpoint, "validating mission against provider", e);
+    } finally {
+      pm.done();
     }
   }
 

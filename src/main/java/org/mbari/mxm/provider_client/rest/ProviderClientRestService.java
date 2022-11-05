@@ -8,18 +8,14 @@ import org.mbari.mxm.provider_client.responses.*;
 @Produces(MediaType.APPLICATION_JSON)
 public interface ProviderClientRestService {
 
-  @GET
+  @POST
   @Path("ping")
-  PingResponse ping();
+  @Consumes(MediaType.APPLICATION_JSON)
+  PingResponse ping(MxmInfo pl);
 
   @GET
   @Path("info")
   GeneralInfoResponse getGeneralInfo();
-
-  @POST
-  @Path("mxmInfo")
-  @Consumes(MediaType.APPLICATION_JSON)
-  MxmInfo postMxmInfo(MxmInfo pl);
 
   @GET
   @Path("assetclasses")

@@ -7,10 +7,13 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.mbari.mxm.provider_client.responses.PingResponse;
 
 @Slf4j
 public class WireMockProviderRest implements QuarkusTestResourceLifecycleManager {
@@ -47,7 +50,7 @@ public class WireMockProviderRest implements QuarkusTestResourceLifecycleManager
 
   private void addStubs() {
     try {
-      addStub("/ping");
+      addPingStub();
       addStub("/info");
       addStub("/missiontemplates");
       addStub("/missiontemplates/_examples", BASE_RES_PATH + "/missiontemplates_examples.json");
@@ -58,6 +61,14 @@ public class WireMockProviderRest implements QuarkusTestResourceLifecycleManager
     } catch (IOException e) {
       fail("Could not configure Wiremock server. Caused by: " + e.getMessage());
     }
+  }
+
+  private void addPingStub() throws IOException {
+    var pingResp = new PingResponse();
+    pingResp.result = new PingResponse.Pong();
+    pingResp.result.datetime = OffsetDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
+    wireMockServer.stubFor(
+        post(urlEqualTo(BASE_API_PATH + "/ping")).willReturn(jsonResponse(pingResp, 200)));
   }
 
   private void addStub(String suffix) throws IOException {
