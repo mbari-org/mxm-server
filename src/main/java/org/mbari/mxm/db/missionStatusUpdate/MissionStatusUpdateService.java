@@ -41,6 +41,16 @@ public class MissionStatusUpdateService {
 
   public void missionStatusReported(
       Mission mission, List<MissionStatus.StatusUpdate> statusUpdates) {
+    missionStatusReported(mission, statusUpdates, false);
+  }
+
+  public void missionStatusReportedAndBroadcast(
+      Mission mission, List<MissionStatus.StatusUpdate> statusUpdates) {
+    missionStatusReported(mission, statusUpdates, true);
+  }
+
+  private void missionStatusReported(
+      Mission mission, List<MissionStatus.StatusUpdate> statusUpdates, boolean broadcast) {
 
     // delete all for the mission:
     deleteMissionStatusUpdates(mission.providerId, mission.missionTplId, mission.missionId);
@@ -60,7 +70,9 @@ public class MissionStatusUpdateService {
     }
     log.trace("inserted {}", statusUpdates.size());
 
-    broadcastMissionUpdated(mission);
+    if (broadcast) {
+      broadcastMissionUpdated(mission);
+    }
   }
 
   private MissionStatusUpdate createMissionStatusUpdate(MissionStatusUpdate pl) {

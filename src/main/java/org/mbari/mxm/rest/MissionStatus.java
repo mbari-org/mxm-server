@@ -24,6 +24,7 @@ public class MissionStatus {
 
   // TODO other elements
 
+  @ToString
   public static class StatusUpdate {
     public OffsetDateTime date;
     public MissionStatusType status;

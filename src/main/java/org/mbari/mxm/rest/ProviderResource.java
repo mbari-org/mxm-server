@@ -171,7 +171,7 @@ public class ProviderResource extends BaseResource {
     pl.missionId = missionId;
     var res = missionService.missionStatusReported(providerId, missionTplId, missionId, pl.status);
     if (res != null) {
-      missionStatusUpdateService.missionStatusReported(res, pl.statusUpdates);
+      missionStatusUpdateService.missionStatusReportedAndBroadcast(res, pl.statusUpdates);
       return Response.ok(res).build();
     } else {
       return Response.status(Response.Status.NOT_FOUND).build();

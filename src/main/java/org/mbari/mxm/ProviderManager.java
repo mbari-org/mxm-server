@@ -30,6 +30,7 @@ import org.mbari.mxm.provider_client.responses.MissionValidationResponse;
 import org.mbari.mxm.provider_client.responses.PingResponse;
 import org.mbari.mxm.provider_client.rest.MxmInfo;
 import org.mbari.mxm.provider_client.rest.PostMissionRequest;
+import org.mbari.mxm.rest.MissionStatus;
 
 @ApplicationScoped
 @Slf4j
@@ -443,7 +444,7 @@ public class ProviderManager {
       return param;
     }
 
-    public void preUpdateMission(Provider provider, Mission pl) {
+    public List<MissionStatus.StatusUpdate> preUpdateMission(Provider provider, Mission pl) {
       log.debug("preUpdateMission: pl={}", pl);
 
       // get the current state of the mission:
@@ -455,7 +456,7 @@ public class ProviderManager {
         // is mission being submitted?
         if (pl.missionStatus == MissionStatusType.SUBMITTED) {
           log.debug("preUpdateMission: submitting, pl={}", Utl.writeJson(pl));
-          submitMission(mission, pl);
+          return submitMission(mission, pl);
         } else if (pl.missionStatus == null || pl.missionStatus == MissionStatusType.DRAFT) {
           // OK, no requested change in status; let mutation proceed.
           pl.setUpdatedDate(OffsetDateTime.now());
@@ -474,6 +475,7 @@ public class ProviderManager {
       } else {
         throw new IllegalStateException("Unexpected pl.missionStatus: " + pl.missionStatus);
       }
+      return null;
     }
 
     public MissionValidationResponse validateMission(Mission mission) {
@@ -484,7 +486,7 @@ public class ProviderManager {
       return res;
     }
 
-    private void submitMission(Mission mission, Mission pl) {
+    private List<MissionStatus.StatusUpdate> submitMission(Mission mission, Mission pl) {
       PostMissionRequest pmpl = preparePostMissionPayload(mission);
 
       log.debug("submitMission: pmpl={}", Utl.writeJson(pmpl));
@@ -495,8 +497,10 @@ public class ProviderManager {
       if (MissionStatusType.SUBMITTED == status) {
         pl.missionStatus = MissionStatusType.SUBMITTED;
         pl.providerMissionId = res.result().providerMissionId;
+        return res.result().statusUpdates;
       } else {
         log.warn("unexpected mission status: {}", status);
+        return null;
       }
     }
 

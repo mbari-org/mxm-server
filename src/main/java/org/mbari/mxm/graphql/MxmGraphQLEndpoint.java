@@ -19,6 +19,8 @@ import org.mbari.mxm.db.assetClass.AssetClass;
 import org.mbari.mxm.db.assetClass.AssetClassService;
 import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.mission.MissionService;
+import org.mbari.mxm.db.mission.MissionStatusType;
+import org.mbari.mxm.db.missionStatusUpdate.MissionStatusUpdateService;
 import org.mbari.mxm.db.missionTemplate.MissionTemplate;
 import org.mbari.mxm.db.missionTemplate.MissionTemplateService;
 import org.mbari.mxm.db.missionTemplateAssetClass.MissionTemplateAssetClass;
@@ -59,6 +61,8 @@ public class MxmGraphQLEndpoint {
   @Inject ArgumentService argumentService;
 
   @Inject ProviderManager providerManager;
+
+  @Inject MissionStatusUpdateService missionStatusUpdateService;
 
   private ProviderManager.PMInstance createProviderManager(Provider pl) {
     return providerManager.createInstance(
@@ -357,6 +361,10 @@ public class MxmGraphQLEndpoint {
   @Mutation
   @Description("Create a new mission")
   public Mission createMission(@Valid Mission pl) {
+    if (pl.missionStatus != null && pl.missionStatus != MissionStatusType.DRAFT) {
+      log.warn("if given, missionStatus must be DRAFT. ({})", pl.missionStatus);
+    }
+    pl.missionStatus = MissionStatusType.DRAFT;
     return missionService.createMission(pl);
   }
 
@@ -368,11 +376,23 @@ public class MxmGraphQLEndpoint {
     var pm = createProviderManager(provider);
 
     try {
-      pm.preUpdateMission(provider, pl);
-      return missionService.updateMission(pl);
-      // not critical but attempt to broadcast mission status update here
-      // (in particular, upon just submitting the mission)
-      // was triggering subscription related issues.
+      var statusUpdates = pm.preUpdateMission(provider, pl);
+      var mission = missionService.updateMission(pl);
+      // add any status updates, the case upon just submitting the mission:
+      if (statusUpdates != null) {
+        log.warn("updateMission: statusUpdates={}", statusUpdates);
+        missionStatusUpdateService.missionStatusReported(mission, statusUpdates);
+      }
+      /*
+      Not really critical but attempt to also broadcast mission status update here
+      (in particular, upon just submitting the mission)
+      was triggering subscription related issues:
+
+      ERROR [io.sma.graphql] (vert.x-worker-thread-1)
+        SRGQL012000: Data Fetching Error: io.smallrye.mutiny.subscription.BackPressureFailure:
+          Could not emit item downstream due to lack of requests
+      */
+      return mission;
     } catch (Exception e) {
       throw handleException(provider.httpEndpoint, "refreshing mission from provider", e);
     } finally {
