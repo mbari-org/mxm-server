@@ -1,5 +1,6 @@
 2022-11
 
+- upgrade quarkus to 2.13.4
 - create status updates upon mission submission
 - ping request now with MxmInfo payload (`POST /mxmInfo` removed in Provider API)
 
