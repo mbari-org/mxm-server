@@ -1,3 +1,7 @@
+2022-12
+
+- upgrade quarkus to 2.15.0 (no need for migrations)
+
 2022-11
 
 - upgrade quarkus to 2.14.0 (no need for migrations)
