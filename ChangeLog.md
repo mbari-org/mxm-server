@@ -1,5 +1,6 @@
 2022-12
 
+- some dependency upgrades (upon reviewing corresp release notes)
 - upgrade quarkus to 2.15.0 (no need for migrations)
 
 2022-11
