@@ -1,3 +1,12 @@
+2023-04
+
+0.9.90
+
+- upgrade quinoa to 1.2.6
+- upgrade quarkus to 2.16.6 (and CORS related adjustment)
+
+---
+
 2022-12
 
 - some dependency upgrades (upon reviewing corresp release notes)
