@@ -1,3 +1,8 @@
+2023-05
+
+- CD now triggered via watchtower --http-api-update option.
+  (But minimal adjustments here; the triggering is done under 'mxm' repo.)
+  
 2023-04
 
 0.9.90
