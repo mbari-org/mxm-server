@@ -2,6 +2,7 @@
 
 0.9.91
 
+- bump quarkus to 2.16.11
 - bump wiremock-jre8 to 3.0.1. "All 25 tests are passing (0 skipped)"
   (motivated by https://github.com/mbari-org/mxm-server/security/dependabot/1)
 
