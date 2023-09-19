@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mbari</groupId>
   <artifactId>mxm</artifactId>
-  <version>0.9.90</version>
+  <version>0.9.91</version>
   <properties>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
     <maven.compiler.parameters>true</maven.compiler.parameters>
@@ -88,7 +88,7 @@
     <dependency>
       <groupId>com.github.tomakehurst</groupId>
       <artifactId>wiremock-jre8</artifactId>
-      <version>2.35.0</version>
+      <version>3.0.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
