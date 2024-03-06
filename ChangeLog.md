@@ -1,3 +1,9 @@
+2024-03
+
+0.9.92
+
+- enabled quarkus-micrometer-registry-prometheus
+
 2023-09
 
 0.9.91
