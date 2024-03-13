@@ -4,9 +4,9 @@ import static java.util.stream.Collectors.toList;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.util.List;
 import org.eclipse.microprofile.graphql.Source;
 import org.mbari.mxm.db.parameter.Parameter;
 import org.mbari.mxm.db.provider.Provider;

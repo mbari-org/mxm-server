@@ -2,10 +2,10 @@ package org.mbari.mxm.graphql;
 
 import io.smallrye.graphql.api.Subscription;
 import io.smallrye.mutiny.Multi;
-import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.graphql.*;
 import org.mbari.mxm.Broadcaster;

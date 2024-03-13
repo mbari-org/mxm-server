@@ -3,9 +3,9 @@ package org.mbari.mxm;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import java.util.Objects;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 

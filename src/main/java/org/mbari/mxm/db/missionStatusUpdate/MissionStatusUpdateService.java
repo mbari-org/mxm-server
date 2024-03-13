@@ -1,9 +1,9 @@
 package org.mbari.mxm.db.missionStatusUpdate;
 
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.mission.Mission;
 import org.mbari.mxm.db.mission.MissionService;

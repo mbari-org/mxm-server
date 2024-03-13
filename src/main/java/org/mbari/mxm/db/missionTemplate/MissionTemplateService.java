@@ -1,10 +1,10 @@
 package org.mbari.mxm.db.missionTemplate;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.Utl;
 import org.mbari.mxm.db.DbUtl;

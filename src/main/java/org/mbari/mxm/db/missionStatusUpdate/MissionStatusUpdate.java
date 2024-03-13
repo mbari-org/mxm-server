@@ -2,8 +2,8 @@ package org.mbari.mxm.db.missionStatusUpdate;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import java.time.OffsetDateTime;
 import jakarta.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

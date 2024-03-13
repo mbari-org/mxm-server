@@ -1,9 +1,9 @@
 package org.mbari.mxm.db.provider;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import org.mbari.mxm.Broadcaster;
 import org.mbari.mxm.ProgressBroadcaster;

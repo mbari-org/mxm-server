@@ -4,11 +4,11 @@ import static java.util.stream.Collectors.toList;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.Source;
 import org.mbari.mxm.db.assetClass.AssetClass;
