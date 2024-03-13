@@ -2,8 +2,8 @@ package org.mbari.mxm.db.assetClass;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.mbari.mxm.db.DbUtl;
 import org.mbari.mxm.db.asset.Asset;

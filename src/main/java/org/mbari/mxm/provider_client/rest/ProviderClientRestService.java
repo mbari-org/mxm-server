@@ -1,7 +1,7 @@
 package org.mbari.mxm.provider_client.rest;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import org.mbari.mxm.provider_client.responses.*;
 
 @Path("/")
