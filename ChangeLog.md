@@ -2,6 +2,7 @@
 
 0.9.93
 
+- upgrade quarkus to 3.8.2, and other base dependencies
 - upgrade quarkus to 3.1.1 (from 2.16.4)
 
 0.9.92
