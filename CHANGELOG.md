@@ -1,6 +1,6 @@
 2024-03
 
-0.9.93
+0.9.94
 
 - upgrade quarkus to 3.8.2, and other base dependencies
 - upgrade quarkus to 3.1.1 (from 2.16.4)

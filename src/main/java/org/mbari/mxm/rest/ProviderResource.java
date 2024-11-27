@@ -50,7 +50,7 @@ public class ProviderResource extends BaseResource {
     }
     pl.providerId = providerId;
     var res = service.updateProvider(pl);
-    log.debug("createProvider: pl={} =>{}", writeValueAsString(pl), res);
+    log.debug("updateProvider: pl={} =>{}", writeValueAsString(pl), res);
     return Response.ok(pl).build();
   }
 
