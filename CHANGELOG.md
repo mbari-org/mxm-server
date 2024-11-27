@@ -2,6 +2,7 @@
 
 0.9.95
 
+- Updated docker instructions, and tested dockerized system locally.
 - Quinoa:
     - Updated quinoa to 2.3.10 (from 1.2.6).
       Per https://github.com/quarkiverse/quarkus-quinoa, that's the version for Quarkus 3.8.

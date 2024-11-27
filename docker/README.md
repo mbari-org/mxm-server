@@ -53,14 +53,14 @@ the desired password for the "mxm" user in the database,
 the host directory for the postgres database,
 and other settings.
 
-Review `docker-compose.yml` for any other further adjustments.
+Review `compose.yml` for any other further adjustments.
 
 Then:
 
 ```bash
 source setenv.sh
-docker-compose up -d
-docker logs -f --tail=20 mxm-server
+docker compose up -d
+docker logs -f --tail=20 mxm
 ```
 
 The MXM UI will be available at <http://localhost:8080/>.
