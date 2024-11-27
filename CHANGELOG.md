@@ -1,3 +1,14 @@
+2024-11
+
+0.9.95
+
+- Quinoa:
+    - Updated quinoa to 2.3.10 (from 1.2.6).
+      Per https://github.com/quarkiverse/quarkus-quinoa, that's the version for Quarkus 3.8.
+    - Note: Make sure to use node 18 (e.g., `nvm install 18 && nvm use 18`) before launching
+      `quarkus dev` due to the UI (`../mxm-ui`) still requiring it.
+      I've had node 22 by default in general for a while, and got quinoa related errors.
+
 2024-03
 
 0.9.94
